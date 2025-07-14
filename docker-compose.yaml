@@ -1,0 +1,54 @@
+services:
+  server:
+    build:
+      context: apps/server
+      dockerfile: DockerFile
+    ports:
+      - "3000:3000"
+    # environment:
+    #   - NODE_ENV=production
+    volumes:
+      - ./apps/server:/app
+      - /app/node_modules
+    command: ["pnpm", "start"]
+    
+  client:
+    build:
+      context: apps/client
+      dockerfile: DockerFile
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./apps/client:/app
+      - /app/node_modules
+    command: ["pnpm", "dev"]
+
+  nats:
+    image: nats:latest
+    ports:
+      - '4222:4222'
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+
+  mongodb:
+    image: mongodb/mongodb-community-server:8.0.9-ubuntu2204
+    command: ['--replSet', 'rs1', '--bind_ip_all', '--port', '27017']
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata:/data/db
+    healthcheck:
+      test: |
+        test $$(mongosh --quiet --eval "try { rs.initiate({ _id: 'rs1', members: [{ _id: 0, host: 'mongodb' }] }).ok } catch (_) { rs.status().ok }") -eq 1
+      start_period: 5s
+
+
+volumes:
+  dbdata:
+  redisdata:
