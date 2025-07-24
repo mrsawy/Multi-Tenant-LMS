@@ -32,40 +32,40 @@ export class BrandingDto {
     secondaryColor: string;
 }
 
-export class FeaturesDto {
-    @IsInt()
-    maxUsers: number;
+// export class FeaturesDto {
+//     @IsInt()
+//     maxUsers: number;
 
-    @IsInt()
-    maxCourses: number;
+//     @IsInt()
+//     maxCourses: number;
 
-    @IsBoolean()
-    certificatesEnabled: boolean;
+//     @IsBoolean()
+//     certificatesEnabled: boolean;
 
-    @IsBoolean()
-    advancedAnalytics: boolean;
-}
+//     @IsBoolean()
+//     advancedAnalytics: boolean;
+// }
 
-export class NotificationsDto {
-    @IsBoolean()
-    emailEnabled: boolean;
+// export class NotificationsDto {
+//     @IsBoolean()
+//     emailEnabled: boolean;
 
-    @IsBoolean()
-    smsEnabled: boolean;
-}
+//     @IsBoolean()
+//     smsEnabled: boolean;
+// }
 
 export class SettingsDto {
     @ValidateNested()
     @Type(() => BrandingDto)
     branding: BrandingDto;
 
-    @ValidateNested()
-    @Type(() => FeaturesDto)
-    features: FeaturesDto;
+    // @ValidateNested()
+    // @Type(() => FeaturesDto)
+    // features: FeaturesDto;
 
-    @ValidateNested()
-    @Type(() => NotificationsDto)
-    notifications: NotificationsDto;
+    // @ValidateNested()
+    // @Type(() => NotificationsDto)
+    // notifications: NotificationsDto;
 }
 
 export class CreateOrganizationDto {
@@ -81,12 +81,9 @@ export class CreateOrganizationDto {
     @IsString()
     domain?: string;
 
-    @IsEnum(Plans)
-    plan: Plans;
-
-    @ValidateNested()
-    @Type(() => SubscriptionDto)
-    subscription: SubscriptionDto;
+    // @ValidateNested()
+    // @Type(() => SubscriptionDto)
+    // subscription: SubscriptionDto;
 
     @ValidateNested()
     @Type(() => SettingsDto)

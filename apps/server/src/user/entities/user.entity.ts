@@ -34,6 +34,8 @@ class SocialLinks {
 
 @Schema({ _id: false })
 class Profile {
+
+
   @Prop()
   bio: string;
 
@@ -65,7 +67,12 @@ class Preferences {
 @Schema({ timestamps: true })
 export class User {
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: true })
-  organizationId: Types.ObjectId;
+  organization: Types.ObjectId;
+
+
+  @Prop({ type: String, unique: true })
+  username: string
+
 
   @Prop({ required: true, unique: true })
   email: string;
@@ -83,11 +90,11 @@ export class User {
 
   @Prop()
   lastName: string;
-  // Role-based access
-  @Prop({ type: Types.ObjectId, ref: 'Role', required: true })
-  roleId: Types.ObjectId;
+  // 👇 Link to role by name instead of ID
+  @Prop({ type: String, ref: 'Role', required: true })
+  role: string;
 
-  @Prop({ type: Profile })
+  @Prop({ type: Profile , required: false })
   profile: Profile;
 
   @Prop({ type: Preferences })

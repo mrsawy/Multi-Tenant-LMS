@@ -1,0 +1,9 @@
+export enum CourseType {
+    VIDEO = 'VIDEO',
+    ARTICLE = 'ARTICLE',
+    QUIZ = 'QUIZ',
+    ASSIGNMENT = 'ASSIGNMENT',
+    PROJECT = 'PROJECT',
+    LIVE_SESSION = 'LIVE_SESSION',
+    DISCUSSION = 'DISCUSSION'
+}

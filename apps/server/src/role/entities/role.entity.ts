@@ -13,8 +13,9 @@ export class Role {
 
     @Prop([
         {
-            action: { type: String, enum: Actions },
-            subject: { type: String, enum: Subjects },
+            action: { type: String, enum: Actions, required: true },
+            subject: { type: String, enum: Subjects, required: true },
+            _id: false
         },
     ])
     permissions: {

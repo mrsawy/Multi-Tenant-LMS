@@ -9,6 +9,8 @@ import { CourseModule } from './course/course.module';
 import { CategoryModule } from './category/category.module';
 import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
+import { CourseContentModule } from './course-content/course-content.module';
+import { CourseContentModule } from './course-content/course-content.module';
 configDotenv();
 
 console.log('MongoDB URI:', process.env.MONGODB_URI_DEV);
@@ -39,7 +41,8 @@ console.log('MongoDB URI:', process.env.MONGODB_URI_DEV);
     CourseModule,
     CategoryModule,
     RoleModule,
-    AuthModule
+    AuthModule,
+    CourseContentModule
   ],
   controllers: [AppController],
   providers: [AppService],

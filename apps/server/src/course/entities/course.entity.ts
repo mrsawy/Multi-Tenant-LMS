@@ -3,16 +3,13 @@ import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 import { PricingType } from '../enum/pricingType.enum';
 import { Difficulty } from '../enum/difficulty.enum';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, discriminatorKey: 'type' })
 export class Course extends Document {
     @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Organization' })
     organizationId: Types.ObjectId;
 
     @Prop({ required: true })
     title: string;
-
-    @Prop({ required: true, unique: true })
-    slug: string;
 
     @Prop()
     description: string;
@@ -26,11 +23,11 @@ export class Course extends Document {
     @Prop()
     trailer: string;
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category' })
-    categoryId: Types.ObjectId;
+    @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Category' })
+    categories: Types.ObjectId[];
 
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-    instructorId: Types.ObjectId;
+    instructor: Types.ObjectId;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
     coInstructors: Types.ObjectId[];
@@ -50,27 +47,6 @@ export class Course extends Document {
         currency?: string;
         discountPrice?: number;
         discountEndDate?: Date;
-    };
-
-    @Prop({
-        type: {
-            level: { type: String, enum: Difficulty },
-            duration: Number,
-            language: String,
-            // subtitles: [String],
-            requirements: [String],
-            whatYouWillLearn: [String],
-            tags: [String],
-        },
-    })
-    content: {
-        level: string;
-        duration: number;
-        language: string;
-        // subtitles: string[];
-        requirements: string[];
-        whatYouWillLearn: string[];
-        tags: string[];
     };
 
     @Prop({

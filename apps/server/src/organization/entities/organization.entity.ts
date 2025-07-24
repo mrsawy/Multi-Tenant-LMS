@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Plans } from "../enums/plans.enums";
-import { Subscription } from "../enums/subscription.enum";
+import { Status } from "../enums/subscription.enum";
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 @Schema({ timestamps: true })
@@ -14,25 +14,23 @@ export class Organization {
     @Prop()
     domain?: string;
 
-    @Prop({ required: true, enum: Plans })
+    @Prop({ required: true, enum: Plans, default: Plans.NONE })
     plan: Plans;
 
     @Prop({
         type: {
-            status: { type: String, enum: Subscription, required: true },
-            planId: String,
+            status: { type: String, enum: Status, required: true },
+            plan: { type: String, enum: Plans, required: true },
             startDate: Date,
             endDate: Date,
-            stripeCustomerId: String,
         },
-        required: true
+        // required: true
     })
     subscription: {
         status: string;
         planId: string;
         startDate: Date;
         endDate: Date;
-        stripeCustomerId: string;
     };
 
     @Prop({
@@ -42,15 +40,19 @@ export class Organization {
                 primaryColor: String,
                 secondaryColor: String
             },
-            features: {
-                maxUsers: Number,
-                maxCourses: Number,
-                certificatesEnabled: Boolean,
-                advancedAnalytics: Boolean
-            },
             notifications: {
                 emailEnabled: Boolean,
                 smsEnabled: Boolean
+            }
+        },
+        default: {
+            branding: {
+                primaryColor: "#000",
+                secondaryColor: "#fff",
+            },
+            notifications: {
+                emailEnabled: false,
+                smsEnabled: false
             }
         },
         required: true
@@ -60,12 +62,6 @@ export class Organization {
             logo: string;
             primaryColor: string;
             secondaryColor: string;
-        };
-        features: {
-            maxUsers: number;
-            maxCourses: number;
-            // certificatesEnabled: boolean;
-            // advancedAnalytics: boolean;
         };
         notifications: {
             emailEnabled: boolean;
