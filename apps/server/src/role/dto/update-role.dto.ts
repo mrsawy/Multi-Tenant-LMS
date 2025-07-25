@@ -16,8 +16,9 @@ export class PermissionDto {
     subject: Subjects;
 
     @IsOptional()
-    @IsEnum(Conditions)
-    condition?: Conditions;
+    @IsArray()
+    @IsEnum(Conditions, { each: true })
+    conditions?: Conditions[];
 }
 export class UpdateRoleDto extends PartialType(CreateRoleDto) {
 

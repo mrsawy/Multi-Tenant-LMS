@@ -3,5 +3,6 @@ export enum Subjects {
     CATEGORY = 'CATEGORY',
     USER = 'USER',
     ORGANIZATION = 'ORGANIZATION',
+    ROLE = 'ROLE',
     ALL = "*"
 }

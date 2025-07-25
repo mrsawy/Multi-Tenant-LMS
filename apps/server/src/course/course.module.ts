@@ -9,14 +9,19 @@ import { VideoSchema } from './entities/video.schema';
 import { ArticleSchema } from './entities/article.schema';
 import { QuizSchema } from './entities/quiz.schema';
 import { AssignmentSchema } from './entities/assignment.schema';
+import { AuthModule } from 'src/auth/auth.module';
+import { CaslAbilityFactory } from 'src/role/permissions.factory';
+import { RoleModule } from 'src/role/role.module';
+import { UserModule } from 'src/user/user.module';
+import { CourseContentService } from './courseContent.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Course.name, schema: CourseSchema },
-      { 
-        name: CourseContent.name, 
-        schema: CourseContentSchema, 
+      {
+        name: CourseContent.name,
+        schema: CourseContentSchema,
         discriminators: [
           { name: CourseType.VIDEO, schema: VideoSchema },
           { name: CourseType.ARTICLE, schema: ArticleSchema },
@@ -28,8 +33,12 @@ import { AssignmentSchema } from './entities/assignment.schema';
         ]
       }
     ]),
+
+    AuthModule,
+    RoleModule,
+    UserModule
   ],
   controllers: [CourseController],
-  providers: [CourseService],
+  providers: [CourseService, CourseContentService],
 })
 export class CourseModule { }

@@ -10,21 +10,95 @@ export type AppAbility = MongoAbility;
 
 @Injectable()
 export class CaslAbilityFactory {
-   createForUser(user: UserDocument & { role: Role }): AppAbility {
+  createForUser(user: UserDocument & { role: Role }): AppAbility {
     const { can, build } = new AbilityBuilder(createMongoAbility);
 
     user.role.permissions.forEach(permission => {
-      const { action, subject, condition } = permission;
+      const { action, subject, conditions } = permission;
 
-      if (condition === Conditions.OWN) {
-        // User can only perform action on their own resources
-        can(action, subject, { userId: user._id });
-      } else {
-        // User can perform action on all resources of this type
-        can(action, subject);
+
+      // Build condition query
+      let conditionQuery: Record<string, any> | undefined = {};
+
+      if (conditions?.includes(Conditions.OWN)) {
+        conditionQuery = { ...conditionQuery, [Conditions.OWN]: user._id };
+      } else if (conditions?.includes(Conditions.OWN_ORG)) {
+        conditionQuery = { ...conditionQuery, [Conditions.OWN_ORG]: user.organization._id }; // Corrected from 'orientation' assuming it was a typo for organization
+      } else if (conditions?.includes(Conditions.SELF)) {
+        console.log('conditions contains SELF :');
+        conditionQuery = { ...conditionQuery, [Conditions.SELF]: user._id };
+      }
+
+      // Helper function to safely add permissions
+      const addPermission = (act: string, subj: string) => {
+        try {
+          if (conditionQuery) {
+            console.log(`Adding conditional permission: can(${act}, ${subj}, ${JSON.stringify(conditionQuery)})`);
+            can(act, subj, conditionQuery);
+          } else {
+            console.log(`Adding permission: can(${act}, ${subj})`);
+            can(act, subj);
+          }
+        } catch (error) {
+          console.error(`Error adding permission can(${act}, ${subj}):`, error);
+        }
+      };
+
+      // Handle specific action and subject
+      if (action !== Actions.MANAGE && subject !== Subjects.ALL) {
+        addPermission(action, subject);
+        return;
+      }
+
+      // Handle action on ALL subjects
+      if (subject === Subjects.ALL && action !== Actions.MANAGE) {
+        Object.values(Subjects).forEach(sub => {
+          if (sub !== Subjects.ALL) { // Skip ALL to avoid recursion
+            addPermission(action, sub);
+          }
+        });
+        return;
+      }
+
+      // Handle MANAGE action on specific subject
+      if (action === Actions.MANAGE && subject !== Subjects.ALL) {
+        Object.values(Actions).forEach(act => {
+          if (act !== Actions.MANAGE) { // Skip MANAGE to avoid recursion
+            addPermission(act, subject);
+          }
+        });
+        return;
+      }
+
+      // Handle MANAGE ALL (super admin)
+      if (action === Actions.MANAGE && subject === Subjects.ALL) {
+        Object.values(Actions).forEach(act => {
+          if (act !== Actions.MANAGE) { // Skip MANAGE to avoid recursion
+            Object.values(Subjects).forEach(sub => {
+              if (sub !== Subjects.ALL) { // Skip ALL to avoid recursion
+                addPermission(act, sub);
+              }
+            });
+          }
+        });
+        return;
       }
     });
 
-    return build();
+    const ability = build({
+      detectSubjectType: (item) => {
+        // Make sure this returns a string, not undefined
+        if (typeof item === 'string') {
+          return item;
+        }
+        if (item && item.constructor) {
+          return item.constructor.name;
+        }
+        return 'Unknown';
+      }
+    });
+
+    // console.log('Built ability with rules:', ability.rules);
+    return ability;
   }
 }

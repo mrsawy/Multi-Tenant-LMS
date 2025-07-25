@@ -11,6 +11,7 @@ import { Role, RoleSchema } from './entities/role.entity';
     MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }])
   ],
   controllers: [RoleController],
-  providers: [RoleService, CaslAbilityFactory, PermissionsGuard],
+  providers: [RoleService, CaslAbilityFactory],
+  exports: [CaslAbilityFactory, RoleService]
 })
 export class RoleModule { }

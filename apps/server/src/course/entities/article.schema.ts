@@ -4,16 +4,8 @@ import { Types } from 'mongoose';
 
 @Schema({ _id: false })
 export class Article {
-
-
-  @Prop({ type: Types.ObjectId, required: true, ref: 'User' })
-  creator: Types.ObjectId;
-
   @Prop({ required: true })
-  body: string; // The article content in Markdown or HTML
-
-  @Prop({ type: String, required: false })
-  fileUrl?: string;
+  body: string;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

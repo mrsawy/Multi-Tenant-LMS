@@ -8,11 +8,13 @@ import {
 
 import { RpcException } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly userService: UserService
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,9 +35,7 @@ export class AuthGuard implements CanActivate {
         context: ExecutionContext,
     ): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-
         const token = this.extractTokenFromHeader(request);
-
         if (!token) {
             throw new UnauthorizedException('No token provided');
         }
@@ -45,7 +45,8 @@ export class AuthGuard implements CanActivate {
             request.user = payload;
             return true;
         } catch (error) {
-            throw new UnauthorizedException('Invalid token');
+            console.error('Token verification failed:', error);
+            throw new UnauthorizedException('Invalid token ::=>', error.message);
         }
     }
     private extractTokenFromHeader(request: any): string | undefined {

@@ -1,22 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Request, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { RequiredPermissions } from 'src/role/permission.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Actions } from 'src/role/enum/Action.enum';
+import { Subjects } from 'src/role/enum/subject.enum';
+import { PermissionsGuard } from 'src/role/guards/permissions.guard';
+import { RoleService } from 'src/role/role.service';
+import { handleError } from 'src/utils/errorHandling';
+import { AppAbility } from 'src/role/permissions.factory';
+import { checkConditionForRule } from 'src/utils/abilityUtils';
+import { Conditions } from 'src/role/enum/Conditions.enum';
+
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService,
-    // @InjectModel(User.name) private readonly userModel: Model<User>
+    private readonly roleService: RoleService
   ) { }
 
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.CREATE, subject: Subjects.USER })
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto, @Request() req) {
+    try {
+      const organizationId = req.user.organization._id
+      const role = createUserDto.role;
+      await this.roleService.findOne(role);
+      const createdUserDoc = await this.userService.create({ ...createUserDto, organization: organizationId });
+      const { password, ...createdUser } = createdUserDoc;
+
+      return {
+        message: 'User created successfully',
+        user: createdUser,
+      };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      handleError(error);
+    }
   }
 
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.READ, subject: Subjects.USER })
+  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.userService.findAll();
@@ -27,15 +58,35 @@ export class UserController {
   //   return this.userService.findOne(+id);
   // }
 
+
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.USER })
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req) {
+    const userAbility = req.userAbility as AppAbility
+
+    const { hasCondition, conditionValue } = checkConditionForRule(userAbility, Actions.UPDATE, Subjects.USER, Conditions.SELF);
+
+    if (hasCondition) {
+      if (id !== conditionValue) {
+        throw new UnauthorizedException('You can only update your own user information');
+      }
+    }
+
+    if (updateUserDto.role) {
+      if (userAbility.cannot(Actions.UPDATE, Subjects.ROLE)) {
+        throw new UnauthorizedException('You do not have permission to update roles');
+      }
+    }
+
+    return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.userService.remove(+id);
+  // }
 
 
 }

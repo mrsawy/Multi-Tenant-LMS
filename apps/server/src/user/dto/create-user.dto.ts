@@ -78,9 +78,8 @@ export class CreateUserDto {
     @IsString()
     username: string
 
-    @IsNotEmpty()
-    @IsObject()
-    organization: object
+    // @IsOptional()
+    // organization: object
 
 
     @IsNotEmpty()

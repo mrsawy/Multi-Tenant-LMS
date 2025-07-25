@@ -15,13 +15,14 @@ export class Role {
         {
             action: { type: String, enum: Actions, required: true },
             subject: { type: String, enum: Subjects, required: true },
+            conditions: { type: [String], enum: Conditions, required: false },
             _id: false
         },
     ])
     permissions: {
         action: Actions;
         subject: Subjects;
-        condition?: Conditions
+        conditions?: Conditions[]
     }[];
 }
 

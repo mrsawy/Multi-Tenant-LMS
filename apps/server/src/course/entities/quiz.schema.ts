@@ -18,11 +18,6 @@ const QuestionSchema = SchemaFactory.createForClass(Question);
 
 @Schema({ _id: false })
 export class Quiz {
-
-
-    @Prop({ type: Types.ObjectId, required: true, ref: 'User' })
-    creator: Types.ObjectId;
-
     @Prop({ type: [QuestionSchema], required: true })
     questions: Question[];
 }

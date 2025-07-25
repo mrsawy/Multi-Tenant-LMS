@@ -4,19 +4,17 @@ import { OrganizationService } from 'src/organization/organization.service';
 import { UserService } from 'src/user/user.service';
 import * as jwt from 'jsonwebtoken';
 import { User } from 'src/user/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 
-
-const saltRounds = 10;
 
 @Injectable()
 export class AuthService {
 
   private readonly secret = process.env.JSON_PRIVATE_KEY || "";
-  private readonly expiresIn = '24h';
+  private readonly expiresIn = '3d';
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
@@ -35,15 +33,11 @@ export class AuthService {
       // 1. Create organization inside transaction
       const { organization } = await this.organizationService.create(organizationDto, session);
 
-      // 2. Hash password
-      const hashedPassword = await bcrypt.hash(userDto.password, saltRounds);
-
       // 3. Create user inside transaction
-      const { user } = await this.userService.create(
+      const user = await this.userService.create(
         {
           ...userDto,
-          password: hashedPassword,
-          organization: organization._id,
+          organization: organization._id.toString(),
           role: 'ADMIN',
         },
         session,
@@ -87,7 +81,7 @@ export class AuthService {
       if (!isMatch) {
         throw new Error("Wrong Password")
       }
-      const payload = { userName: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organization: foundedUser.organization }
+      const payload = { _id: foundedUser._id, userName: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organization: foundedUser.organization }
 
       const token = this.generateToken(payload);
 
@@ -105,15 +99,21 @@ export class AuthService {
 
 
   generateToken(payload: any): string {
-    console.log({ payload })
+    // console.log({ payload })
     return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
   }
 
   verifyToken(token: string): any {
     try {
-      return jwt.verify(token, this.secret);
+      return jwt.verify(token, this.secret); // returns decoded payload
     } catch (error) {
-      throw new Error('Invalid token');
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
+      throw new UnauthorizedException('Authentication failed');
     }
   }
 

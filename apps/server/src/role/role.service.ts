@@ -1,9 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role } from './entities/role.entity';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class RoleService {
@@ -27,19 +27,39 @@ export class RoleService {
     return `This action returns all role`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: string) {
+    const filter = Types.ObjectId.isValid(id)
+      ? { _id: id }
+      : { name: id };
+
+    const foundedRole = await this.roleModel.findOne(filter);
+
+    console.log({ foundedRole })
+    
+    if (!foundedRole) {
+      throw new NotFoundException('Role not found');
+    }
+    return foundedRole;
   }
 
-  async update(id: string,  updateRoleDto: UpdateRoleDto) {
+  async update(id: string, updateRoleDto: UpdateRoleDto) {
     try {
-      const updated = await this.roleModel.updateOne({ _id: id }, updateRoleDto);
+
+      console.log({ updateRoleDto, p: updateRoleDto.permissions });
+
+
+      const filter = Types.ObjectId.isValid(id)
+        ? { _id: id }
+        : { name: id };
+
+      const updated = await this.roleModel.updateOne(filter, updateRoleDto);
+
       return {
         updated,
-        message: "Role Updated Successfully"
-      }
+        message: 'Role Updated Successfully',
+      };
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      throw new InternalServerErrorException(error.message);
     }
   }
 
