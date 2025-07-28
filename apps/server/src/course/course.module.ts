@@ -14,6 +14,8 @@ import { CaslAbilityFactory } from 'src/role/permissions.factory';
 import { RoleModule } from 'src/role/role.module';
 import { UserModule } from 'src/user/user.module';
 import { CourseContentService } from './courseContent.service';
+import { FileModule } from 'src/file/file.module';
+// import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
@@ -36,9 +38,15 @@ import { CourseContentService } from './courseContent.service';
 
     AuthModule,
     RoleModule,
-    UserModule
+    UserModule,
+    FileModule,
+    // NestjsFormDataModule
   ],
   controllers: [CourseController],
-  providers: [CourseService, CourseContentService],
+  providers: [
+
+    CourseService
+    , CourseContentService
+  ],
 })
 export class CourseModule { }

@@ -5,8 +5,8 @@ export const handleError = (error: Error) => {
         throw error; // rethrow custom not found
     }
 
-    if (error.name === 'ValidationError') {
-        throw new BadRequestException(error.message); // Mongoose validation
+    if (error instanceof NotFoundException) {
+        throw new BadRequestException(error.message); 
     }
 
     throw new InternalServerErrorException(

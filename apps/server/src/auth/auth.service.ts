@@ -45,7 +45,7 @@ export class AuthService {
 
       // 4. Generate JWT
       const payload = {
-        userName: user.username,
+        username: user.username,
         email: user.email,
         role: user.role,
         organization,
@@ -81,7 +81,7 @@ export class AuthService {
       if (!isMatch) {
         throw new Error("Wrong Password")
       }
-      const payload = { _id: foundedUser._id, userName: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organization: foundedUser.organization }
+      const payload = { _id: foundedUser._id, username: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organization: foundedUser.organization }
 
       const token = this.generateToken(payload);
 

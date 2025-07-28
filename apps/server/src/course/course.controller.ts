@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -11,12 +11,17 @@ import { Conditions } from 'src/role/enum/Conditions.enum';
 import { CaslAbilityFactory } from 'src/role/permissions.factory';
 import { CourseContentService } from './courseContent.service';
 import { CreateCourseContentDto } from './dto/create-course-content.dto';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
+import { ValidateThenContinueInterceptor } from './validate-then-continue.interseptor';
+import { handleError } from 'src/utils/errorHandling';
+// import { FormDataRequest } from 'nestjs-form-data';
 
 @Controller('course')
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
-    private readonly caslAbilityFactory: CaslAbilityFactory,
+    // private readonly caslAbilityFactory: CaslAbilityFactory,
     private readonly courseContentService: CourseContentService
   ) { }
 
@@ -42,24 +47,27 @@ export class CourseController {
   }
 
 
+  @UseInterceptors(AnyFilesInterceptor())
   @UseGuards(PermissionsGuard)
   @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.COURSE })
   @UseGuards(AuthGuard)
   @Post("content")
-  async createCourseContent(@Body() createCourseContentDto: CreateCourseContentDto, @Request() req) {
+  async createCourseContent(
+    @Body() createCourseContentDto: CreateCourseContentDto,
+    @Req() req: IUserRequest,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    createCourseContentDto.organizationId = req.user.organization._id.toString()
+    createCourseContentDto.createdBy = req.user.username as string
 
-    createCourseContentDto.organizationId = req.user.organization._id
-    createCourseContentDto.createdBy = req.user._id
-    const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto)
+    const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto, files)
 
     return {
       message: 'Course content created successfully',
       createdContent
     }
-
   }
-
-
+  
 
 
   @Get()

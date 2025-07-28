@@ -11,7 +11,7 @@ export class Assignment {
     maxPoints?: number;
 
     @Prop({ type: String, required: true })
-    fileUrl: string;
+    fileKey: string;
 
 }
 

@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 @Schema({ _id: false }) // _id is not needed as it will be part of the parent document
 export class Video {
     @Prop({ required: true })
-    url: string;
+    fileKey: string;
 }
 
 export const VideoSchema = SchemaFactory.createForClass(Video);

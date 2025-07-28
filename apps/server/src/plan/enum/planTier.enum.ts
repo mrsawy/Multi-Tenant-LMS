@@ -1,0 +1,3 @@
+export enum PlanTier {
+    FREE = 'FREE', BASIC = 'BASIC', PREMIUM = 'PREMIUM', ENTERPRISE = 'ENTERPRISE'
+}

@@ -13,8 +13,9 @@ export class CourseContent extends Document {
     @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Organization' })
     organizationId: Types.ObjectId;
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
-    createdBy: Types.ObjectId;
+    @Prop({ type: String, required: true, ref: 'User', refPath: 'username' })
+    createdBy: string;
+
 
     @Prop({ type: String, enum: CourseType, required: true })
     type: CourseType
@@ -26,6 +27,13 @@ export class CourseContent extends Document {
     description: string
 }
 
-
 export const CourseContentSchema = SchemaFactory.createForClass(CourseContent);
+
+CourseContentSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
+
+CourseContentSchema.set('toJSON', { virtuals: true });
+CourseContentSchema.set('toObject', { virtuals: true });
+
+
+
 CourseContentSchema.plugin(mongoosePaginate);

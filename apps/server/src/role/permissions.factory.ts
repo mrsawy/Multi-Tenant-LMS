@@ -25,7 +25,6 @@ export class CaslAbilityFactory {
       } else if (conditions?.includes(Conditions.OWN_ORG)) {
         conditionQuery = { ...conditionQuery, [Conditions.OWN_ORG]: user.organization._id }; // Corrected from 'orientation' assuming it was a typo for organization
       } else if (conditions?.includes(Conditions.SELF)) {
-        console.log('conditions contains SELF :');
         conditionQuery = { ...conditionQuery, [Conditions.SELF]: user._id };
       }
 
@@ -33,10 +32,8 @@ export class CaslAbilityFactory {
       const addPermission = (act: string, subj: string) => {
         try {
           if (conditionQuery) {
-            console.log(`Adding conditional permission: can(${act}, ${subj}, ${JSON.stringify(conditionQuery)})`);
             can(act, subj, conditionQuery);
           } else {
-            console.log(`Adding permission: can(${act}, ${subj})`);
             can(act, subj);
           }
         } catch (error) {

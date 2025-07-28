@@ -70,8 +70,14 @@ export class User {
   organization: Types.ObjectId;
 
 
-  @Prop({ type: String, unique: true })
-  username: string
+  @Prop({
+    required: true,
+    unique: true,
+    index: true, // Add index for better query performance
+    trim: true,
+    lowercase: true // Optional: store usernames in lowercase
+  })
+  username: string;
 
 
   @Prop({ required: true, unique: true })
@@ -94,7 +100,7 @@ export class User {
   @Prop({ type: String, ref: 'Role', required: true })
   role: string;
 
-  @Prop({ type: Profile , required: false })
+  @Prop({ type: Profile, required: false })
   profile: Profile;
 
   @Prop({ type: Preferences })

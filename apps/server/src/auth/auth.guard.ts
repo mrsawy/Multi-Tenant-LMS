@@ -8,13 +8,13 @@ import {
 
 import { RpcException } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
-import { UserService } from 'src/user/user.service';
+// import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
     constructor(
         private readonly authService: AuthService,
-        private readonly userService: UserService
+        // private readonly userService: UserService
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 import { PricingType } from '../enum/pricingType.enum';
-import { Difficulty } from '../enum/difficulty.enum';
+import * as mongoosePaginate from "mongoose-paginate-v2";
 
 // Define the pricing subdocument schema
 @Schema({ _id: false }) // Don't create _id for subdocuments
@@ -17,7 +17,7 @@ export class PricingSchema {
     })
     price?: number;
 
-    @Prop({ type: String , default: 'ُEGP' })
+    @Prop({ type: String, default: 'ُEGP' })
     currency?: string;
 
     @Prop({ type: Number })
@@ -79,8 +79,8 @@ export class Course extends Document {
     @Prop({ required: true })
     title: string;
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
-    createdBy: Types.ObjectId;
+    @Prop({ type: String, required: true, ref: 'User', refPath: 'username' })
+    createdBy: string;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Category' })
     categories: Types.ObjectId[];
@@ -120,6 +120,14 @@ export class Course extends Document {
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
+
+CourseSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
+
+CourseSchema.set('toJSON', { virtuals: true });
+CourseSchema.set('toObject', { virtuals: true });
+
+
+CourseSchema.plugin(mongoosePaginate)
 
 // Create schemas for sub-documents
 export const PricingSchemaFactory = SchemaFactory.createForClass(PricingSchema);
