@@ -1,19 +1,26 @@
-import { IsString, IsNotEmpty, IsOptional, IsMongoId, ValidateNested, IsEnum, IsNumber, IsBoolean, IsDate } from 'class-validator';
+import {
+    IsString,
+    IsNotEmpty,
+    IsOptional,
+    IsMongoId,
+    ValidateNested,
+    IsEnum,
+    IsNumber,
+    IsBoolean,
+    IsDate,
+    Min
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { PricingType } from '../enum/pricingType.enum';
+import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 
-export class PricingDto {
-    @IsEnum(PricingType)
-    @IsNotEmpty()
-    type: PricingType;
 
+export class PricingDetailsDto {
     @IsNumber()
-    @IsOptional()
-    price?: number;
+    price: number;
 
     @IsString()
     @IsOptional()
-    currency?: string;
+    currency?: string = 'EGP';
 
     @IsNumber()
     @IsOptional()
@@ -21,8 +28,24 @@ export class PricingDto {
 
     @IsDate()
     @IsOptional()
-    @Type(() => Date)
+    @Type(() => Date) 
     discountEndDate?: Date;
+}
+export class PricingDto {
+    @ValidateNested()
+    @Type(() => PricingDetailsDto)
+    @IsOptional()
+    [BillingCycle.MONTHLY]?: PricingDetailsDto;
+
+    @ValidateNested()
+    @Type(() => PricingDetailsDto)
+    @IsOptional()
+    [BillingCycle.YEARLY]?: PricingDetailsDto;
+
+    @ValidateNested()
+    @Type(() => PricingDetailsDto)
+    @IsOptional()
+    [BillingCycle.ONE_TIME]?: PricingDetailsDto;
 }
 
 export class SettingsDto {
@@ -59,7 +82,7 @@ export class SettingsDto {
 export class CreateCourseDto {
     @IsString()
     @IsNotEmpty()
-    title: string;
+    name: string;
 
     @IsString()
     @IsOptional()
@@ -77,6 +100,14 @@ export class CreateCourseDto {
     @IsOptional()
     instructor?: string;
 
+    @ValidateNested()
+    @Type(() => PricingDto)
+    pricing: PricingDto;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isPaid: boolean
+
     @IsMongoId({ each: true })
     @IsOptional()
     coInstructors?: string[];
@@ -88,11 +119,6 @@ export class CreateCourseDto {
     @IsString()
     @IsOptional()
     trailer?: string;
-
-    @ValidateNested()
-    @Type(() => PricingDto)
-    @IsNotEmpty()
-    pricing: PricingDto;
 
     @ValidateNested()
     @Type(() => SettingsDto)

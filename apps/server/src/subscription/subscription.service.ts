@@ -1,26 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+// import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Subscription } from './entities/subscription.entity';
+import { Model } from 'mongoose';
+import { PlanService } from 'src/plan/plan.service';
+import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
+import { PaymentService } from 'src/payment/payment.service';
+import { SubscriptionType } from './enum/subscriptionType.enum';
 
 @Injectable()
 export class SubscriptionService {
-  create(createSubscriptionDto: CreateSubscriptionDto) {
-    return 'This action adds a new subscription';
-  }
+  constructor(
+    @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>,
+    private readonly planService: PlanService,
+    private readonly paymentService: PaymentService
+  ) { }
 
-  findAll() {
-    return `This action returns all subscription`;
-  }
+ 
 
-  findOne(id: number) {
-    return `This action returns a #${id} subscription`;
-  }
+ 
 
-  update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
-    return `This action updates a #${id} subscription`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} subscription`;
-  }
 }

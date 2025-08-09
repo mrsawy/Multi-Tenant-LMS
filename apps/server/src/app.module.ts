@@ -11,10 +11,10 @@ import { RoleModule } from './role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
-import { EnrollmentModule } from './plan/enrollment/enrollment.module';
 import { PlanModule } from './plan/plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
+import { PaymentModule } from './payment/payment.module';
 
 configDotenv();
 
@@ -54,7 +54,8 @@ configDotenv();
     FileModule,
     EnrollmentModule,
     PlanModule,
-    SubscriptionModule
+    SubscriptionModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [AppService],

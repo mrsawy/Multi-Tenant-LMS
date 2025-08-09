@@ -1,23 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
-import { PricingType } from '../enum/pricingType.enum';
 import * as mongoosePaginate from "mongoose-paginate-v2";
-
-// Define the pricing subdocument schema
+import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 @Schema({ _id: false }) // Don't create _id for subdocuments
-export class PricingSchema {
-    @Prop({ type: String, enum: PricingType, required: true })
-    type: PricingType;
+export class PricingDetails {
+    @Prop({ type: Number, required: true })
+    price: number;
 
-    @Prop({
-        type: Number,
-        required: function (this: any) {
-            return this.type === PricingType.SUBSCRIPTION || this.type === PricingType.PAID;
-        }
-    })
-    price?: number;
-
-    @Prop({ type: String, default: 'ُEGP' })
+    @Prop({ type: String, default: 'EGP' })
     currency?: string;
 
     @Prop({ type: Number })
@@ -25,6 +15,18 @@ export class PricingSchema {
 
     @Prop({ type: Date })
     discountEndDate?: Date;
+}
+
+@Schema({ _id: false })
+export class PricingSchema {
+    @Prop({ type: PricingDetails, required: false })
+    [BillingCycle.MONTHLY]?: PricingDetails;
+
+    @Prop({ type: PricingDetails, required: false })
+    [BillingCycle.YEARLY]?: PricingDetails;
+
+    @Prop({ type: PricingDetails, required: false })
+    [BillingCycle.ONE_TIME]?: PricingDetails;
 }
 
 // Define the settings subdocument schema
@@ -77,13 +79,16 @@ export class Course extends Document {
     organization: Types.ObjectId;
 
     @Prop({ required: true })
-    title: string;
+    name: string;
 
     @Prop({ type: String, required: true, ref: 'User', refPath: 'username' })
     createdBy: string;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Category' })
     categories: Types.ObjectId[];
+
+    @Prop({ type: Boolean, required: true })
+    isPaid: boolean
 
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
     instructor: Types.ObjectId;

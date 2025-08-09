@@ -8,7 +8,7 @@ export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Post()
-  create(@Body() createPlanDto: CreatePlanDto) {
+  async create(@Body() createPlanDto: CreatePlanDto) {
     return this.planService.create(createPlanDto);
   }
 
@@ -19,7 +19,7 @@ export class PlanController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.planService.findOne(+id);
+    return this.planService.findOne(id);
   }
 
   @Patch(':id')

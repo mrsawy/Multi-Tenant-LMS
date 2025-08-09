@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { PlanType } from '../enum/planType.enum';
-import { PlanTier } from '../enum/planTier.enum';
+
+import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 
 @Schema({ timestamps: true })
 export class Plan extends Document {
     @Prop({ required: true })
     name: string;
 
-    @Prop()
+    @Prop({ type: String, required: true })
     description: string;
 
     // Correctly define price as a nested object with keys based on PlanType
@@ -17,12 +17,10 @@ export class Plan extends Document {
         required: true,
     })
     price: {
-        [PlanType.MONTHLY]: number;
-        [PlanType.YEARLY]: number;
+        [BillingCycle.MONTHLY]: number;
+        [BillingCycle.YEARLY]: number;
+        [BillingCycle.ONE_TIME]: number;
     };
-
-    @Prop({ enum: PlanType, required: true })
-    billingCycle: PlanType;
 
     // Use raw type definition for nested object
     @Prop({
@@ -43,10 +41,10 @@ export class Plan extends Document {
         prioritySupport: boolean;
     };
 
-    @Prop({ default: true })
+    @Prop({ type: Boolean, default: true })
     isActive: boolean;
 
-    @Prop({ enum: PlanTier, required: true })
+    @Prop({ type: String, required: true })
     tier: string;
 }
 

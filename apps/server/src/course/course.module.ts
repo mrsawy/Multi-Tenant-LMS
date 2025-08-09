@@ -48,5 +48,6 @@ import { FileModule } from 'src/file/file.module';
     CourseService
     , CourseContentService
   ],
+  exports: [CourseService]
 })
 export class CourseModule { }
