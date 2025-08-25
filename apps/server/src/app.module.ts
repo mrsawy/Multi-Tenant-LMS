@@ -12,9 +12,12 @@ import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
 import { PlanModule } from './plan/plan.module';
-import { SubscriptionModule } from './subscription/subscription.module';
+// import { SubscriptionModule } from './subscription/subscription.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { PaymentModule } from './payment/payment.module';
+import { WalletModule } from './wallet/wallet.module';
+import { OptionsModule } from './options/options.module';
+import { CurrencyModule } from './currency/currency.module';
 
 configDotenv();
 
@@ -54,8 +57,11 @@ configDotenv();
     FileModule,
     EnrollmentModule,
     PlanModule,
-    SubscriptionModule,
-    PaymentModule
+    // SubscriptionModule,
+    PaymentModule,
+    WalletModule,
+    OptionsModule,
+    CurrencyModule
   ],
   controllers: [AppController],
   providers: [AppService],

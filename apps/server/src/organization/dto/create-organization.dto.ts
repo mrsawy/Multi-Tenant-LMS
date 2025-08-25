@@ -1,26 +1,99 @@
-import { IsBoolean, IsEnum, IsInt, IsISO8601, IsNotEmpty, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
+import {
+    IsString,
+    IsEmail,
+    IsNumber,
+    IsEnum,
+    IsDate,
+    IsOptional,
+    IsObject,
+    ValidateNested,
+    IsUrl,
+    IsNotEmpty,
+    IsMongoId,
+    IsDateString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { BillingCycle } from '../../utils/enums/billingCycle.enum';
+import mongoose from 'mongoose';
+import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
 
 
-import { Plans } from "../enums/plans.enums";
-import { Type } from "class-transformer";
 
-export class SubscriptionDto {
+class BillingDto {
+    @IsEmail()
+    email: string;
+
     @IsString()
-    planId: string;
-
-    @IsEnum(['active', 'expired', 'cancelled'])
-    status: string;
-
-    @IsISO8601()
-    startDate: string;
-
-    @IsISO8601()
-    endDate: string;
+    @IsNotEmpty()
+    last_name: string;
 
     @IsString()
-    stripeCustomerId: string;
+    @IsNotEmpty()
+    first_name: string;
+
+    @IsOptional()
+    @IsString()
+    phone_number?: string;
+
+    @IsNumber()
+    amount: number;
+
+    @IsString()
+    currency: string;
+
+    @IsEnum(BillingCycle)
+    billingCycle: BillingCycle;
 }
 
+export class SubscriptionDto {
+    @IsOptional()
+    @IsNumber()
+    reminder_days?: number;
+
+    @IsEnum(SubscriptionStatus)
+    status: SubscriptionStatus;
+
+    @IsDateString()
+    starts_at: string;
+
+    @IsOptional()
+    // @IsDateString()
+    next_billing?: string;
+
+    @IsOptional()
+    @IsDateString()
+    reminder_date?: string;
+
+    @IsOptional()
+    @IsDateString()
+    ends_at?: string;
+
+    @IsOptional()
+    @IsDateString()
+    resumed_at?: string;
+
+    @IsOptional()
+    @IsDateString()
+    suspended_at?: string;
+
+    @IsOptional()
+    @IsDateString()
+    reactivated_at?: string;
+
+    @IsString()
+    @IsOptional()
+    transaction_id?: string;
+
+    @ValidateNested()
+    @Type(() => BillingDto)
+    billing: BillingDto;
+
+    @IsDateString()
+    createdAt: string;
+
+    @IsDateString()
+    updatedAt: string;
+}
 export class BrandingDto {
     @IsUrl()
     logo: string;
@@ -69,6 +142,11 @@ export class SettingsDto {
 }
 
 export class CreateOrganizationDto {
+
+    @IsMongoId()
+    @IsOptional()
+    _id?: mongoose.Types.ObjectId
+
     @IsString()
     @IsNotEmpty()
     name: string;
@@ -81,11 +159,25 @@ export class CreateOrganizationDto {
     @IsString()
     domain?: string;
 
+    @IsMongoId()
+    @IsString()
+    @IsOptional()
+    superAdminId?: mongoose.Types.ObjectId;
     // @ValidateNested()
     // @Type(() => SubscriptionDto)
     // subscription: SubscriptionDto;
 
+
+    @IsOptional()
+    @IsString()
+    planName: string;
+
     @ValidateNested()
     @Type(() => SettingsDto)
     settings: SettingsDto;
+
+
+    @ValidateNested()
+    @Type(() => SubscriptionDto)
+    subscription: SubscriptionDto
 }

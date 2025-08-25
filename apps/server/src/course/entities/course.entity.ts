@@ -1,20 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 import * as mongoosePaginate from "mongoose-paginate-v2";
+import { Currency } from 'src/payment/enums/currency.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
+
 @Schema({ _id: false }) // Don't create _id for subdocuments
 export class PricingDetails {
     @Prop({ type: Number, required: true })
-    price: number;
+    originalPice: number;
 
-    @Prop({ type: String, default: 'EGP' })
-    currency?: string;
+    @Prop({ type: String, default: 'EGP', enum: Object.values(Currency) })
+    originalCurrency: string;
 
     @Prop({ type: Number })
-    discountPrice?: number;
+    priceUSD: number;
 
     @Prop({ type: Date })
     discountEndDate?: Date;
+
+    @Prop({ type: Date })
+    discountStartDate?: Date;
+
+    @Prop({ type: Number, min: 0, max: 100 })
+    discountPercentage?: number;
 }
 
 @Schema({ _id: false })
@@ -76,7 +84,7 @@ export class StatsSchema {
 @Schema({ timestamps: true, discriminatorKey: 'type' })
 export class Course extends Document {
     @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Organization' })
-    organization: Types.ObjectId;
+    organizationId: Types.ObjectId;
 
     @Prop({ required: true })
     name: string;
@@ -91,7 +99,7 @@ export class Course extends Document {
     isPaid: boolean
 
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-    instructor: Types.ObjectId;
+    instructorId: Types.ObjectId;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
     coInstructors: Types.ObjectId[];
@@ -109,7 +117,18 @@ export class Course extends Document {
     trailer: string;
 
     // Use the proper schema for pricing
-    @Prop({ type: PricingSchema, required: true })
+    // Note: At least one of monthly, yearly, or one-time pricing must be provided
+    @Prop({
+        type: PricingSchema,
+        required: true,
+        validate: {
+            validator: function (pricing: PricingSchema) {
+                // Ensure at least one pricing option is available
+                return !!(pricing[BillingCycle.MONTHLY] || pricing[BillingCycle.YEARLY] || pricing[BillingCycle.ONE_TIME]);
+            },
+            message: 'At least one pricing option (monthly, yearly, or one-time) must be provided'
+        }
+    })
     pricing: PricingSchema;
 
     // Use the proper schema for settings
@@ -122,6 +141,9 @@ export class Course extends Document {
 
     @Prop()
     publishedAt: Date;
+
+    @Prop({ type: String, required: false })
+    paypalPlanId: string;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
@@ -130,7 +152,6 @@ CourseSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignF
 
 CourseSchema.set('toJSON', { virtuals: true });
 CourseSchema.set('toObject', { virtuals: true });
-
 
 CourseSchema.plugin(mongoosePaginate)
 

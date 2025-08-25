@@ -30,12 +30,8 @@ export class CourseController {
   @RequiredPermissions({ action: Actions.CREATE, subject: Subjects.COURSE })
   @UseGuards(AuthGuard)
   @Post()
-  async create(@Body() createCourseDto: CreateCourseDto, @Request() req) {
-    const organization = req.user.organization;
-
-    if (!organization) {
-      throw new Error('Organization not found in request user');
-    }
+  async create(@Body() createCourseDto: CreateCourseDto, @Request() req: IUserRequest) {
+    const organizationId = `${req.user.organizationId}`;
 
     const user = req.user;
     console.log({ user })
@@ -43,7 +39,7 @@ export class CourseController {
       throw new Error('User not found in request');
     }
 
-    return await this.courseService.create({ organization, createdBy: req.user._id, ...createCourseDto });
+    return await this.courseService.create({ organizationId, createdBy: req.user._id as string, ...createCourseDto });
   }
 
 
@@ -57,7 +53,7 @@ export class CourseController {
     @Req() req: IUserRequest,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    createCourseContentDto.organizationId = req.user.organization._id.toString()
+    createCourseContentDto.organizationId = req.user.organizationId.toString()
     createCourseContentDto.createdBy = req.user.username as string
 
     const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto, files)
@@ -67,7 +63,7 @@ export class CourseController {
       createdContent
     }
   }
-  
+
 
 
   @Get()

@@ -22,13 +22,13 @@ export class PlanController {
     return this.planService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
-    return this.planService.update(+id, updatePlanDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
+  //   return this.planService.update(+id, updatePlanDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.planService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.planService.remove(+id);
+  // }
 }

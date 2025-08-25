@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { Status } from '../enum/status.enum';
+import { Currency } from 'src/payment/enums/currency.enum';
 
 export type UserDocument = User & Document;
 
@@ -67,7 +68,7 @@ class Preferences {
 @Schema({ timestamps: true })
 export class User {
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: true })
-  organization: Types.ObjectId;
+  organizationId: Types.ObjectId;
 
 
   @Prop({
@@ -111,7 +112,19 @@ export class User {
 
   @Prop()
   lastLogin: Date;
+
+  @Prop({ type: mongoose.Types.ObjectId })
+  walletId: mongoose.Types.ObjectId
+
+  @Prop({ type: String, enum: Currency, required: true })
+  preferredCurrency: string
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.plugin(mongoosePaginate)
+
+
+UserSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });

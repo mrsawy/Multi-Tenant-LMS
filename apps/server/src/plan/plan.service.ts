@@ -3,40 +3,54 @@ import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Plan } from './entities/plan.entity';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 @Injectable()
 export class PlanService {
   constructor(
     @InjectModel(Plan.name) private readonly planModel: Model<Plan>
   ) { }
+
+  // Create a new plan
   async create(createPlanDto: CreatePlanDto) {
-
     const createdPlan = await this.planModel.create(createPlanDto);
-
-    return createdPlan
+    return createdPlan;
   }
 
-  findAll() {
-    return `This action returns all plan`;
+  // Find all plans
+  async findAll() {
+    return this.planModel.find().exec();
   }
 
-  async findOne(id: string) {
-    try {
-      const foundedPlan = await this.planModel.findById(id);
-      return foundedPlan;
-    } catch (error) {
-      console.error(error)
-      throw new NotFoundException(error)
+  // Find one plan by ID
+  async findOne(identifier: string) {
+    const filter = mongoose.isValidObjectId(identifier) ? { _id: identifier } : { $or: [{ tier: identifier }, { name: identifier }] };
+    const plan = await this.planModel.findOne(filter).exec();
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID ${identifier} not found`);
+    }
+    return plan;
+  }
+
+  // Update a plan
+  async update(id: string, updatePlanDto: UpdatePlanDto) {
+    const updatedPlan = await this.planModel
+      .findByIdAndUpdate(id, updatePlanDto, { new: true, runValidators: true })
+      .exec();
+
+    if (!updatedPlan) {
+      throw new NotFoundException(`Plan with ID ${id} not found`);
     }
 
+    return updatedPlan;
   }
 
-  update(id: number, updatePlanDto: UpdatePlanDto) {
-    return `This action updates a #${id} plan`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} plan`;
+  // Remove (soft delete or hard delete)
+  async remove(id: string) {
+    const deletedPlan = await this.planModel.findByIdAndDelete(id).exec();
+    if (!deletedPlan) {
+      throw new NotFoundException(`Plan with ID ${id} not found`);
+    }
+    return { message: `Plan with ID ${id} deleted successfully` };
   }
 }

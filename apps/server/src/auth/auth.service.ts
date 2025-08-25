@@ -6,8 +6,13 @@ import * as jwt from 'jsonwebtoken';
 import { User } from 'src/user/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import mongoose, { Connection } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { WalletService } from 'src/wallet/wallet.service';
+import { RoleService } from 'src/role/role.service';
+import { PlanService } from 'src/plan/plan.service';
+import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
+import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 
 
 @Injectable()
@@ -20,6 +25,9 @@ export class AuthService {
     @InjectConnection() private readonly connection: Connection,
     private readonly organizationService: OrganizationService,
     private readonly userService: UserService,
+    private readonly walletService: WalletService,
+    private readonly roleService: RoleService,
+    private readonly planService: PlanService
   ) { }
 
 
@@ -27,33 +35,64 @@ export class AuthService {
     const session = await this.connection.startSession();
     session.startTransaction();
 
+
     try {
       const { userDto, organizationDto } = registerDto;
 
-      // 1. Create organization inside transaction
-      const { organization } = await this.organizationService.create(organizationDto, session);
+      const userId = new mongoose.Types.ObjectId()
+      const organizationId = new mongoose.Types.ObjectId()
+      const walletId = new mongoose.Types.ObjectId()
 
-      // 3. Create user inside transaction
+      const foundedRole = await this.roleService.findOne('ADMIN');
+      if (!foundedRole) throw new InternalServerErrorException("Admin Role Not Found. Please create it first.")
+
+      const freePlan = await this.planService.findOne("FREE")
+      if (!freePlan) throw new InternalServerErrorException("Free Plan Not Found. Please create it first.")
+
       const user = await this.userService.create(
         {
           ...userDto,
-          organization: organization._id.toString(),
-          role: 'ADMIN',
+          _id: userId,
+          organizationId: organizationId,
+          role: foundedRole.name,
+          walletId
         },
         session,
       );
 
-      // 4. Generate JWT
+      const { organization } = await this.organizationService.create({
+        ...organizationDto, superAdminId: userId, _id: organizationId,
+        planName: freePlan.name,
+        subscription: {
+          status: SubscriptionStatus.ACTIVE,
+          starts_at: (new Date()).toISOString(),
+          createdAt: (new Date()).toISOString(),
+          updatedAt: (new Date()).toISOString(),
+          billing: {
+            amount: 0,
+            billingCycle: BillingCycle.ONE_TIME,
+            currency: user.preferredCurrency,
+            email: user.email,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            phone_number: user.phone,
+          }
+        }
+      }, session);
+
+
+      await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization._id })
+
+
       const payload = {
         username: user.username,
         email: user.email,
         role: user.role,
-        organization,
+        organizationId: user.organizationId,
       };
 
       const token = this.generateToken(payload);
 
-      // 5. Commit transaction
       await session.commitTransaction();
       session.endSession();
 
@@ -62,7 +101,6 @@ export class AuthService {
         user: payload,
       };
     } catch (error) {
-      // Rollback if anything fails
       await session.abortTransaction();
       session.endSession();
       throw error;
@@ -81,7 +119,7 @@ export class AuthService {
       if (!isMatch) {
         throw new Error("Wrong Password")
       }
-      const payload = { _id: foundedUser._id, username: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organization: foundedUser.organization }
+      const payload = { _id: foundedUser._id as string, username: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organizationId: foundedUser.organizationId }
 
       const token = this.generateToken(payload);
 

@@ -8,28 +8,37 @@ import {
     IsNumber,
     IsBoolean,
     IsDate,
-    Min
+    Min,
+    Max,
+    ValidateIf
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
+import { Currency } from 'src/payment/enums/currency.enum';
 
 
 export class PricingDetailsDto {
+
     @IsNumber()
+    @Min(0)
     price: number;
 
-    @IsString()
+    @IsEnum(Currency)
+    currency: Currency;
+    
+    @IsDate()
     @IsOptional()
-    currency?: string = 'EGP';
-
-    @IsNumber()
-    @IsOptional()
-    discountPrice?: number;
+    discountEndDate?: Date;
 
     @IsDate()
     @IsOptional()
-    @Type(() => Date) 
-    discountEndDate?: Date;
+    discountStartDate?: Date;
+
+    @IsNumber()
+    @IsOptional()
+    @Min(0)
+    @Max(100)
+    discountPercentage?: number;
 }
 export class PricingDto {
     @ValidateNested()
@@ -102,6 +111,11 @@ export class CreateCourseDto {
 
     @ValidateNested()
     @Type(() => PricingDto)
+    @ValidateIf(o =>
+        o.pricing?.[BillingCycle.MONTHLY] ||
+        o.pricing?.[BillingCycle.YEARLY] ||
+        o.pricing?.[BillingCycle.ONE_TIME]
+    )
     pricing: PricingDto;
 
     @IsBoolean()

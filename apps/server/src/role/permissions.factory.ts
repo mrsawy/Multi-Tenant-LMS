@@ -23,7 +23,7 @@ export class CaslAbilityFactory {
       if (conditions?.includes(Conditions.OWN)) {
         conditionQuery = { ...conditionQuery, [Conditions.OWN]: user._id };
       } else if (conditions?.includes(Conditions.OWN_ORG)) {
-        conditionQuery = { ...conditionQuery, [Conditions.OWN_ORG]: user.organization._id }; // Corrected from 'orientation' assuming it was a typo for organization
+        conditionQuery = { ...conditionQuery, [Conditions.OWN_ORG]: user.organizationId }; // Corrected from 'orientation' assuming it was a typo for organization
       } else if (conditions?.includes(Conditions.SELF)) {
         conditionQuery = { ...conditionQuery, [Conditions.SELF]: user._id };
       }

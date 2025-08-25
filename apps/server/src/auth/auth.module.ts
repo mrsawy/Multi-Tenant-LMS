@@ -5,6 +5,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { OrganizationModule } from 'src/organization/organization.module';
 import { User } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
+import { WalletModule } from 'src/wallet/wallet.module';
+import { RoleModule } from 'src/role/role.module';
+import { PlanModule } from 'src/plan/plan.module';
 
 
 export const JWT_SECRET = 'VERY_hard!to-guess_secret'
@@ -13,7 +16,10 @@ export const JWT_SECRET = 'VERY_hard!to-guess_secret'
   imports: [
     JwtModule.register({ secret: JWT_SECRET }),
     OrganizationModule,
-    forwardRef(() => UserModule)
+    forwardRef(() => UserModule),
+    RoleModule,
+    WalletModule,
+    PlanModule
   ],
   controllers: [AuthController],
   providers: [AuthService],

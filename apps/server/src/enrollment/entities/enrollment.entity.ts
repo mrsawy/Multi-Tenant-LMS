@@ -3,7 +3,8 @@ import { Document, Types } from 'mongoose';
 import * as mongoosePaginate from "mongoose-paginate-v2"
 import { Status } from '../enum/status.enum';
 import { AccessType } from '../enum/accessType.enum';
-import { Subscription, SubscriptionSchema } from 'src/subscription/entities/subscription.entity';
+import { SubscriptionDto } from 'src/utils/dto/subscription.dto';
+import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 
 @Schema({ timestamps: true })
 export class Enrollment extends Document {
@@ -16,19 +17,15 @@ export class Enrollment extends Document {
     @Prop({ type: Types.ObjectId, ref: 'Organization', required: true })
     organizationId: Types.ObjectId;
 
-    @Prop({ enum: Status, default: 'active' })
-    status: string;
-
     @Prop({ required: true, default: Date.now })
     enrolledAt: Date;
 
-    @Prop()
-    expiresAt: Date; // When access expires (for subscriptions/trials)
+    // @Prop()
+    // expiresAt: Date;
 
     @Prop()
     completedAt: Date;
 
-    // ACCESS TYPE - How user got access to this course
     @Prop({
         enum: AccessType,
         required: true
@@ -36,15 +33,15 @@ export class Enrollment extends Document {
     accessType: string;
 
     @Prop({
-        type: SubscriptionSchema,
+        type: SubscriptionDto,
         validate: {
             validator: function (this: Enrollment) {
                 return (this.accessType !== AccessType.PAID_ONCE && this.accessType !== AccessType.SUBSCRIPTION) || !!this.subscription;
             },
-            message: 'AccessType is required when AccessType is not ' + AccessType.FREE,
+            message: 'subscription is required when AccessType is not ' + AccessType.FREE,
         }
     })
-    subscription: Subscription
+    subscription: SubscriptionTypeDef
 
     @Prop({ default: 0, min: 0, max: 100 })
     progressPercentage: number;
@@ -52,53 +49,52 @@ export class Enrollment extends Document {
     @Prop({ default: 0 })
     timeSpentMinutes: number;
 
-    @Prop()
+    @Prop({ default: Date.now })
     lastAccessedAt: Date;
 
-    @Prop()
+    @Prop({
+        type: {
+            completedModules: [{ type: Types.ObjectId, ref: 'Module' }],
+            completedLessons: [{ type: Types.ObjectId, ref: 'Lesson' }],
+            quizScores: [{
+                quizId: { type: Types.ObjectId, ref: 'Quiz' },
+                score: Number,
+                attempts: Number,
+                completedAt: Date
+            }]
+        },
+        default: {}
+    })
     progress: {
-        completedModules: [Types.ObjectId];
-        completedLessons: [Types.ObjectId];
-        quizScores: [{
+        completedModules: Types.ObjectId[];
+        completedLessons: Types.ObjectId[];
+        quizScores: {
             quizId: Types.ObjectId;
             score: number;
             attempts: number;
             completedAt: Date;
-        }];
+        }[];
     };
 
-    // CERTIFICATE
-    @Prop()
+    @Prop({
+        type: {
+            issued: Boolean,
+            issuedAt: Date,
+            certificateUrl: String
+        },
+        default: {}
+    })
     certificate: {
         issued: boolean;
         issuedAt: Date;
         certificateUrl: string;
     };
 
-    // ACCESS PERMISSIONS - What user can do
-    @Prop()
-    permissions: {
-        canViewContent: boolean;
-        canDownloadMaterials: boolean;
-        canTakeQuizzes: boolean;
-        canReceiveCertificate: boolean;
-        hasLifetimeAccess: boolean;
-    };
-
-    // SUBSCRIPTION RENEWALS HISTORY
-    @Prop()
-    renewalHistory: [{
-        renewedAt: Date;
-        amount: number;
-        nextExpiryDate: Date;
-        billingCycle: string;
-        transactionId: string;
-    }];
 }
 
 export const EnrollmentSchema = SchemaFactory.createForClass(Enrollment);
+EnrollmentSchema.plugin(mongoosePaginate);
 
-// VIRTUALS
 EnrollmentSchema.virtual("user", {
     ref: "User",
     localField: "userId",
@@ -120,3 +116,20 @@ EnrollmentSchema.virtual("organization", {
     justOne: true
 });
 
+EnrollmentSchema.virtual("completedModules", {
+    ref: "Module",
+    localField: "progress.completedModules",
+    foreignField: "_id",
+    justOne: false
+});
+
+EnrollmentSchema.virtual("completedLessons", {
+    ref: "Lesson",
+    localField: "progress.completedLessons",
+    foreignField: "_id",
+    justOne: false
+});
+
+
+EnrollmentSchema.set('toJSON', { virtuals: true });
+EnrollmentSchema.set('toObject', { virtuals: true });

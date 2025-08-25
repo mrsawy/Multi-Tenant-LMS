@@ -1,9 +1,9 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model } from 'mongoose';
-import { User } from './entities/user.entity';
+import mongoose, { ClientSession, Model } from 'mongoose';
+import { User, UserDocument } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { handleError } from 'src/utils/errorHandling';
 
@@ -16,7 +16,7 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>
   ) { }
-  async create(createUserDto: CreateUserDto & { organization: string }, session?: ClientSession) {
+  async create(createUserDto: CreateUserDto & { organizationId: mongoose.Types.ObjectId }, session?: ClientSession) {
     try {
 
       const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
@@ -38,24 +38,24 @@ export class UserService {
   }
 
   async findOne(identifier: string) {
-    try {
-      const user = await this.userModel.findOne({
-        $or: [
-          { username: identifier },
-          { email: identifier },
-          { phone: identifier },
-        ],
-      }).populate({
-        path: 'role',
-        model: 'Role',
-        localField: 'role',
-        foreignField: 'name'
-      }).populate("organization");
 
-      return user;
-    } catch (error) {
-      throw new Error("Could'nt find user:", error.message);
+    let foundedUser: UserDocument | null = null;
+
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      foundedUser = await this.userModel.findById(identifier).populate({ path: 'role', model: 'Role', localField: 'role', foreignField: 'name' })
+        .populate("organization");
+    } else {
+      foundedUser = await this.userModel
+        .findOne({
+          $or: [{ email: identifier }, { username: identifier }, { phone: identifier }]
+        })
+        .populate({ path: 'role', model: 'Role', localField: 'role', foreignField: 'name' })
+        .populate("organization");
     }
+    if (!foundedUser) throw new NotFoundException("User Not Found")
+
+    return foundedUser;
+
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

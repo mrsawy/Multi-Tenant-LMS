@@ -2,7 +2,7 @@ import { IsString, IsOptional, IsDateString, IsEnum, IsMongoId, ValidateIf, Vali
 import { BillingCycle } from '../../utils/enums/billingCycle.enum';
 import { CreatePaymobSubscriptionPlanDto } from 'src/payment/dto/create-subscription-plan.dto';
 import { Type } from 'class-transformer';
-import { SubscriptionType } from 'src/subscription/enum/subscriptionType.enum';
+import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 
 
 export class customerDto {
@@ -44,6 +44,7 @@ export class customerDto {
 
 
 export class PaymobBillingData {
+    @IsOptional()
     @IsString()
     apartment: string;
 
@@ -59,7 +60,8 @@ export class PaymobBillingData {
     street: string;
 
     @IsString()
-    building: string;
+    @IsOptional()
+    building?: string;
 
     @IsString()
     @IsNotEmpty()
@@ -75,11 +77,20 @@ export class PaymobBillingData {
     @IsNotEmpty()
     email: string;
 
+    @IsOptional()
     @IsString()
-    floor: string;
+    floor?: string;
+
+    // @IsString()
+    // state: string;
 
     @IsString()
-    state: string;
+    @IsOptional()
+    extra_description: string;
+
+    @IsString()
+    country_code:string
+
 }
 
 
@@ -145,4 +156,5 @@ export class CreatePaymobSubscriptionDto {
 
     @IsOptional()
     extras: any;
+
 }

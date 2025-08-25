@@ -17,6 +17,7 @@ export class PaymobSubscriptionItem {
 
 export class CreatePaymobSubscriptionPlanDto {
     @IsString()
+    @IsOptional()
     token: string
 
     @IsOptional()
@@ -26,6 +27,7 @@ export class CreatePaymobSubscriptionPlanDto {
 
     @IsString()
     @IsNotEmpty()
+    @IsOptional()
     plan_type: 'rent'; // only 'rent' is supported for now
 
     @IsOptional()

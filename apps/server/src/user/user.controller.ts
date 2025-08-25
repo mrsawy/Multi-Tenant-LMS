@@ -32,7 +32,7 @@ export class UserController {
       const organizationId = req.user.organization._id
       const role = createUserDto.role;
       await this.roleService.findOne(role);
-      const createdUserDoc = await this.userService.create({ ...createUserDto, organization: organizationId });
+      const createdUserDoc = await this.userService.create({ ...createUserDto, organizationId });
       const { password, ...createdUser } = createdUserDoc;
 
       return {

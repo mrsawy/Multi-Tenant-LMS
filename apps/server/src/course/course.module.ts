@@ -15,6 +15,7 @@ import { RoleModule } from 'src/role/role.module';
 import { UserModule } from 'src/user/user.module';
 import { CourseContentService } from './courseContent.service';
 import { FileModule } from 'src/file/file.module';
+import { CurrencyModule } from 'src/currency/currency.module';
 // import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
@@ -40,6 +41,7 @@ import { FileModule } from 'src/file/file.module';
     RoleModule,
     UserModule,
     FileModule,
+    CurrencyModule
     // NestjsFormDataModule
   ],
   controllers: [CourseController],

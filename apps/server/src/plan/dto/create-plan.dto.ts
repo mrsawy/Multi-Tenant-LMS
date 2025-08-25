@@ -1,6 +1,7 @@
 import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
+import { PlanTier } from '../enum/planTier.enum';
 
 class PriceDto {
     @IsNumber()
@@ -57,7 +58,11 @@ export class CreatePlanDto {
     @IsBoolean()
     isActive?: boolean = true;
 
-    @IsString()
+    @IsEnum(PlanTier)
     @IsNotEmpty()
-    tier: string;
+    tier: PlanTier;
+
+    @IsString()
+    @IsOptional()
+    paypalPlanId: string;
 }

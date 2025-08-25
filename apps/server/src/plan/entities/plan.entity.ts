@@ -2,10 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
+import { PlanTier } from '../enum/planTier.enum';
 
 @Schema({ timestamps: true })
 export class Plan extends Document {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     name: string;
 
     @Prop({ type: String, required: true })
@@ -22,7 +23,9 @@ export class Plan extends Document {
         [BillingCycle.ONE_TIME]: number;
     };
 
-    // Use raw type definition for nested object
+    @Prop({ type: String, required: false })
+    paypalPlanId: string;
+
     @Prop({
         type: {
             maxUsers: { type: Number, required: true },
@@ -44,7 +47,7 @@ export class Plan extends Document {
     @Prop({ type: Boolean, default: true })
     isActive: boolean;
 
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, enum: PlanTier, required: true, unique: true })
     tier: string;
 }
 
