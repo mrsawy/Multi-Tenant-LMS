@@ -4,5 +4,20 @@
   "nxCloudId": "687306a1011c6a6c644562c0",
   "name": "lms-organization",
   "version": "1.0.0",
-  "packageManager": "pnpm@8.15.4"
+  "packageManager": "pnpm@8.15.4",
+  "targetDefaults": {
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ]
 }

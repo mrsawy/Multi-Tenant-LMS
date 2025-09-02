@@ -95,6 +95,9 @@ export class Course extends Document {
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Category' })
     categories: Types.ObjectId[];
 
+    @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'CourseModule', default: [] })
+    modulesIds: Types.ObjectId[];
+
     @Prop({ type: Boolean, required: true })
     isPaid: boolean
 
@@ -113,8 +116,8 @@ export class Course extends Document {
     @Prop({ type: String })
     thumbnail: string;
 
-    @Prop({ type: String })
-    trailer: string;
+    // @Prop({ type: String })
+    // trailer: string;
 
     // Use the proper schema for pricing
     // Note: At least one of monthly, yearly, or one-time pricing must be provided
@@ -149,6 +152,7 @@ export class Course extends Document {
 export const CourseSchema = SchemaFactory.createForClass(Course);
 
 CourseSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
+CourseSchema.virtual('modules', { ref: 'CourseModule', localField: 'modulesIds', foreignField: '_id', justOne: false });
 
 CourseSchema.set('toJSON', { virtuals: true });
 CourseSchema.set('toObject', { virtuals: true });

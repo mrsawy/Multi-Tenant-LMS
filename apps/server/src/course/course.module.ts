@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CourseService } from './course.service';
-import { CourseController } from './course.controller';
+import { CourseController } from './course.controller.http';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Course, CourseSchema } from './entities/course.entity';
 import { CourseContent, CourseContentSchema } from './entities/course-content.entity';
@@ -16,12 +16,16 @@ import { UserModule } from 'src/user/user.module';
 import { CourseContentService } from './courseContent.service';
 import { FileModule } from 'src/file/file.module';
 import { CurrencyModule } from 'src/currency/currency.module';
-// import { NestjsFormDataModule } from 'nestjs-form-data';
+import { CourseModulesService } from './courseModules.service';
+import { CourseModuleSchema, CourseModule as CourseModuleEntity } from './entities/course-module.entity';
+import { CourseControllerMessage } from './course.controller.message';
+
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Course.name, schema: CourseSchema },
+      { name: CourseModuleEntity.name, schema: CourseModuleSchema },
       {
         name: CourseContent.name,
         schema: CourseContentSchema,
@@ -44,11 +48,12 @@ import { CurrencyModule } from 'src/currency/currency.module';
     CurrencyModule
     // NestjsFormDataModule
   ],
-  controllers: [CourseController],
+  controllers: [CourseController , CourseControllerMessage],
   providers: [
 
     CourseService
     , CourseContentService
+    , CourseModulesService
   ],
   exports: [CourseService]
 })

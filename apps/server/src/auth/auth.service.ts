@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { OrganizationService } from 'src/organization/organization.service';
 import { UserService } from 'src/user/user.service';
@@ -35,6 +35,8 @@ export class AuthService {
     const session = await this.connection.startSession();
     session.startTransaction();
 
+    const userType = registerDto.userDto.role;
+    const isStudent = userType == "STUDENT"
 
     try {
       const { userDto, organizationDto } = registerDto;
@@ -43,8 +45,8 @@ export class AuthService {
       const organizationId = new mongoose.Types.ObjectId()
       const walletId = new mongoose.Types.ObjectId()
 
-      const foundedRole = await this.roleService.findOne('ADMIN');
-      if (!foundedRole) throw new InternalServerErrorException("Admin Role Not Found. Please create it first.")
+      const foundedRole = await this.roleService.findOne(isStudent ? "STUDENT" : 'ADMIN');
+      if (!foundedRole) throw new InternalServerErrorException("Role Not Found. Please create it first.")
 
       const freePlan = await this.planService.findOne("FREE")
       if (!freePlan) throw new InternalServerErrorException("Free Plan Not Found. Please create it first.")
@@ -53,15 +55,15 @@ export class AuthService {
         {
           ...userDto,
           _id: userId,
-          organizationId: organizationId,
+          organizationId: isStudent ? undefined : organizationId,
           role: foundedRole.name,
           walletId
         },
         session,
       );
 
-      const { organization } = await this.organizationService.create({
-        ...organizationDto, superAdminId: userId, _id: organizationId,
+      const { organization } = isStudent ? { organization: undefined } : await this.organizationService.create({
+        ...organizationDto!, superAdminId: userId, _id: organizationId,
         planName: freePlan.name,
         subscription: {
           status: SubscriptionStatus.ACTIVE,
@@ -81,14 +83,14 @@ export class AuthService {
       }, session);
 
 
-      await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization._id })
+      await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization?._id })
 
 
       const payload = {
         username: user.username,
         email: user.email,
         role: user.role,
-        organizationId: user.organizationId,
+        organizationId: user?.organizationId,
       };
 
       const token = this.generateToken(payload);
@@ -101,8 +103,23 @@ export class AuthService {
         user: payload,
       };
     } catch (error) {
+      console.error(error)
       await session.abortTransaction();
       session.endSession();
+
+      // Handle specific conflict errors with custom messages
+      if (error instanceof ConflictException) {
+        if (error.message.includes('username')) {
+          throw new ConflictException('This username is already taken. Please choose a different username.');
+        }
+        if (error.message.includes('email')) {
+          throw new ConflictException('This email is already registered. Please use a different email or try logging in.');
+        }
+        if (error.message.includes('phone')) {
+          throw new ConflictException('This phone number is already registered. Please use a different phone number.');
+        }
+      }
+
       throw error;
     }
   }
@@ -119,7 +136,8 @@ export class AuthService {
       if (!isMatch) {
         throw new Error("Wrong Password")
       }
-      const payload = { _id: foundedUser._id as string, username: foundedUser.username, email: foundedUser.email, role: foundedUser.role, organizationId: foundedUser.organizationId }
+
+      const payload = foundedUser.toObject()
 
       const token = this.generateToken(payload);
 
@@ -141,9 +159,10 @@ export class AuthService {
     return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
   }
 
-  verifyToken(token: string): any {
+  async verifyToken(token: string) {
     try {
-      return jwt.verify(token, this.secret); // returns decoded payload
+      const decodedPayload = jwt.verify(token, this.secret) as User;
+      return decodedPayload
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token expired');

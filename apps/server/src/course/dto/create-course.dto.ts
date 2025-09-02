@@ -105,6 +105,10 @@ export class CreateCourseDto {
     @IsOptional()
     categories?: string[];
 
+    @IsMongoId({ each: true })
+    @IsOptional()
+    modulesIds?: string[];
+
     @IsMongoId()
     @IsOptional()
     instructor?: string;
@@ -130,9 +134,9 @@ export class CreateCourseDto {
     @IsOptional()
     thumbnail?: string;
 
-    @IsString()
-    @IsOptional()
-    trailer?: string;
+    // @IsString()
+    // @IsOptional()
+    // trailer?: string;
 
     @ValidateNested()
     @Type(() => SettingsDto)

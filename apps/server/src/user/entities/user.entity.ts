@@ -67,7 +67,7 @@ class Preferences {
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ type: Types.ObjectId, ref: 'Organization', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Organization', required: false })
   organizationId: Types.ObjectId;
 
 
@@ -126,5 +126,6 @@ UserSchema.plugin(mongoosePaginate)
 
 
 UserSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
+UserSchema.virtual('wallet', { ref: 'Wallet', localField: 'walletId', foreignField: '_id', justOne: true });
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });

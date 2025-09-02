@@ -1,8 +1,7 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsNotEmpty, ValidateNested, ValidateIf, IsOptional } from "class-validator";
 import { CreateOrganizationDto } from "src/organization/dto/create-organization.dto";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
-
 
 export class RegisterDto {
 
@@ -11,10 +10,12 @@ export class RegisterDto {
     @Type(() => CreateUserDto)
     userDto: CreateUserDto
 
-    @IsNotEmpty()
+    // @IsOptional()
+    @ValidateIf(o => o.userDto.role !== "STUDENT")
     @ValidateNested()
+    @IsNotEmpty()
     @Type(() => CreateOrganizationDto)
-    organizationDto: CreateOrganizationDto
+    organizationDto?: CreateOrganizationDto
 }
 
 

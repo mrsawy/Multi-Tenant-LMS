@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsOptional, IsObject, IsEnum, IsNumber, IsMongoId } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsBoolean, IsOptional, IsObject, IsEnum, IsNumber, IsMongoId, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Status } from 'src/user/enum/status.enum';
 import mongoose from 'mongoose';
@@ -21,9 +21,9 @@ export class AddressDto {
     @IsString()
     zipCode?: string;
 
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    country?: string;
+    country: string;
 }
 
 export class SocialLinksDto {
@@ -92,7 +92,7 @@ export class CreateUserDto {
     @IsOptional()
     walletId: mongoose.Types.ObjectId
 
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
     role: string
 
@@ -101,8 +101,8 @@ export class CreateUserDto {
     email: string;
 
     @IsNotEmpty()
-    @IsNumber()
-    phone: number;
+    @Matches(/^\+?\d+$/, { message: 'Phone must contain only digits and may start with +' })
+    phone: string;
 
 
     @IsNotEmpty()

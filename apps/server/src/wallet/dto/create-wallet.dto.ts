@@ -13,8 +13,9 @@ export class CreateWalletDto {
   @IsMongoId()
   userId: Types.ObjectId;
 
+  @IsOptional()
   @IsMongoId()
-  organizationId: Types.ObjectId;
+  organizationId?: Types.ObjectId;
 
   @IsNumber()
   @Min(0)

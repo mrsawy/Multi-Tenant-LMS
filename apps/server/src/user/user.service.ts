@@ -16,7 +16,7 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>
   ) { }
-  async create(createUserDto: CreateUserDto & { organizationId: mongoose.Types.ObjectId }, session?: ClientSession) {
+  async create(createUserDto: CreateUserDto & { organizationId?: mongoose.Types.ObjectId }, session?: ClientSession) {
     try {
 
       const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
@@ -50,7 +50,7 @@ export class UserService {
           $or: [{ email: identifier }, { username: identifier }, { phone: identifier }]
         })
         .populate({ path: 'role', model: 'Role', localField: 'role', foreignField: 'name' })
-        .populate("organization");
+        .populate("organization").populate("wallet")
     }
     if (!foundedUser) throw new NotFoundException("User Not Found")
 

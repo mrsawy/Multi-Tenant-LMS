@@ -8,6 +8,7 @@ import {
 
 import { RpcException } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
+import { User } from 'src/user/entities/user.entity';
 // import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -54,33 +55,30 @@ export class AuthGuard implements CanActivate {
         return type === 'Bearer' ? token : undefined;
     }
 
+
     private async handleRpcRequest(
         context: ExecutionContext,
     ): Promise<boolean> {
-        const ctx = context.switchToRpc();
-        const data = ctx.getData();
-        const metadata = ctx.getContext();
-
-        // Option 1: Token in metadata (e.g. gRPC or custom microservice clients)
-        const token =
-            metadata?.get?.('Authorization')?.split?.(' ')[1] ||
-            metadata?.authorization?.split?.(' ')[1] ||
-            data?.authorization?.split?.(' ')[1];
-
-        if (!token) {
-            throw new RpcException('No token provided in RPC request');
-        }
-
+        const data: { authorization: string } = context.switchToRpc().getData();
+        const rpcContext: { userPayload: User } = context
+            .switchToRpc()
+            .getContext();
         try {
-            const payload = this.authService.verifyToken(token);
-
-            // Attach user to data context or metadata for further processing
-            if (data) data.user = payload;
-            if (metadata) metadata.user = payload;
-
+            if (!data.authorization || data.authorization.trim() === '') {
+                throw new RpcException('please provide token');
+            }
+            const user = await this.authService.verifyToken(
+                data.authorization,
+            );
+            rpcContext.userPayload = user!;
             return true;
         } catch (error) {
-            throw new RpcException('Invalid token in RPC request');
+            const errorMessage =
+                error instanceof Error && error.message
+                    ? error.message
+                    : 'session expired! Please sign In';
+
+            throw new RpcException(errorMessage);
         }
     }
 

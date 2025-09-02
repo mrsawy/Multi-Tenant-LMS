@@ -5,12 +5,20 @@ services:
       dockerfile: DockerFile
     ports:
       - "3000:3000"
-    # environment:
-    #   - NODE_ENV=production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NATS_URLS=nats://nats:4222
+      - MONGODB_URI_DEV=mongodb://mongodb:27017/lms
+      - REDIS_URL_DEV=redis://redis:6379
     volumes:
       - ./apps/server:/app
       - /app/node_modules
     command: ["pnpm", "start"]
+    depends_on:
+      - mongodb
+      - nats
+      - redis
     
   client:
     build:
@@ -18,15 +26,14 @@ services:
       dockerfile: DockerFile
     ports:
       - "3001:3000"
+    environment:
+      - NATS_URLS=nats://nats:4222
     volumes:
       - ./apps/client:/app
       - /app/node_modules
     command: ["pnpm", "dev"]
-
-  nats:
-    image: nats:latest
-    ports:
-      - '4222:4222'
+    depends_on:
+      - nats
 
   redis:
     image: redis:latest
@@ -35,6 +42,18 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - redisdata:/data
+
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--jetstream", "--http_port", "8222"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongodb:
     image: mongodb/mongodb-community-server:8.0.9-ubuntu2204

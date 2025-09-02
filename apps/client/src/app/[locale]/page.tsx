@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/atoms/button";
 // import { useTranslations } from 'next-intl';
 import { routing } from '@/i18n/routing';
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,10 +17,7 @@ interface Props {
 export default async function Page({ params }: Props) {
   const { locale } = await params;
 
-
   setRequestLocale(locale);
-
-  console.log({ locale })
 
   const t = await getTranslations('HomePage');
 

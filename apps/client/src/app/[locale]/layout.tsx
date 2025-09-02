@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from 'next-intl';
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./../globals.css";
 import { setRequestLocale } from "next-intl/server";
+import Provider from "./provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,17 +34,17 @@ export default async function LocaleLayout({
   const { locale } = await params;
 
   if (!routing.locales.includes(locale as "en" | "ar")) {
-    notFound();
+    redirect("/ar/" + locale)
   }
 
 
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
-      >
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
+        <Provider>
+          {children}
+        </Provider>
       </body>
     </html>
   );
