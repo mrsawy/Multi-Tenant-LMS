@@ -50,7 +50,7 @@ export class AuthControllerMessage {
                     error: 'Unauthorized'
                 });
             }
-            
+
             throw new RpcException({
                 message: error.message || 'An unexpected error occurred',
                 status: 500,

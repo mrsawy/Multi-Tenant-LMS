@@ -81,6 +81,11 @@ export async function handleLogin(loginData: LoginSchema) {
 
     redirect(response.user.role == "STUDENT" ? '/student-dashboard' : "organization-dashboard");
 }
+
+
+
+
+
 // export async function logout(redirectAfterLogin = true) {
 //   const idToken = await getCookie(AUTH_COOKIE_NAME);
 //   if (idToken) {

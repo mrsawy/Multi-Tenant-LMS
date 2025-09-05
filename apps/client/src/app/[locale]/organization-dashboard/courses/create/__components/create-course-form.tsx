@@ -4,13 +4,16 @@ import React, { useState } from 'react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/atoms/button"
 import { Input } from "@/components/atoms/input"
-import { useForm } from 'react-hook-form'
+import { useForm, SubmitHandler, Resolver } from 'react-hook-form'
 import { Label } from "@/components/atoms/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/select"
-import { CreateCourseSchema } from '@/lib/schema/course.schema'
+import { createCourseSchema, CreateCourseSchema } from '@/lib/schema/course.schema'
 import DropzoneWithPreview from '@/components/molecules/dropzone-preview'
 import { Currency } from '@/lib/data/currency.enum'
 import { handleCreateCourse } from '@/lib/actions/courses/createCourse.action'
+import useGeneralStore from '@/lib/store/generalStore'
+import { toast } from 'react-toastify'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 // Simple form data type
 
@@ -29,6 +32,7 @@ function CreateCourseForm() {
         setValue,
         formState: { errors },
     } = useForm<CreateCourseSchema>({
+        resolver: yupResolver(createCourseSchema) as unknown as Resolver<CreateCourseSchema>,
         mode: 'onSubmit',
         defaultValues: {
             isPaid: false,
@@ -36,6 +40,7 @@ function CreateCourseForm() {
                 certificateEnabled: false,
                 discussionEnabled: true,
                 downloadEnabled: false,
+                enrollmentLimit: undefined
             },
             description: "",
             shortDescription: ""
@@ -44,12 +49,32 @@ function CreateCourseForm() {
 
     const isPaid = watch('isPaid');
 
-    const onSubmit = async (data: CreateCourseSchema) => {
+    const onSubmit: SubmitHandler<CreateCourseSchema> = async (data) => {
 
-        const response = await handleCreateCourse(data)
+        try {
+            useGeneralStore.setState({ generalIsLoading: true })
+            const formData = new FormData()
+            Object.entries(data).forEach(([key, value]) => {
+                if (value instanceof File) {
+                    return formData.append(key, value);
+                }
+                if (typeof value == 'object') {
+                    return formData.append(key, JSON.stringify(value));
+                }
 
+                !!value && formData.append(key, value as any)
 
- 
+            })
+            const response = await handleCreateCourse(formData)
+            toast.success("Course Created")
+            // console.log('Course data:', { data, response }, Object.fromEntries(formData.entries()));
+        } catch (error: any) {
+            console.error(error)
+            toast.error(typeof error?.message ? error.message : "something went wrong")
+        } finally {
+            useGeneralStore.setState({ generalIsLoading: false })
+
+        }
 
     }
 
@@ -72,7 +97,7 @@ function CreateCourseForm() {
 
 
     return (
-        <div className='rounded-lg p-6  shadow-sm  m-auto w-md md:w-xl xl:w-7xl border-2 '>
+        <div className='rounded-lg p-6  shadow-sm  m-auto w-md md:w-3xl 2xl:w-7xl border-2 bg-zinc-100 dark:bg-zinc-900'>
             <h2 className="text-2xl font-bold mb-6">Create New Course</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
                 {/* Basic Information */}
@@ -83,7 +108,7 @@ function CreateCourseForm() {
                         <Label className="text-sm lg:text-medium" htmlFor="name">Course Name *</Label>
                         <Input
                             placeholder="Enter course name..."
-                            className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium"
+                            className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium border-3"
                             {...register("name", { required: "Course name is required" })}
                         />
                         {errors.name && (
@@ -97,7 +122,7 @@ function CreateCourseForm() {
                         <Label className="text-sm lg:text-medium" htmlFor="shortDescription">Short Description</Label>
                         <Input
                             placeholder="Brief description of the course..."
-                            className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium"
+                            className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium border-3"
                             {...register("shortDescription")}
                         />
                     </div>
@@ -106,13 +131,13 @@ function CreateCourseForm() {
                         <Label className="text-sm lg:text-medium" htmlFor="description">Full Description</Label>
                         <textarea
                             placeholder="Detailed description of the course..."
-                            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="border-3 flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             {...register("description")}
                         />
                     </div>
 
 
-                    <div className='flex flex-row gap-12 border-2 me-auto w-fit p-9 rounded-md'>
+                    <div className='flex flex-row gap-12 border-3 me-auto w-fit p-9 rounded-md'>
                         <div className="flex flex-row gap-9 w-full ">
                             <Label className="text-sm lg:text-medium" htmlFor="thumbnail">Thumbnail Image </Label>
                             {/* <Input
@@ -121,9 +146,13 @@ function CreateCourseForm() {
                             {...register("thumbnail")}
                             /> */}
 
-                            <DropzoneWithPreview setFilePreview={setFilePreview} filePreview={filePreview} handleDrop={handleDrop} files={files} setFiles={setFiles} className='md:h-60 md:w-80' />
+                            <DropzoneWithPreview setFilePreview={setFilePreview} filePreview={filePreview} handleDrop={handleDrop} files={files} setFiles={setFiles} className='size-50 md:h-60 md:w-80' />
                         </div>
-
+                        {errors.thumbnail && (
+                            <p className="text-left text-sm text-red-400 whitespace-nowrap flex items-center">
+                                {errors.thumbnail?.message}
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -137,7 +166,7 @@ function CreateCourseForm() {
                             id="isPaid"
                             checked={isPaid}
                             onChange={(e) => setValue('isPaid', e.target.checked)}
-                            className="h-4 w-4 rounded  text-primary focus:ring-primary"
+                            className="h-4 w-4 rounded  text-primary focus:ring-primary border-3"
                         />
                         <Label htmlFor="isPaid">This is a paid course</Label>
                     </div>
@@ -156,12 +185,13 @@ function CreateCourseForm() {
                                         step="0.01"
                                         placeholder="0.00"
                                         {...register("pricing.MONTHLY.price" as any, { valueAsNumber: true })}
+                                        className='border-3'
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <Label htmlFor="monthlyCurrency">Currency</Label>
                                     <Select onValueChange={(value) => setValue("pricing.MONTHLY.currency" as any, value as any)}>
-                                        <SelectTrigger>
+                                        <SelectTrigger className="border-3">
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -189,7 +219,7 @@ function CreateCourseForm() {
                                 <div className="flex flex-col gap-2">
                                     <Label htmlFor="yearlyCurrency">Currency</Label>
                                     <Select onValueChange={(value) => setValue("pricing.YEARLY.currency" as any, value as any)}>
-                                        <SelectTrigger>
+                                        <SelectTrigger className="border-3">
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -212,12 +242,13 @@ function CreateCourseForm() {
                                         step="0.01"
                                         placeholder="0.00"
                                         {...register("pricing.ONE_TIME.price" as any, { valueAsNumber: true })}
+                                        className='border-3'
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <Label htmlFor="oneTimeCurrency">Currency</Label>
                                     <Select onValueChange={(value) => setValue("pricing.ONE_TIME.currency" as any, value as any)}>
-                                        <SelectTrigger>
+                                        <SelectTrigger className="border-3">
                                             <SelectValue placeholder="Select currency" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -232,6 +263,12 @@ function CreateCourseForm() {
                             </div>
                         </div>
                     )}
+                    {errors.pricing && (
+                        <p className="text-left text-sm text-red-400">
+                            {errors.pricing.message}
+                        </p>
+                    )}
+
                 </div>
 
                 {/* Course Settings */}
@@ -245,7 +282,7 @@ function CreateCourseForm() {
                                 id="certificateEnabled"
                                 checked={watch('settings.certificateEnabled' as any) || false}
                                 onChange={(e) => setValue('settings.certificateEnabled' as any, e.target.checked)}
-                                className="h-4 w-4 rounded  text-primary focus:ring-primary"
+                                className="h-4 w-4 rounded  text-primary focus:ring-primary border-3"
                             />
                             <Label htmlFor="certificateEnabled">Enable Certificates</Label>
                         </div>
@@ -256,7 +293,7 @@ function CreateCourseForm() {
                                 id="discussionEnabled"
                                 checked={watch('settings.discussionEnabled' as any) || false}
                                 onChange={(e) => setValue('settings.discussionEnabled' as any, e.target.checked)}
-                                className="h-4 w-4 rounded  text-primary focus:ring-primary"
+                                className="h-4 w-4 rounded  text-primary focus:ring-primary border-3"
                             />
                             <Label htmlFor="discussionEnabled">Enable Discussions</Label>
                         </div>
@@ -267,7 +304,7 @@ function CreateCourseForm() {
                                 id="downloadEnabled"
                                 checked={watch('settings.downloadEnabled' as any) || false}
                                 onChange={(e) => setValue('settings.downloadEnabled' as any, e.target.checked)}
-                                className="h-4 w-4 rounded  text-primary focus:ring-primary"
+                                className="h-4 w-4 rounded  text-primary focus:ring-primary border-3"
                             />
                             <Label htmlFor="downloadEnabled">Enable Downloads</Label>
                         </div>
@@ -278,7 +315,13 @@ function CreateCourseForm() {
                                 type="number"
                                 placeholder="No limit"
                                 {...register("settings.enrollmentLimit" as any, { valueAsNumber: true })}
+                                className="border-3"
                             />
+                            {errors.settings?.enrollmentLimit && (
+                                <p className="text-left text-sm text-red-400">
+                                    {errors.settings?.enrollmentLimit.message}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

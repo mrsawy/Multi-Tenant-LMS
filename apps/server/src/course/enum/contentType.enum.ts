@@ -1,4 +1,4 @@
-export enum CourseType {
+export enum ContentType {
     VIDEO = 'VIDEO',
     ARTICLE = 'ARTICLE',
     QUIZ = 'QUIZ',

@@ -8,14 +8,22 @@ import {
     Min,
     Max,
     IsEnum,
-    ValidateIf
+    ValidateIf,
+    IsArray,
+    ValidateNested
 } from 'class-validator';
-import { CourseType } from '../enum/courseType.enum';
+import { ContentType } from '../enum/contentType.enum';
+import { VideoType } from '../enum/videoType.enum';
+import { Type } from 'class-transformer';
 
 export class CreateCourseContentDto {
     @IsNotEmpty()
     @IsMongoId({ message: 'Course ID must be a valid MongoDB ObjectId' })
     courseId: string;
+
+    @IsNotEmpty()
+    @IsMongoId({ message: 'Module ID must be a valid MongoDB ObjectId' })
+    moduleId: string;
 
     @IsOptional()
     organizationId: string;
@@ -32,44 +40,94 @@ export class CreateCourseContentDto {
     description: string;
 
     @IsNotEmpty()
-    @IsEnum(CourseType)
-    type: CourseType;
+    @IsEnum(ContentType)
+    type: ContentType;
 
-    @ValidateIf(o => o.type === CourseType.VIDEO)
+    @ValidateIf(o => o.type === ContentType.VIDEO)
+    @IsNotEmpty()
+    @IsEnum(VideoType)
+    videoType?: string;
+
+
+    @ValidateIf(o => (o.type === ContentType.VIDEO && o.videoType === VideoType.URL))
+    @IsNotEmpty()
+    @IsString()
+    videoUrl?: string;
+
+    @ValidateIf(o => (o.type === ContentType.VIDEO && o.videoType === VideoType.UPLOAD) || o.type === ContentType.ASSIGNMENT)
     @IsNotEmpty()
     @IsString()
     fileKey?: string;
 
     // Article-specific properties (only validated when type is ARTICLE)
-    @ValidateIf(o => o.type === CourseType.ARTICLE)
+    @ValidateIf(o => o.type === ContentType.ARTICLE)
     @IsNotEmpty({ message: 'Body is required for article content' })
     @IsString()
     body?: string;
 
-    @ValidateIf(o => o.type === CourseType.ARTICLE)
+    @ValidateIf(o => o.type === ContentType.ARTICLE)
     @IsOptional()
     @IsString()
     summary?: string;
 
     // Assignment-specific properties (only validated when type is ASSIGNMENT)
-    @ValidateIf(o => o.type === CourseType.ASSIGNMENT)
+    @ValidateIf(o => o.type === ContentType.ASSIGNMENT)
     @IsNotEmpty({ message: 'Due date is required for assignment content' })
     @IsDateString({}, { message: 'Due date must be a valid ISO date string' })
     dueDate?: Date;
 
-    @ValidateIf(o => o.type === CourseType.ASSIGNMENT)
+    @ValidateIf(o => o.type === ContentType.ASSIGNMENT)
     @IsNotEmpty()
     @IsNumber()
     @Min(1, { message: 'Max points must be at least 1' })
     @Max(1000, { message: 'Max points cannot exceed 1000' })
     maxPoints?: number = 100;
 
-    @ValidateIf(o => o.type === CourseType.ASSIGNMENT)
+    @ValidateIf(o => o.type === ContentType.ASSIGNMENT)
     @IsOptional()
     @IsString()
     instructions?: string;
 
 
-    // @IsOptional()
-    // file: any
+    @IsOptional()
+    @IsString()
+    authorization?: string
+
+
+    @ValidateIf(o => o.type === ContentType.QUIZ)
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => Question)
+    questions?: Question[]
+
+
+    @ValidateIf(o => o.type === ContentType.QUIZ)
+    @IsDateString()
+    quizStartDate?: string
+
+
+    @ValidateIf(o => o.type === ContentType.QUIZ)
+    @IsDateString()
+    quizEndDate?: string
+
+
+    @ValidateIf(o => o.type === ContentType.QUIZ)
+    @IsNumber()
+    quizDurationInMinutes?: number
+}
+
+
+
+class Question {
+    @IsNotEmpty()
+    @IsArray()
+    options: string[]
+
+    @IsNotEmpty()
+    @IsNumber()
+    correctOption: number
+
+    @IsNotEmpty()
+    @IsString()
+    questionText: string
 }

@@ -3,12 +3,13 @@ import { CreateCourseDto, PricingDetailsDto, PricingDto } from './dto/create-cou
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Course } from './entities/course.entity';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { ClientSession, Model } from 'mongoose';
 
 import { Frequency } from 'src/utils/types/Frequency.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { CurrencyService } from 'src/currency/currency.service';
 import { Currency } from 'src/payment/enums/currency.enum';
+import { handleError } from 'src/utils/errorHandling';
 
 @Injectable()
 export class CourseService {
@@ -18,27 +19,27 @@ export class CourseService {
   ) { }
 
   async create(createCourseDto: CreateCourseDto & { organizationId: string, createdBy: string }) {
-    try {
-      const createdCourse = await this.courseModel.create({ ...createCourseDto, pricing: this.transformPricing(createCourseDto.pricing) });
-      return {
-        message: 'Course created successfully',
-        course: createdCourse,
-      };
-    } catch (error) {
-      console.error(error)
-      throw new InternalServerErrorException(error)
-    }
+    const foundedCourse = await this.courseModel.findOne({ organizationId: createCourseDto.organizationId, name: createCourseDto.name })
+    if (foundedCourse) throw new BadRequestException("Course With the same name already exist for this organization .")
+    const createdCourse = await this.courseModel.create({ ...createCourseDto, pricing: this.transformPricing(createCourseDto.pricing) });
+    return {
+      message: 'Course created successfully',
+      course: createdCourse,
+    };
   }
 
   async findAll(filters: mongoose.RootFilterQuery<Course>) {
     return await this.courseModel.find(filters)
   }
 
-  async findOne(id: string) {
-    const foundedCourse = await this.courseModel.findById(id);
+  async findOne(id: string, session?: ClientSession) {
+    const query = this.courseModel.findById(id);
+    if (session) query.session(session);
+    const foundedCourse = await query.exec();
     if (!foundedCourse) throw new NotFoundException("Course Not Found")
-    return foundedCourse
+    return foundedCourse;
   }
+
 
   async update(id: string, updateCourseDto: UpdateCourseDto) {
     try {
@@ -105,16 +106,11 @@ export class CourseService {
     ]);
   }
 
-  async addModuleToCourse(courseId: string, moduleId: string) {
+  async addModuleToCourse(courseId: string, moduleId: string, session?: ClientSession) {
     try {
-
-
-      const foundedCourseModule = await this.findOne(moduleId)
-      if (!foundedCourseModule) throw new NotFoundException('Course Module not found');
-
       const result = await this.courseModel.updateOne(
         { _id: courseId },
-        { $addToSet: { modulesIds: new mongoose.Types.ObjectId(moduleId) } }
+        { $addToSet: { modulesIds: new mongoose.Types.ObjectId(moduleId) } }, { session }
       );
 
       if (result.matchedCount === 0) {
@@ -234,38 +230,42 @@ export class CourseService {
 
 
 
-  private transformPricing(pricing: PricingDto) {
+  private transformPricing(pricing?: PricingDto) {
+    if (!pricing) {
+      return {
+        [BillingCycle.MONTHLY]: undefined,
+        [BillingCycle.YEARLY]: undefined,
+        [BillingCycle.ONE_TIME]: undefined,
+      };
+    }
+
+    const transformBillingCycle = (billingCycle: any) => {
+      if (!billingCycle ||
+        typeof billingCycle.price !== 'number' ||
+        !billingCycle.currency ||
+        billingCycle.price < 0) {
+        return undefined;
+      }
+
+      try {
+        return {
+          originalPice: billingCycle.price,
+          originalCurrency: billingCycle.currency,
+          priceUSD: this.currencyService.convertToUSD(
+            billingCycle.price,
+            billingCycle.currency
+          ),
+        };
+      } catch (error) {
+        // If currency conversion fails, return undefined
+        return undefined;
+      }
+    };
+
     return {
-      [BillingCycle.MONTHLY]: pricing[BillingCycle.MONTHLY]
-        ? {
-          originalPice: pricing[BillingCycle.MONTHLY].price,
-          originalCurrency: pricing[BillingCycle.MONTHLY].currency,
-          priceUSD: this.currencyService.convertToUSD(
-            pricing[BillingCycle.MONTHLY].price,
-            pricing[BillingCycle.MONTHLY].currency
-          ),
-        }
-        : undefined,
-      [BillingCycle.YEARLY]: pricing[BillingCycle.YEARLY]
-        ? {
-          originalPice: pricing[BillingCycle.YEARLY].price,
-          originalCurrency: pricing[BillingCycle.YEARLY].currency,
-          priceUSD: this.currencyService.convertToUSD(
-            pricing[BillingCycle.YEARLY].price,
-            pricing[BillingCycle.YEARLY].currency
-          ),
-        }
-        : undefined,
-      [BillingCycle.ONE_TIME]: pricing[BillingCycle.ONE_TIME]
-        ? {
-          originalPice: pricing[BillingCycle.ONE_TIME].price,
-          originalCurrency: pricing[BillingCycle.ONE_TIME].currency,
-          priceUSD: this.currencyService.convertToUSD(
-            pricing[BillingCycle.ONE_TIME].price,
-            pricing[BillingCycle.ONE_TIME].currency
-          ),
-        }
-        : undefined,
+      [BillingCycle.MONTHLY]: transformBillingCycle(pricing[BillingCycle.MONTHLY]),
+      [BillingCycle.YEARLY]: transformBillingCycle(pricing[BillingCycle.YEARLY]),
+      [BillingCycle.ONE_TIME]: transformBillingCycle(pricing[BillingCycle.ONE_TIME]),
     };
   }
 

@@ -14,11 +14,11 @@ export class CreateCourseModuleDto {
     courseId: string;
 
     @IsMongoId()
-    @IsNotEmpty()
+    @IsOptional()
     organizationId: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     createdBy: string;
 
     @IsArray()
@@ -33,4 +33,12 @@ export class CreateCourseModuleDto {
     @IsString()
     @IsOptional()
     description?: string;
+
+    @IsArray()
+    @IsOptional()
+    learningObjectives?: string
+
+    @IsOptional()
+    @IsString()
+    authorization: string
 }

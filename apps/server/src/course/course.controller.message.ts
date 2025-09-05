@@ -6,11 +6,20 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { IUserContext } from "src/utils/types/IUserContext.interface";
+import { handleRpcError } from "src/utils/errorHandling";
+import { CreateCourseModuleDto } from "./dto/create-course-module.dto";
+import { CourseModulesService } from "./courseModules.service";
+import { CreateCourseContentDto } from "./dto/create-course-content.dto";
+import { CourseContentService } from "./courseContent.service";
 
 
 @Controller()
 export class CourseControllerMessage {
-    constructor(private courseService: CourseService) { }
+    constructor(
+        private courseService: CourseService,
+        private readonly courseModulesService: CourseModulesService,
+        private readonly courseContentService: CourseContentService
+    ) { }
 
     @UseGuards(AuthGuard)
     @MessagePattern('courses.getAllCourses')
@@ -38,6 +47,83 @@ export class CourseControllerMessage {
             });
         }
     }
+
+    @UseGuards(AuthGuard)
+    @MessagePattern('courses.getCourseWithModule')
+    async getCourseById(
+        @Payload(new RpcValidationPipe())
+        payload: { courseId: string; data?: { authorization?: string } },
+    ) {
+        try {
+            const course = (await this.courseService.findCourseWithOrderedModules(payload.courseId))[0];
+            return {
+                success: true,
+                data: course,
+                message: 'Course retrieved successfully'
+            };
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+    @MessagePattern('course.createCourse')
+    @UseGuards(AuthGuard)
+    async createCourse(
+        @Payload(new RpcValidationPipe())
+        payload: CreateCourseDto,
+        @Ctx() context: IUserContext,
+
+    ) {
+        try {
+            const user = context.userPayload
+            return await this.courseService.create({ organizationId: user.organizationId.toString(), createdBy: user._id as string, ...payload });
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+    @MessagePattern('course.createModule')
+    @UseGuards(AuthGuard)
+    async createModule(
+        @Payload(new RpcValidationPipe())
+        payload: CreateCourseModuleDto,
+        @Ctx() context: IUserContext,
+
+    ) {
+        try {
+            const user = context.userPayload
+            payload.organizationId = user.organizationId.toString();
+            payload.createdBy = user._id as string;
+            const createdModule = await this.courseModulesService.create(payload)
+            return createdModule
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+
+    @MessagePattern("course.createContent")
+    @UseGuards(AuthGuard)
+    async createCourseContent(
+        @Payload(new RpcValidationPipe())
+        createCourseContentDto: CreateCourseContentDto,
+        @Ctx() context: IUserContext,
+    ) {
+        try {
+            const user = context.userPayload
+            createCourseContentDto.organizationId = user.organizationId.toString()
+            createCourseContentDto.createdBy = user.username as string
+
+            const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto)
+
+            return {
+                message: 'Course content created successfully',
+                createdContent
+            }
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
 
     // @MessagePattern('courses.getCourseById')
     // async getCourseById(
@@ -70,15 +156,37 @@ export class CourseControllerMessage {
     //     }
     // }
 
-    @MessagePattern('course.createCourse')
-    async createCourse(
-        @Payload(new RpcValidationPipe())
-        payload: CreateCourseDto,
-    ) {
 
-        console.log({ payload })
-        return "course created"
-    }
+    // @MessagePattern('course.updateModule')
+    // @UseGuards(AuthGuard)
+    // async updateModule(
+    //     @Payload(new RpcValidationPipe())
+    //     payload: { moduleId: string; data: Partial<CreateCourseModuleDto> },
+    //     @Ctx() context: IUserContext,
+    // ) {
+    //     try {
+    //         const updatedModule = await this.courseModulesService.update(payload.moduleId, payload.data)
+    //         return updatedModule
+    //     } catch (error) {
+    //         handleRpcError(error)
+    //     }
+    // }
+
+    // @MessagePattern('course.getModule')
+    // @UseGuards(AuthGuard)
+    // async getModule(
+    //     @Payload(new RpcValidationPipe())
+    //     payload: { moduleId: string },
+    //     @Ctx() context: IUserContext,
+    // ) {
+    //     try {
+    //         const module = await this.courseModulesService.findOne(payload.moduleId)
+    //         return module
+    //     } catch (error) {
+    //         handleRpcError(error)
+    //     }
+    // }
+
 
     // @MessagePattern('courses.updateCourse')
     // async updateCourse(

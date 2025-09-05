@@ -20,7 +20,7 @@ import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
 
 @Controller('file')
 @UseGuards(AuthGuard)
-export class FileController {
+export class FileHttpController {
   constructor(private readonly fileService: FileService) { }
 
   @Post('presigned-url')

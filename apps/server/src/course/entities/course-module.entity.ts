@@ -18,13 +18,16 @@ export class CourseModule extends Document {
 
     @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'CourseContent' }], default: [] })
     contentsIds: Types.ObjectId[];
-    
+
 
     @Prop({ type: String, required: true })
     title: string
 
     @Prop({ type: String, required: false })
     description: string
+
+    @Prop({ type: [String], required: false })
+    learningObjectives: string[]
 }
 
 export const CourseModuleSchema = SchemaFactory.createForClass(CourseModule);

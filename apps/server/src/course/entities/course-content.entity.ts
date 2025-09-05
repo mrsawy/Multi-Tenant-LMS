@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
-import { CourseType } from '../enum/courseType.enum';
+import { ContentType } from '../enum/contentType.enum';
 import { CourseModule } from './course-module.entity';
 
 
@@ -21,8 +21,8 @@ export class CourseContent extends Document {
     createdBy: string;
 
 
-    @Prop({ type: String, enum: CourseType, required: true })
-    type: CourseType
+    @Prop({ type: String, enum: ContentType, required: true })
+    type: string
 
     @Prop({ type: String, required: true })
     title: string

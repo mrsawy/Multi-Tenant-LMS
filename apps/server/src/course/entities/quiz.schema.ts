@@ -20,6 +20,15 @@ const QuestionSchema = SchemaFactory.createForClass(Question);
 export class Quiz {
     @Prop({ type: [QuestionSchema], required: true })
     questions: Question[];
+
+    @Prop({ type: Number, required: false })
+    quizDurationInMinutes: number
+
+    @Prop({ type: Date, required: false })
+    quizStartDate: Date
+
+    @Prop({ type: Date, required: false })
+    quizEndDate: Date
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);

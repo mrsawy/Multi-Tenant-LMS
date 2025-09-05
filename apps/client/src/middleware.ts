@@ -40,6 +40,7 @@ export default async function middleware(request: NextRequest & { user?: IUser }
             });
             if (response.status === 200) {
                 request.user = (await response.json()) as IUser;
+                // console.log({ user: request.user })
                 return i18nResponse
             } else {
                 const response = NextResponse.redirect(new URL('/login', request.url));
@@ -50,7 +51,7 @@ export default async function middleware(request: NextRequest & { user?: IUser }
 
         return NextResponse.redirect(new URL('/login', request.url))
     } catch (error) {
-        console.error("error frmo middleware:", error)
+        console.error("error from middleware:", error)
         return NextResponse.redirect(new URL('/login', request.url))
     }
 }

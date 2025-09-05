@@ -12,12 +12,20 @@ export class GeneratePresignedUrlDto {
     @IsNumber()
     fileSize: number;
 
-    @IsEnum(FileCategory)
-    category: FileCategory;
+    // @IsEnum(FileCategory)
+    // category: FileCategory;
 
     @IsString()
     @IsOptional()
     userUserName?: string;
+
+    @IsNotEmpty()
+    @IsString()
+    fileKey: string
+
+    @IsOptional()
+    @IsString()
+    authorization?: string
 }
 
 export class PresignedUrlResponseDto {

@@ -15,10 +15,11 @@ import { handleError } from 'src/utils/errorHandling';
 import { AppAbility } from 'src/role/permissions.factory';
 import { checkConditionForRule } from 'src/utils/abilityUtils';
 import { Conditions } from 'src/role/enum/Conditions.enum';
+import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
 
 
 @Controller('user')
-export class UserController {
+export class UserControllerHttp {
   constructor(private readonly userService: UserService,
     private readonly roleService: RoleService
   ) { }
@@ -58,6 +59,18 @@ export class UserController {
   //   return this.userService.findOne(+id);
   // }
 
+  @Get("user-data")
+  @UseGuards(AuthGuard)
+  async findOwnData(@Request() req: IUserRequest) {
+    const user = req.user;
+    const foundedUser = await this.userService.findOne(user._id as string);
+    if (!foundedUser) throw new UnauthorizedException('User not found')
+    const { password, ...userData } = foundedUser;
+    return {
+      message: 'User data fetched successfully',
+      user: userData,
+    };
+  }
 
   @UseGuards(PermissionsGuard)
   @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.USER })

@@ -98,7 +98,7 @@ export class Course extends Document {
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'CourseModule', default: [] })
     modulesIds: Types.ObjectId[];
 
-    @Prop({ type: Boolean, required: true })
+    @Prop({ type: Boolean, default: false })
     isPaid: boolean
 
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
@@ -114,22 +114,28 @@ export class Course extends Document {
     shortDescription: string;
 
     @Prop({ type: String })
-    thumbnail: string;
+    thumbnailKey: string;
 
     // @Prop({ type: String })
     // trailer: string;
 
     // Use the proper schema for pricing
-    // Note: At least one of monthly, yearly, or one-time pricing must be provided
+    // Note: At least one of monthly, yearly, or one-time pricing must be provided only if isPaid is true
     @Prop({
         type: PricingSchema,
-        required: true,
+        required: function() {
+            return this.isPaid;
+        },
         validate: {
             validator: function (pricing: PricingSchema) {
-                // Ensure at least one pricing option is available
-                return !!(pricing[BillingCycle.MONTHLY] || pricing[BillingCycle.YEARLY] || pricing[BillingCycle.ONE_TIME]);
+                // If isPaid is false, pricing is not required
+                if (!this.isPaid) {
+                    return true;
+                }
+                // If isPaid is true, ensure at least one pricing option is available
+                return !!(pricing && (pricing[BillingCycle.MONTHLY] || pricing[BillingCycle.YEARLY] || pricing[BillingCycle.ONE_TIME]));
             },
-            message: 'At least one pricing option (monthly, yearly, or one-time) must be provided'
+            message: 'At least one pricing option (monthly, yearly, or one-time) must be provided when isPaid is true'
         }
     })
     pricing: PricingSchema;

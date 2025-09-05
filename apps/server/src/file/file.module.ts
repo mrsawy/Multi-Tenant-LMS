@@ -3,8 +3,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { FileService } from './file.service';
 import { ConfigService } from '@nestjs/config';
-import { FileController } from './file.controller';
+import { FileHttpController } from './file.controller.http';
 import { AuthModule } from 'src/auth/auth.module';
+import { FileMessageController } from './file.controller.message';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { AuthModule } from 'src/auth/auth.module';
     AuthModule,
   ],
   providers: [FileService],
-  controllers: [FileController],
+  controllers: [FileHttpController , FileMessageController],
   exports: [MulterModule, FileService],
 })
 export class FileModule { }

@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { Currency } from '@/lib/data/currency.enum';
 import { Status } from './status.enum';
+import { Organization } from '../organization/organization.interface';
 
 export interface Address {
   street?: string;
@@ -53,4 +54,7 @@ export interface IUser {
 
   createdAt?: Date;
   updatedAt?: Date;
+
+
+  organization?: Organization
 }

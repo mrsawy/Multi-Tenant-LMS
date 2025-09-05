@@ -10,101 +10,48 @@ import { Actions } from "src/role/enum/Action.enum";
 import { Subjects } from "src/role/enum/subject.enum";
 import { CreateCourseContentDto } from "./dto/create-course-content.dto";
 import { handleError } from "src/utils/errorHandling";
-import { CourseType } from './enum/courseType.enum';
+import { ContentType } from './enum/contentType.enum';
 // import { FileService } from "src/file/file.service";
 import * as Busboy from 'busboy';
 import { FileService } from "src/file/file.service";
 import { FileCategory } from "src/file/enum/fileCategory.enum";
-
+import { CourseModule } from "./entities/course-module.entity";
+import { InjectConnection } from "@nestjs/mongoose";
+import { Connection } from "mongoose";
 
 @Injectable()
 export class CourseContentService {
     constructor(
         @InjectModel(Course.name) private readonly courseModel: Model<Course>,
         @InjectModel(CourseContent.name) private readonly courseContentModel: Model<CourseContent>,
+        @InjectModel(CourseModule.name) private readonly courseModuleModel: Model<CourseModule>,
+        @InjectConnection() private readonly connection: Connection,
         private readonly fileService: FileService
     ) { }
 
-    async createCourseContent(createCourseContentDto: CreateCourseContentDto, files?: Express.Multer.File[]) {
-        const { courseId } = createCourseContentDto;
-        const course = await this.courseModel.findById(courseId);
-        if (!course) {
-            throw new NotFoundException("Course not found");
+    async createCourseContent(createCourseContentDto: CreateCourseContentDto) {
+        const session = await this.connection.startSession();
+        session.startTransaction();
+
+        try {
+            const { courseId, moduleId } = createCourseContentDto;
+
+            const course = await this.courseModel.findById(courseId).session(session);
+            if (!course) throw new NotFoundException("Course not found");
+
+            const module = await this.courseModuleModel.findById(moduleId).session(session);
+            if (!module) throw new NotFoundException("Module not found")
+
+            const [createdContent] = await this.courseContentModel.create([createCourseContentDto], { session });
+
+            await this.courseModuleModel.findByIdAndUpdate(moduleId, { $push: { contentsIds: createdContent._id } }, { session, new: true });
+            await session.commitTransaction();
+            return createdContent;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error
+        } finally {
+            session.endSession();
         }
-
-        const { type } = createCourseContentDto;
-        let createdContent: CourseContent | null = null;
-
-        switch (type) {
-            case CourseType.ARTICLE:
-                createdContent = await this.createArticle(createCourseContentDto)
-                break;
-
-            case CourseType.VIDEO:
-                createdContent = await this.createVideo(createCourseContentDto)
-                break;
-            case CourseType.ASSIGNMENT:
-
-                if (!files || files.length !== 1) {
-                    throw new BadRequestException("One file is required for this content")
-                }
-                const file = files[0]
-                createdContent = await this.createAssignment(createCourseContentDto, file)
-                break;
-            default:
-                break;
-        }
-
-        return createdContent;
     }
-
-    private async createAssignment(createCourseContentDto: CreateCourseContentDto, file: Express.Multer.File) {
-
-
-        const mimeType = this.fileService.getMimeType(file.originalname);
-        const allowedMimeTypes = ['pdf', 'word'];
-
-        if (!allowedMimeTypes.includes(mimeType)) {
-            throw new BadRequestException(
-                "Invalid file type provided. Expected a video file (e.g., .pdf, .word)."
-            );
-        }
-
-
-
-        const { fileKey } = await this.fileService.uploadToS3(file, `${FileCategory.ASSIGNMENTS}/${createCourseContentDto.createdBy}`);
-
-        return this.courseContentModel.create({ ...createCourseContentDto, fileKey });
-    }
-
-    private async createArticle(createCourseContentDto: CreateCourseContentDto) {
-        return await this.courseContentModel.create(createCourseContentDto)
-    }
-
-
-
-    private async createVideo(createCourseContentDto: CreateCourseContentDto) {
-        const fileKey = createCourseContentDto.fileKey as string;
-
-        const mimeType = this.fileService.getMimeType(fileKey);
-        const allowedMimeTypes = ['mp4', 'mkv'];
-
-        if (!allowedMimeTypes.includes(mimeType)) {
-            throw new BadRequestException(
-                "Invalid file type provided. Expected a video file (e.g., .mp4, .mkv)."
-            );
-        }
-
-        const isValid = await this.fileService.validateFileKeys([fileKey]);
-        if (!isValid) {
-            throw new BadRequestException(
-                "Invalid file key provided. Video file must be successfully uploaded before creating content."
-            );
-        }
-
-        return this.courseContentModel.create(createCourseContentDto);
-    }
-
-
-
 }

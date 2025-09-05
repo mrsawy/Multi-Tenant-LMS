@@ -24,14 +24,14 @@ export class FileService {
   async generatePresignedUrl(
     generatePresignedUrlDto: GeneratePresignedUrlDto,
   ): Promise<PresignedUrlResponseDto> {
-    const { fileType, fileSize, category, userUserName } = generatePresignedUrlDto;
+    const { fileType, fileSize,  fileKey } = generatePresignedUrlDto;
 
     // Validate file type and size
     this.validateFile(fileType, fileSize);
 
     // Generate unique file key with user context
     const fileExtension = this.getFileExtension(fileType);
-    const fileKey = `${category}/${userUserName}/${uuidv4()}.${fileExtension}`;
+    // const fileKey = `${category}/${userUserName}/${uuidv4()}.${fileExtension}`;
 
     const params = {
       Bucket: this.configService.get('S3_BUCKET_NAME'),

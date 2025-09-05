@@ -15,7 +15,7 @@ export default function Spinner() {
     const { generalIsLoading } = useGeneralStore()
     return (
         generalIsLoading ?
-            <div className="fixed top-0 left-0 w-full flex justify-center items-center h-full  bg-black/80">
+            <div className="fixed top-0 left-0 w-full flex justify-center items-center h-full  bg-black/80 z-[999999]">
                 <svg xmlns="http://www.w3.org/2000/svg" height="200px" width="200px" viewBox="0 0 200 200" className={cn(classes.pencil, "h-full")}>
                     <defs>
                         <clipPath id="pencil-eraser">

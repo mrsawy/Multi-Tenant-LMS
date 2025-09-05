@@ -10,22 +10,49 @@ import {
     IsDate,
     Min,
     Max,
-    ValidateIf
+    ValidateIf,
+    Validate,
+    IsDefined
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
 
 
+@ValidatorConstraint({ name: 'AtLeastOnePricingWithPriceAndCurrency', async: false })
+class AtLeastOnePricingWithPriceAndCurrency implements ValidatorConstraintInterface {
+    validate(pricing: PricingDto, args: ValidationArguments): boolean {
+        const obj = args.object as CreateCourseDto;
+        if (!obj?.isPaid) return true; // Not required when course is free
+        if (!pricing) return false;
+
+        const cycles = [BillingCycle.MONTHLY, BillingCycle.YEARLY, BillingCycle.ONE_TIME];
+        return cycles.some((cycle) => {
+            const details = pricing?.[cycle];
+            return details !== undefined
+                && typeof details.price === 'number'
+                && !Number.isNaN(details.price)
+                && details.currency !== undefined;
+        });
+    }
+
+    defaultMessage(): string {
+        return 'pricing must include at least one of monthly, yearly, or one_time with price and currency when isPaid is true';
+    }
+}
+
 export class PricingDetailsDto {
 
     @IsNumber()
+    @IsOptional()
     @Min(0)
     price: number;
 
     @IsEnum(Currency)
+    @IsOptional()
     currency: Currency;
-    
+
     @IsDate()
     @IsOptional()
     discountEndDate?: Date;
@@ -113,18 +140,17 @@ export class CreateCourseDto {
     @IsOptional()
     instructor?: string;
 
+    @ValidateIf(o => o.isPaid === true)
+    @IsDefined({ message: 'pricing is required when isPaid is true' })
+    @Validate(AtLeastOnePricingWithPriceAndCurrency)
     @ValidateNested()
     @Type(() => PricingDto)
-    @ValidateIf(o =>
-        o.pricing?.[BillingCycle.MONTHLY] ||
-        o.pricing?.[BillingCycle.YEARLY] ||
-        o.pricing?.[BillingCycle.ONE_TIME]
-    )
     pricing: PricingDto;
 
     @IsBoolean()
-    @IsNotEmpty()
-    isPaid: boolean
+    @IsOptional()
+    @Transform(({ value }) => value !== undefined ? value : false)
+    isPaid?: boolean;
 
     @IsMongoId({ each: true })
     @IsOptional()
@@ -132,7 +158,7 @@ export class CreateCourseDto {
 
     @IsString()
     @IsOptional()
-    thumbnail?: string;
+    thumbnailKey: string;
 
     // @IsString()
     // @IsOptional()
@@ -142,4 +168,8 @@ export class CreateCourseDto {
     @Type(() => SettingsDto)
     @IsOptional()
     settings?: SettingsDto;
+
+
+    @IsOptional()
+    authorization: string
 }

@@ -1,19 +1,43 @@
 import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { CourseModule } from "./entities/course-module.entity";
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Connection } from "mongoose";
 import { CreateCourseModuleDto } from "./dto/create-course-module.dto";
+import { CourseService } from "./course.service";
+import { InjectConnection } from '@nestjs/mongoose';
 
 
 @Injectable()
 export class CourseModulesService {
     constructor(
-        @InjectModel(CourseModule.name) private readonly courseModuleModel: Model<CourseModule>
+        @InjectConnection() private readonly connection: Connection,
+        @InjectModel(CourseModule.name) private readonly courseModuleModel: Model<CourseModule>,
+        private readonly courseService: CourseService
     ) { }
 
     async create(createCourseModuleDto: CreateCourseModuleDto) {
-        const courseModule = await this.courseModuleModel.create(createCourseModuleDto);
-        return courseModule;
+        const session = await this.connection.startSession();
+        session.startTransaction();
+        try {
+            // Create and save the course module within the transaction
+            const courseModule = new this.courseModuleModel(createCourseModuleDto);
+            await courseModule.save({ session });
+
+            // Add the module to the course (pass the same session)
+            await this.courseService.addModuleToCourse(
+                createCourseModuleDto.courseId,
+                courseModule._id as string,
+                session,
+            );
+
+            await session.commitTransaction();
+            return courseModule;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error; // rethrow to handle at a higher level
+        } finally {
+            await session.endSession();
+        }
     }
 
     async findAll(courseId: string) {
@@ -146,6 +170,29 @@ export class CourseModulesService {
             };
         } catch (error) {
             console.error(error);
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    async update(moduleId: string, updateData: Partial<CreateCourseModuleDto>) {
+        try {
+            const module = await this.courseModuleModel.findById(moduleId);
+            if (!module) {
+                throw new NotFoundException('Course module not found');
+            }
+
+            const updatedModule = await this.courseModuleModel.findByIdAndUpdate(
+                moduleId,
+                { $set: updateData },
+                { new: true, runValidators: true }
+            );
+
+            return updatedModule;
+        } catch (error) {
+            console.error(error);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
             throw new InternalServerErrorException(error);
         }
     }

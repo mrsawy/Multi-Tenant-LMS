@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req, UseInterceptors,  UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -40,7 +40,6 @@ export class CourseController {
   }
 
 
-  @UseInterceptors(AnyFilesInterceptor())
   @UseGuards(PermissionsGuard)
   @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.COURSE })
   @UseGuards(AuthGuard)
@@ -48,12 +47,11 @@ export class CourseController {
   async createCourseContent(
     @Body() createCourseContentDto: CreateCourseContentDto,
     @Req() req: IUserRequest,
-    @UploadedFiles() files: Express.Multer.File[],
   ) {
     createCourseContentDto.organizationId = req.user.organizationId.toString()
     createCourseContentDto.createdBy = req.user.username as string
 
-    const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto, files)
+    const createdContent = await this.courseContentService.createCourseContent(createCourseContentDto)
 
     return {
       message: 'Course content created successfully',
@@ -101,10 +99,42 @@ export class CourseController {
   @RequiredPermissions({ action: Actions.READ, subject: Subjects.COURSE })
   @UseGuards(AuthGuard)
   @Post("/module")
-  async createModule(@Body() createModuleDto: CreateCourseModuleDto) {
+  async createModule(@Body() createModuleDto: CreateCourseModuleDto, @Req() req: IUserRequest) {
+    createModuleDto.organizationId = (req.user.organizationId as any).toString();
+    createModuleDto.createdBy = (req.user._id as any).toString();
     return await this.courseModulesService.create(createModuleDto);
   }
 
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.COURSE })
+  @UseGuards(AuthGuard)
+  @Patch("/module/:moduleId")
+  async updateModule(@Param('moduleId') moduleId: string, @Body() updateModuleDto: Partial<CreateCourseModuleDto>) {
+    return await this.courseModulesService.update(moduleId, updateModuleDto);
+  }
+
+
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.COURSE })
+  @UseGuards(AuthGuard)
+  @Patch(":id/reorder")
+  async reorderModules(
+    @Param('id') id: string,
+    @Body() body: { newOrder: string[] },
+  ) {
+    return await this.courseService.reorderModules(id, body.newOrder);
+  }
+
+  @UseGuards(PermissionsGuard)
+  @RequiredPermissions({ action: Actions.UPDATE, subject: Subjects.COURSE })
+  @UseGuards(AuthGuard)
+  @Post(":id/module/:moduleId")
+  async addModuleToCourse(
+    @Param('id') id: string,
+    @Param('moduleId') moduleId: string,
+  ) {
+    return await this.courseService.addModuleToCourse(id, moduleId);
+  }
 
 
 }

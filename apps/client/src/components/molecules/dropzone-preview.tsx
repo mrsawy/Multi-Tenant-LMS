@@ -22,7 +22,10 @@ const DropzoneWithPreview = ({ className, files, setFiles, handleDrop, filePrevi
     // };
     return (
         <Dropzone
-            accept={{ 'image/*': ['.png', '.jpg', '.jpeg'] }}
+            accept={{ 
+                'image/*': ['.png', '.jpg', '.jpeg'],
+                'video/*': ['.mp4', '.avi', '.mov', '.wmv']
+            }}
             onDrop={handleDrop}
             onError={console.error}
             src={files}
@@ -32,11 +35,19 @@ const DropzoneWithPreview = ({ className, files, setFiles, handleDrop, filePrevi
             <DropzoneContent>
                 {filePreview && (
                     <div className="h-[102px] w-full">
-                        <img
-                            alt="Preview"
-                            className="absolute top-0 left-0 h-full w-full object-cover"
-                            src={filePreview}
-                        />
+                        {files && files[0] && files[0].type.startsWith('video/') ? (
+                            <video
+                                className="absolute top-0 left-0 h-full w-full object-cover"
+                                src={filePreview}
+                                controls
+                            />
+                        ) : (
+                            <img
+                                alt="Preview"
+                                className="absolute top-0 left-0 h-full w-full object-cover"
+                                src={filePreview}
+                            />
+                        )}
                     </div>
                 )}
             </DropzoneContent>

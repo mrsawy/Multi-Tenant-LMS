@@ -86,12 +86,7 @@ export class AuthService {
       await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization?._id })
 
 
-      const payload = {
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        organizationId: user?.organizationId,
-      };
+      const payload = { ...user.toObject(), password: undefined };
 
       const token = this.generateToken(payload);
 
@@ -137,7 +132,7 @@ export class AuthService {
         throw new Error("Wrong Password")
       }
 
-      const payload = foundedUser.toObject()
+      const payload = { ...foundedUser.toObject(), password: undefined }
 
       const token = this.generateToken(payload);
 
