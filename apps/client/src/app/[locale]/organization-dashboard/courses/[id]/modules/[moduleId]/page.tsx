@@ -1,6 +1,6 @@
 import { getModule } from "@/lib/actions/courses/modules.action";
 import { notFound } from "next/navigation";
-import EditModuleForm from "./__components/edit-module-form";
+import EditModuleForm from "../../../__components/edit-module-form";
 
 interface PageProps {
   params: {

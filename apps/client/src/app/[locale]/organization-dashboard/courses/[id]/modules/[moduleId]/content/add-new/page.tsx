@@ -1,4 +1,5 @@
-import CreateContentForm from "./__components/create-content-form";
+import CreateContentForm from "@/app/[locale]/organization-dashboard/courses/__components/create-content-form";
+
 
 interface PageProps {
   id: string;

@@ -41,6 +41,9 @@ class Profile {
   bio: string;
 
   @Prop()
+  shortBio: string;
+
+  @Prop()
   avatar: string;
 
   @Prop()
@@ -118,6 +121,8 @@ export class User {
 
   @Prop({ type: String, enum: Currency, required: true })
   preferredCurrency: string
+
+
 
 }
 

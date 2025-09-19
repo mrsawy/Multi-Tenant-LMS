@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
-
+import * as mongoosePaginate from "mongoose-paginate-v2"
 @Schema({ timestamps: true })
 export class Category extends Document {
     @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Organization' })
@@ -9,27 +9,17 @@ export class Category extends Document {
     @Prop({ required: true })
     name: string;
 
-    // @Prop({ required: true, unique: true })
-    // slug: string;
-
-    @Prop()
+    @Prop({ required: false })
     description: string;
 
-    @Prop()
-    icon: string; // e.g. "code", "laptop", etc. (FontAwesome or Material Icons)
-
-    @Prop()
-    color: string; // hex format (e.g. "#ff6b6b")
-
-    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', default: null })
+    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', default: null, required: false })
     parentId: Types.ObjectId | null;
 
-    @Prop({ default: 0 })
-    order: number;
 
-    @Prop({ default: true })
-    isActive: boolean;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
-export type CategoryDocument = Category & Document;
+
+
+
+CategorySchema.plugin(mongoosePaginate)

@@ -1,6 +1,7 @@
 
 import {
   IconCamera,
+  IconCategory,
   IconChartBar,
   IconDashboard,
   IconDatabase,
@@ -18,37 +19,46 @@ import {
 } from "@tabler/icons-react"
 
 export const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "Courses",
+      url: "/organization-dashboard/courses",
       icon: IconDashboard,
+      key: "courses",
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Categories",
+      url: "/organization-dashboard/categories",
+      icon: IconCategory,
+      key: "Categories",
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
+      title: "Users",
+      url: "/organization-dashboard/users",
       icon: IconUsers,
+      key: "users",
     },
+    // {
+    //   title: "Lifecycle",
+    //   url: "#",
+    //   icon: IconListDetails,
+    // },
+    // {
+    //   title: "Analytics",
+    //   url: "#",
+    //   icon: IconChartBar,
+    // },
+    // {
+    //   title: "Projects",
+    //   url: "#",
+    //   icon: IconFolder,
+    // },
+    // {
+    //   title: "Team",
+    //   url: "#",
+    //   icon: IconUsers,
+    // },
   ],
   // documents: [
   //   {

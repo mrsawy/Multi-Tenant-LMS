@@ -22,6 +22,7 @@ export interface Profile {
   dateOfBirth?: Date;
   address?: Address;
   socialLinks?: SocialLinks;
+  shortBio?:string
 }
 
 export interface Preferences {
@@ -31,8 +32,8 @@ export interface Preferences {
 }
 
 export interface IUser {
-  _id?: Types.ObjectId;
-  organizationId?: Types.ObjectId;
+  _id?: string;
+  organizationId?: string;
 
   username: string;
   email: string;
@@ -49,12 +50,12 @@ export interface IUser {
   status?: Status; // 'active' | 'inactive' etc.
   lastLogin?: Date;
 
-  walletId?: Types.ObjectId;
+  walletId?: string;
   preferredCurrency: Currency; // e.g. 'USD' | 'EUR' | etc.
 
   createdAt?: Date;
   updatedAt?: Date;
-
-
   organization?: Organization
+
+
 }

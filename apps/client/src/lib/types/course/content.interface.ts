@@ -1,59 +1,47 @@
-import { CourseContentType } from "@/lib/types/course/enum/CourseContentType.enum";
+// content.dto.ts
+
+import { CourseContentType } from "./enum/CourseContentType.enum";
+import { VideoType } from "./enum/VideoType.enum";
+
+export interface Question {
+  options: string[];
+  correctOption: number;
+  questionText: string;
+}
 
 export interface IContent {
   _id: string;
-  title: string;
-  description: string;
-  type: CourseContentType;
-  estimatedDuration?: string;
-  content?: string; // For articles
-  videoUrl?: string; // For videos
-  thumbnailUrl?: string; // For videos
-  isRequired: boolean;
-  order: number;
+  courseId: string;
   moduleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+  organizationId?: string;
+  createdBy?: string;
+  title: string;
+  description?: string;
+  type: CourseContentType;
 
-export interface IArticleContent extends IContent {
-  type: CourseContentType.ARTICLE;
-  content: string;
-  estimatedReadingTime?: string;
-}
+  // Video-specific
+  videoType?: VideoType;
+  videoUrl?: string;
+  fileKey?: string; //not just videos
 
-export interface IVideoContent extends IContent {
-  type: CourseContentType.VIDEO;
-  videoUrl: string;
-  thumbnailUrl?: string;
-  videoFile?: File;
-}
+  // Article-specific
+  body?: string;
+  summary?: string;
 
-export interface IQuizContent extends IContent {
-  type: CourseContentType.QUIZ;
-  questions: IQuestion[];
-  passingScore: number;
-}
-
-export interface IAssignmentContent extends IContent {
-  type: CourseContentType.ASSIGNMENT;
-  instructions: string;
+  // Assignment-specific
   dueDate?: Date;
-  maxPoints: number;
-}
+  maxPoints?: number;
+  instructions?: string;
 
-// export interface IResourceContent extends IContent {
-//   type: "resource";
-//   fileUrl: string;
-//   fileName: string;
-//   fileSize: number;
-// }
+  authorization?: string;
 
-export interface IQuestion {
-  _id: string;
-  question: string;
-  type: "multiple-choice" | "true-false" | "short-answer";
-  options?: string[];
-  correctAnswer: string | string[];
-  points: number;
+  // Quiz-specific
+  questions?: Question[];
+  quizStartDate?: string;
+  quizEndDate?: string;
+  quizDurationInMinutes?: number;
+
+  createdAt: Date | string
+
+  content?: any
 }

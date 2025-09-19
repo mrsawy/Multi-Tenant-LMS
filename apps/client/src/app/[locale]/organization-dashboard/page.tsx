@@ -9,6 +9,7 @@ import {
 } from "@/components/atoms/sidebar"
 import { OrgSidebar } from "./__components/OrgSidebar"
 import { getAuthUser } from "@/lib/actions/user/user.action"
+import UserDataTable from "./users/__components/user-data-table"
 
 
 
@@ -31,6 +32,7 @@ export default async function Page() {
               <DataTable data={data} />
             </div>
           </div> */}
+
     </div>
 
   )

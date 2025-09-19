@@ -41,6 +41,28 @@ export class FileMessageController {
         });
     }
 
+    @MessagePattern("file.getFileUrl")
+    @UseGuards(AuthGuard)
+    async getFileUrl(
+        @Payload(new RpcValidationPipe())
+        Payload: { fileKey: string }
+    ) {
+        const result = await this.fileService.getFileUrl(Payload.fileKey)
+        return result
+    }
+
+
+    @MessagePattern("file.deleteFile")
+    @UseGuards(AuthGuard)
+    async deleteFile(
+        @Payload(new RpcValidationPipe())
+        Payload: { fileKey: string }
+    ) {
+        const result = await this.fileService.deleteFile(Payload.fileKey)
+        return result
+    }
+
+
     // @Post('validate')
     // async validateFileKeys(@Body() validateFileKeysDto: ValidateFileKeysDto) {
     //   const isValid = await this.fileService.validateFileKeys(

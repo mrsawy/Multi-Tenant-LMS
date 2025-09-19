@@ -14,7 +14,7 @@ const i18nMiddleware = createI18nMiddleware({
 export const AUTH_COOKIE_NAME = 'nc_sid';
 
 function isPublicRoute(pathname: string): boolean {
-    return PUBLIC_ROUTES.includes(pathname) || PUBLIC_ROUTES.includes(pathname);
+  return PUBLIC_ROUTES.includes(pathname) || PUBLIC_ROUTES.includes(`/${pathname}`);
 }
 
 export default async function middleware(request: NextRequest & { user?: IUser }) {
@@ -25,6 +25,7 @@ export default async function middleware(request: NextRequest & { user?: IUser }
         const pathWithoutLocale = pathname.replace(/^\/(ar|en)/, '');
 
         if (isPublicRoute(pathWithoutLocale)) {
+            console.log("isPublicRoute(pathWithoutLocale)", { pathWithoutLocale })
             return i18nMiddleware(request);
         }
 

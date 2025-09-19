@@ -1,10 +1,11 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException, Inject, forwardRef } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { CourseModule } from "./entities/course-module.entity";
-import mongoose, { Model, Connection } from "mongoose";
+import mongoose, { Model, Connection, ClientSession } from "mongoose";
 import { CreateCourseModuleDto } from "./dto/create-course-module.dto";
 import { CourseService } from "./course.service";
 import { InjectConnection } from '@nestjs/mongoose';
+import { CourseContentService } from "./courseContent.service";
 
 
 @Injectable()
@@ -12,7 +13,8 @@ export class CourseModulesService {
     constructor(
         @InjectConnection() private readonly connection: Connection,
         @InjectModel(CourseModule.name) private readonly courseModuleModel: Model<CourseModule>,
-        private readonly courseService: CourseService
+        @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
+        @Inject(forwardRef(() => CourseContentService)) private readonly courseContentService: CourseContentService,
     ) { }
 
     async create(createCourseModuleDto: CreateCourseModuleDto) {
@@ -81,7 +83,7 @@ export class CourseModulesService {
                         }
                     }
                 }
-            }
+            },
         ]);
     }
 
@@ -153,26 +155,27 @@ export class CourseModulesService {
         }
     }
 
-    async removeContentFromModule(moduleId: string, contentId: string) {
+    async removeContentFromModule(moduleId: string, contentIds: (string | mongoose.Types.ObjectId)[], session: ClientSession | null = null) {
         try {
+            const objectIds = contentIds.map(id => new mongoose.Types.ObjectId(id));
             const result = await this.courseModuleModel.updateOne(
                 { _id: moduleId },
-                { $pull: { contentsIds: new mongoose.Types.ObjectId(contentId) } }
-            );
-
+                { $pull: { contentsIds: { $in: objectIds } } }
+            ).session(session);
             if (result.matchedCount === 0) {
                 throw new NotFoundException('Course module not found');
             }
-
             return {
-                message: 'Content removed from module successfully',
+                message: 'Contents removed from module successfully',
                 updated: true,
+                result
             };
         } catch (error) {
             console.error(error);
-            throw new InternalServerErrorException(error);
+            throw new InternalServerErrorException('Failed to remove contents');
         }
     }
+
 
     async update(moduleId: string, updateData: Partial<CreateCourseModuleDto>) {
         try {
@@ -196,5 +199,82 @@ export class CourseModulesService {
             throw new InternalServerErrorException(error);
         }
     }
+
+    async deleteModules(moduleIds: string[], session?: ClientSession) {
+
+        if (!session) {
+            session = await this.connection.startSession();
+            session.startTransaction();
+        }
+
+        try {
+            // Validate that all modules exist
+            const modules = await this.courseModuleModel.find({
+                _id: { $in: moduleIds.map(id => new mongoose.Types.ObjectId(id)) }
+            }).session(session);
+
+            if (modules.length !== moduleIds.length) {
+                const foundIds = modules.map(m => (m._id as mongoose.Types.ObjectId).toString());
+                const missingIds = moduleIds.filter(id => !foundIds.includes(id));
+                throw new NotFoundException(`Modules not found: ${missingIds.join(', ')}`);
+            }
+
+            // Get course IDs to update
+            const courseIds = [...new Set(modules.map(module => module.courseId.toString()))];
+
+            // Delete all contents for each module first
+            for (const module of modules) {
+                if (module.contentsIds && module.contentsIds.length > 0) {
+                    await this.courseContentService.deleteContents(module.contentsIds, session);
+                }
+            }
+
+            // Delete the modules
+            await this.courseModuleModel.deleteMany({
+                _id: { $in: moduleIds.map(id => new mongoose.Types.ObjectId(id)) }
+            }).session(session);
+
+            // Remove module IDs from course modulesIds arrays
+            for (const courseId of courseIds) {
+                // Get modules that belong to this specific course
+                const courseModuleIds = modules
+                    .filter(module => module.courseId.toString() === courseId)
+                    .map(module => (module._id as mongoose.Types.ObjectId).toString());
+
+                await this.courseService.removeModulesFromCourse(
+                    courseId,
+                    courseModuleIds,
+                    session
+                );
+            }
+
+            await session.commitTransaction();
+
+            return {
+                message: `Successfully deleted ${moduleIds.length} module(s)`,
+                deletedCount: moduleIds.length,
+                deletedModuleIds: moduleIds
+            };
+        } catch (error) {
+            await session.abortTransaction();
+            console.error('Error deleting modules:', error);
+            if (error instanceof NotFoundException) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Failed to delete modules');
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    async deleteModule(moduleId: string) {
+        return this.deleteModules([moduleId]);
+    }
+
+
+
+
+
+
 
 }

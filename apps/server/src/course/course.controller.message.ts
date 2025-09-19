@@ -11,6 +11,7 @@ import { CreateCourseModuleDto } from "./dto/create-course-module.dto";
 import { CourseModulesService } from "./courseModules.service";
 import { CreateCourseContentDto } from "./dto/create-course-content.dto";
 import { CourseContentService } from "./courseContent.service";
+import { PaginateOptions } from "src/utils/types/PaginateOptions";
 
 
 @Controller()
@@ -21,24 +22,51 @@ export class CourseControllerMessage {
         private readonly courseContentService: CourseContentService
     ) { }
 
+
+
+
+
+
+    @MessagePattern('courses.findAllCourses')
+    async findAllCourses(
+        @Payload(new RpcValidationPipe())
+        payload: { options: PaginateOptions },
+    ) {
+        try {
+            console.log({ payload })
+            const courses = await this.courseService.findAll({}, payload.options);
+            return courses
+        } catch (error) {
+            throw new RpcException({
+                message: error.message || 'An unexpected error occurred',
+                code: 500,
+                error: 'Internal Server Error'
+            });
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
     @UseGuards(AuthGuard)
     @MessagePattern('courses.getAllCourses')
     async getAllCourses(
         @Ctx() context: IUserContext,
+        @Payload(new RpcValidationPipe())
+        payload: { options: PaginateOptions },
 
     ) {
         try {
             const user = context.userPayload
-            // console.log({ user })
-            // TODO: Add authorization logic here if needed
-            // const user = await this.validateUser(payload.data?.authorization);
-
-            const courses = await this.courseService.findAll({ organizationId: user.organizationId });
-            return {
-                success: true,
-                data: courses,
-                message: 'Courses retrieved successfully'
-            };
+            const courses = await this.courseService.findAll({ organizationId: user.organizationId }, payload.options);
+            return courses
         } catch (error) {
             throw new RpcException({
                 message: error.message || 'An unexpected error occurred',
@@ -55,16 +83,29 @@ export class CourseControllerMessage {
         payload: { courseId: string; data?: { authorization?: string } },
     ) {
         try {
-            const course = (await this.courseService.findCourseWithOrderedModules(payload.courseId))[0];
-            return {
-                success: true,
-                data: course,
-                message: 'Course retrieved successfully'
-            };
+            return (await this.courseService.findCourseWithOrderedModules(payload.courseId))[0];
+
         } catch (error) {
             handleRpcError(error)
         }
     }
+
+
+    @UseGuards(AuthGuard)
+    @MessagePattern('courses.getCourse')
+    async getCourse(
+        @Payload(new RpcValidationPipe())
+        payload: { courseId: string; data?: { authorization?: string } },
+    ) {
+        try {
+            const course = (await this.courseService.findOne(payload.courseId));
+            return course
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+
     @MessagePattern('course.createCourse')
     @UseGuards(AuthGuard)
     async createCourse(
@@ -100,6 +141,36 @@ export class CourseControllerMessage {
         }
     }
 
+    @MessagePattern('course.deleteModules')
+    @UseGuards(AuthGuard)
+    async deleteModules(
+        @Payload(new RpcValidationPipe())
+        payload: { moduleIds: string[] },
+        @Ctx() context: IUserContext,
+    ) {
+        try {
+            const user = context.userPayload
+            return await this.courseModulesService.deleteModules(payload.moduleIds);
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+    @MessagePattern('course.deleteModule')
+    @UseGuards(AuthGuard)
+    async deleteModule(
+        @Payload(new RpcValidationPipe())
+        payload: { moduleId: string },
+        // @Ctx() context: IUserContext,
+    ) {
+        try {
+            // const user = context.userPayload
+            return await this.courseModulesService.deleteModule(payload.moduleId);
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
 
     @MessagePattern("course.createContent")
     @UseGuards(AuthGuard)
@@ -122,6 +193,54 @@ export class CourseControllerMessage {
         } catch (error) {
             handleRpcError(error)
         }
+    }
+
+    @MessagePattern('course.getContentsByModuleId')
+    @UseGuards(AuthGuard)
+    async getContentsByModuleId(
+        @Payload(new RpcValidationPipe())
+        payload: { moduleId: string },
+    ) {
+        try {
+            const result = await this.courseContentService.getContentsByModuleId(payload.moduleId);
+            return result
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+    @MessagePattern('course.getContent')
+    @UseGuards(AuthGuard)
+    async getContent(
+        @Payload(new RpcValidationPipe())
+        payload: { contentId: string },
+    ) {
+        try {
+            const result = await this.courseContentService.getContent(payload.contentId);
+            console.log({ result })
+            return result
+        } catch (error) {
+            handleRpcError(error)
+        }
+    }
+
+
+    @MessagePattern("course.deleteContent")
+    @UseGuards(AuthGuard)
+    async deleteContent(
+        @Payload(new RpcValidationPipe())
+        payload: { contentId: string },
+    ) {
+        return await this.courseContentService.deleteContents([payload.contentId]);
+    }
+
+    @MessagePattern("course.updateContent")
+    @UseGuards(AuthGuard)
+    async updateContent(
+        @Payload(new RpcValidationPipe())
+        payload: CreateCourseContentDto & { contentId: string },
+    ) {
+        return await this.courseContentService.updateCourseContent(payload);
     }
 
 

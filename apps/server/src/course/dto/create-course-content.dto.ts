@@ -98,21 +98,25 @@ export class CreateCourseContentDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => Question)
+    @IsNotEmpty()
     questions?: Question[]
 
 
     @ValidateIf(o => o.type === ContentType.QUIZ)
     @IsDateString()
+    @IsNotEmpty()
     quizStartDate?: string
 
 
     @ValidateIf(o => o.type === ContentType.QUIZ)
     @IsDateString()
+    @IsNotEmpty()
     quizEndDate?: string
 
 
     @ValidateIf(o => o.type === ContentType.QUIZ)
     @IsNumber()
+    @IsNotEmpty()
     quizDurationInMinutes?: number
 }
 

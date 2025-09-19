@@ -1,21 +1,27 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { CreateCourseDto, PricingDetailsDto, PricingDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Course } from './entities/course.entity';
-import mongoose, { ClientSession, Model } from 'mongoose';
+import mongoose, { ClientSession, Connection, Model, PaginateModel } from 'mongoose';
 
 import { Frequency } from 'src/utils/types/Frequency.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { CurrencyService } from 'src/currency/currency.service';
 import { Currency } from 'src/payment/enums/currency.enum';
 import { handleError } from 'src/utils/errorHandling';
+import { PaginateOptions } from 'src/utils/types/PaginateOptions';
+import { CourseModulesService } from './courseModules.service';
+import { FileService } from 'src/file/file.service';
 
 @Injectable()
 export class CourseService {
   constructor(
-    @InjectModel(Course.name) private readonly courseModel: Model<Course>
-    , private readonly currencyService: CurrencyService
+    @InjectConnection() private readonly connection: Connection,
+    @InjectModel(Course.name) private readonly courseModel: PaginateModel<Course>
+    , private readonly currencyService: CurrencyService,
+    @Inject(forwardRef(() => CourseModulesService)) private readonly courseModuleService: CourseModulesService,
+    private readonly fileService: FileService
   ) { }
 
   async create(createCourseDto: CreateCourseDto & { organizationId: string, createdBy: string }) {
@@ -28,8 +34,8 @@ export class CourseService {
     };
   }
 
-  async findAll(filters: mongoose.RootFilterQuery<Course>) {
-    return await this.courseModel.find(filters)
+  async findAll(filters: mongoose.RootFilterQuery<Course>, options: PaginateOptions) {
+    return await this.courseModel.paginate(filters, options)
   }
 
   async findOne(id: string, session?: ClientSession) {
@@ -127,11 +133,12 @@ export class CourseService {
     }
   }
 
-  async removeModuleFromCourse(courseId: string, moduleId: string) {
+  async removeModuleFromCourse(courseId: string, moduleId: string, session?: ClientSession) {
     try {
       const result = await this.courseModel.updateOne(
         { _id: courseId },
-        { $pull: { modulesIds: new mongoose.Types.ObjectId(moduleId) } }
+        { $pull: { modulesIds: new mongoose.Types.ObjectId(moduleId) } },
+        { session }
       );
 
       if (result.matchedCount === 0) {
@@ -140,6 +147,28 @@ export class CourseService {
 
       return {
         message: 'Module removed from course successfully',
+        updated: true,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async removeModulesFromCourse(courseId: string, moduleIds: string[], session?: ClientSession) {
+    try {
+      const result = await this.courseModel.updateOne(
+        { _id: courseId },
+        { $pullAll: { modulesIds: moduleIds.map(id => new mongoose.Types.ObjectId(id)) } },
+        { session }
+      );
+
+      if (result.matchedCount === 0) {
+        throw new NotFoundException('Course not found');
+      }
+
+      return {
+        message: 'Modules removed from course successfully',
         updated: true,
       };
     } catch (error) {
@@ -205,7 +234,7 @@ export class CourseService {
         if (!pricing) throw new Error('Monthly pricing not available for this course.');
         if (userCurrency === pricing.originalCurrency) {
           currency = pricing.originalCurrency;
-          price = pricing.originalPice;
+          price = pricing.originalPrice;
         } else {
           price = pricing.priceUSD;
         }
@@ -215,7 +244,7 @@ export class CourseService {
         if (!yearlyPricing) throw new Error('Yearly pricing not available for this course.');
         if (userCurrency === yearlyPricing.originalCurrency) {
           currency = yearlyPricing.originalCurrency;
-          price = yearlyPricing.originalPice;
+          price = yearlyPricing.originalPrice;
         } else {
           price = yearlyPricing.priceUSD;
         } break;
@@ -249,7 +278,7 @@ export class CourseService {
 
       try {
         return {
-          originalPice: billingCycle.price,
+          originalPrice: billingCycle.price,
           originalCurrency: billingCycle.currency,
           priceUSD: this.currencyService.convertToUSD(
             billingCycle.price,
@@ -269,5 +298,36 @@ export class CourseService {
     };
   }
 
+
+
+  async deleteCourses(coursesIds: string[]) {
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const courses = await this.courseModel.find({ _id: { $in: coursesIds.map(id => new mongoose.Types.ObjectId(id)) } }).session(session)
+
+      for (const course of courses) {
+        await this.courseModuleService.deleteModules(course.modulesIds.map(id => id.toString()), session)
+        if (course.thumbnailKey) {
+          await this.fileService.deleteFile(course.thumbnailKey)
+        }
+      }
+
+      await this.courseModel.deleteMany({ _id: { $in: coursesIds } }).session(session)
+
+    } catch (error) {
+      await session.abortTransaction();
+      console.error('Error deleting Courses:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to delete Courses');
+    } finally {
+      await session.endSession();
+    }
+
+
+
+  }
 
 }

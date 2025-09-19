@@ -13,7 +13,7 @@ import {
 } from "@/components/atoms/dropdown-menu"
 
 export function ModeToggle({ className }: { className?: string }) {
-    const { setTheme } = useTheme()
+    const { setTheme ,theme } = useTheme()
 
     return (
         <DropdownMenu>

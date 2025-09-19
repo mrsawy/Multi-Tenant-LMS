@@ -5,7 +5,7 @@ import { routing } from '@/i18n/routing';
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./../globals.css";
-import { setRequestLocale } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import Provider from "./provider";
 
 const geistSans = Geist({
@@ -37,12 +37,13 @@ export default async function LocaleLayout({
     redirect("/ar/" + locale)
   }
 
+  const messages = await getMessages(); // will load messages for current locale
 
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
-        <Provider>
+        <Provider locale={locale} messages={messages}>
           {children}
         </Provider>
       </body>

@@ -3,6 +3,10 @@ import { Document, Types } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { ContentType } from '../enum/contentType.enum';
 import { CourseModule } from './course-module.entity';
+import { QuizSchema } from './quiz.schema';
+import { ArticleSchema } from './article.schema';
+import { VideoSchema } from './video.schema';
+import { AssignmentSchema } from './assignment.schema';
 
 
 
@@ -33,11 +37,16 @@ export class CourseContent extends Document {
 
 export const CourseContentSchema = SchemaFactory.createForClass(CourseContent);
 
+
+// export const QuizModel = CourseContentSchema.discriminator(ContentType.QUIZ, QuizSchema);
+// export const ArticleModel = CourseContentSchema.discriminator(ContentType.ARTICLE, ArticleSchema);
+// export const AssignmentModel = CourseContentSchema.discriminator(ContentType.ASSIGNMENT, AssignmentSchema);
+// export const VideoModel = CourseContentSchema.discriminator(ContentType.VIDEO, VideoSchema);
+
 CourseContentSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
 CourseContentSchema.virtual('course', { ref: 'Course', localField: 'courseId', foreignField: '_id', justOne: true });
 CourseContentSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
 CourseContentSchema.virtual('module', { ref: 'CourseModule', localField: 'moduleId', foreignField: '_id', justOne: true });
-
 CourseContentSchema.set('toJSON', { virtuals: true });
 CourseContentSchema.set('toObject', { virtuals: true });
 

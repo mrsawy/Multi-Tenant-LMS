@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/atoms/sidebar"
 import { ModeToggle } from "./theme-switcher"
+import { Link } from "@/i18n/navigation"
 
 export function NavMain({
   items,
@@ -18,7 +19,8 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon?: Icon
+    icon?: Icon,
+    key: string
   }[]
 }) {
   return (
@@ -49,12 +51,14 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <Link href={item.url}  key={item.key}>
+              <SidebarMenuItem key={item.title} >
+                <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </Link>
           ))}
         </SidebarMenu>
       </SidebarGroupContent>

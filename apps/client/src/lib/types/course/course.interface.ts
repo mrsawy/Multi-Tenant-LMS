@@ -1,11 +1,12 @@
 import { Types } from 'mongoose';
 import { BillingCycle } from './enum/BillingCycle.enum';
 import { Currency } from '@/lib/data/currency.enum';
+import { IModule } from "./modules.interface";
 
 // ----- Subdocuments -----
 
 export interface PricingDetails {
-    originalPice: number; // Typo in schema? Should be originalPrice?
+    originalPrice: number; // Typo in schema? Should be originalPrice?
     originalCurrency: Currency; // EGP, USD, etc.
     priceUSD?: number;
     discountEndDate?: Date;
@@ -57,7 +58,7 @@ export interface ICourse {
     description?: string;
     shortDescription?: string;
 
-    thumbnail?: string;
+    thumbnailKey?: string;
     trailer?: string;
 
     pricing: PricingSchema;
@@ -70,3 +71,11 @@ export interface ICourse {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+
+
+export interface ICourseWithModules extends ICourse {
+    modules: IModule[]
+}
+
+// export interface ICourseWithContents 

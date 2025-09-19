@@ -17,8 +17,10 @@ import { DeleteIcon, Trash2Icon } from "lucide-react"
 import { TabsList, TabsTrigger } from "@radix-ui/react-tabs"
 import { Badge } from "../atoms/badge"
 
+export const SortableRowHandleContext = React.createContext<{ attributes: React.HTMLAttributes<any>; listeners: any } | null>(null)
+
 function DraggableRow<TData>({ row }: { row: Row<TData> }) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
+  const { transform, transition, setNodeRef, isDragging, attributes, listeners } = useSortable({
     id: row.id,
   })
 
@@ -27,17 +29,19 @@ function DraggableRow<TData>({ row }: { row: Row<TData> }) {
       data-state={row.getIsSelected() && "selected"}
       data-dragging={isDragging}
       ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80 "
       style={{
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? 'none' : transition, // Disable transition during drag
       }}
     >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell className="py-4" key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
+      <SortableRowHandleContext.Provider value={{ attributes, listeners }}>
+        {row.getVisibleCells().map((cell) => (
+          <TableCell className="py-4" key={cell.id} style={{ verticalAlign: "top" }}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        ))}
+      </SortableRowHandleContext.Provider>
     </TableRow>
   )
 }
@@ -56,7 +60,8 @@ export type DataTableProps<TData> = {
 }
 
 export function DataTable<TData>({
-  data: initialData,
+  data,
+  onChangeData: setData,
   columns: columnsProp,
   headers,
   getRowId,
@@ -68,8 +73,11 @@ export function DataTable<TData>({
   onDeleteSelected,
   globalFilter,
   onGlobalFilterChange,
-}: DataTableProps<TData> & { onReorder?: (newData: TData[]) => void, onDeleteSelected?: (data: string[]) => void }) {
-  const [data, setData] = React.useState<TData[]>(() => initialData)
+}: DataTableProps<TData> & {
+  onReorder?: (newData: TData[]) => void,
+  onDeleteSelected?: (data: string[]) => void, onChangeData: (data: TData[]) => void
+}) {
+  // const [data, setData] = React.useState<TData[]>(() => initialData)
   const [isDragging, setIsDragging] = React.useState(false)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -90,7 +98,9 @@ export function DataTable<TData>({
     [getRowId]
   )
 
-  const dataIds = React.useMemo<UniqueIdentifier[]>(() => { return data?.map((row, index) => deriveRowId(row, index)) || [] }, [data, deriveRowId])
+  const dataIds = React.useMemo<UniqueIdentifier[]>(() => {
+    return data?.map((row, index) => deriveRowId(row, index)) || []
+  }, [data, deriveRowId])
 
   // Sync global filter state with prop
   React.useEffect(() => {
@@ -153,6 +163,7 @@ export function DataTable<TData>({
 
   const table = useReactTable({
     data,
+    // onDataChange: setData,
     columns: resolvedColumns,
     state: {
       sorting,
@@ -178,19 +189,19 @@ export function DataTable<TData>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  function handleDragEnd(event: DragEndEvent) {
+  const handleDragEnd = React.useCallback((event: DragEndEvent) => {
     const { active, over } = event
     if (active && over && active.id !== over.id) {
-      setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id)
-        const newIndex = dataIds.indexOf(over.id)
+      const oldIndex = dataIds.indexOf(active.id)
+      const newIndex = dataIds.indexOf(over.id)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
         const final = arrayMove(data, oldIndex, newIndex)
-        console.log({ final })
-        // onReorder(final)
-        return final
-      })
+        setData(final)
+        onReorder?.(final)
+      }
     }
-  }
+  }, [data, dataIds, setData, onReorder])
 
   return (
     <Tabs
@@ -233,7 +244,7 @@ export function DataTable<TData>({
                     column.getCanHide()
                 )
                 .map((column) => {
-                  console.log({ column })
+                  // console.log({ column })
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
@@ -261,6 +272,7 @@ export function DataTable<TData>({
       >
         <div className="overflow-hidden rounded-lg border  bg-zinc-50 dark:bg-zinc-900">
           <DndContext
+            key={dataIds.join('-')}
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
             onDragEnd={handleDragEnd}
@@ -289,6 +301,7 @@ export function DataTable<TData>({
               <TableBody className="**:data-[slot=table-cell]:first:w-8">
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
+                    key={dataIds.join('-')}
                     items={dataIds}
                     strategy={verticalListSortingStrategy}
                   >
@@ -300,7 +313,7 @@ export function DataTable<TData>({
                   <TableRow>
                     <TableCell
                       colSpan={resolvedColumns.length}
-                      className="h-36 text-center"
+                      className="h-36 text-center m-5 rounded-2xl"
                     >
                       No results.
                     </TableCell>
@@ -332,7 +345,7 @@ export function DataTable<TData>({
                   />
                 </SelectTrigger>
                 <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                  {[10, 20, 30, 40, 50, 100].map((pageSize) => (
                     <SelectItem key={pageSize} value={`${pageSize}`}>
                       {pageSize}
                     </SelectItem>

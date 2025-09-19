@@ -9,6 +9,36 @@ import { connectToNats, request } from '@/lib/nats/client';
 import { v7 } from 'uuid';
 import { NatsError } from 'nats';
 import { ICourse } from '@/lib/types/course/course.interface';
+import { Paginated } from '@/lib/types/Paginated';
+
+
+
+export async function findCourses(page: number = 1, limit: number = 10) {
+    try {
+        const natsClient = await connectToNats();
+        const response = await request<Paginated<ICourse>>(
+            natsClient,
+            'courses.findAllCourses',
+            JSON.stringify({
+                id: v7(),
+                data: {
+                    options: { page, limit }
+                }
+            }),
+        );
+
+        console.dir({ response }, { depth: null })
+        if ('err' in response) {
+            throw new Error((response as { err: NatsError }).err.message)
+        }
+
+        return response
+    } catch (error) {
+        console.error("error frmo getCourses:", error)
+        throw new Error()
+    }
+
+}
 
 
 
@@ -18,13 +48,14 @@ export async function getCourses() {
 
         const idToken = await getCookie(AUTH_COOKIE_NAME);
 
-        const response = await request<ICourse>(
+        const response = await request<Paginated<ICourse>>(
             natsClient,
             'courses.getAllCourses',
             JSON.stringify({
                 id: v7(),
                 data: {
-                    authorization: idToken
+                    authorization: idToken,
+                    options: { page: 1, limit: 10 }
                 }
             }),
         );

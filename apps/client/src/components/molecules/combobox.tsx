@@ -20,7 +20,7 @@ import {
 interface Props {
     title?: string
     data: { value: string, label: string }[]
-    defaultValue: { value: string, label: string }
+    defaultValue?: { value: string, label: string }
     buttonClassName?: string
     contentClassName?: string
     placeholder: string
@@ -30,7 +30,7 @@ interface Props {
 
 export function Combobox({ title, data, defaultValue, buttonClassName, contentClassName, placeholder, buttonStyles, onValueChange }: Props) {
     const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState(defaultValue.value)
+    const [value, setValue] = React.useState(defaultValue?.value ?? "")
 
     return (
         <Popover open={open} onOpenChange={setOpen}>

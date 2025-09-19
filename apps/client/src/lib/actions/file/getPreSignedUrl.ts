@@ -44,3 +44,36 @@ export async function getPresignedUrl({ fileType, fileSize, fileKey }: { fileTyp
         throw new Error("Failed to get presigned URL")
     }
 }
+
+
+export async function getFileUrl({ fileKey }: { fileKey: string }) {
+    try {
+        const natsClient = await connectToNats();
+        const idToken = await getCookie(AUTH_COOKIE_NAME);
+        if (!idToken) throw new Error("No Token Provided")
+
+        const response = await request<any>(
+            natsClient,
+            'file.getFileUrl',
+            JSON.stringify({
+                id: v7(),
+                data: {
+                    authorization: idToken,
+                    fileKey
+                }
+            }),
+        );
+        console.dir({ response }, { depth: null })
+
+        if (typeof response == "object" && 'err' in response) {
+            throw new Error((response as { err: NatsError }).err.message)
+        }
+        // Return the presigned URL from the response
+        return response;
+
+    } catch (error: any) {
+
+        console.error("error from FileUrl:", error)
+        throw new Error("Failed to get FileUrl URL")
+    }
+}

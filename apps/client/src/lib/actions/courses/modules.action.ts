@@ -3,7 +3,7 @@
 import { AUTH_COOKIE_NAME } from "@/middleware";
 import { getCookie } from "@/lib/utils/serverUtils";
 import { connectToNats, request } from "@/lib/nats/client";
-import { ICourse } from "@/lib/types/course/course.interface";
+import { ICourse, ICourseWithModules } from "@/lib/types/course/course.interface";
 import { v7 } from "uuid";
 import NatsError from "@/lib/nats/error";
 import { CreateCourseSchema } from "@/lib/schema/course.schema";
@@ -11,171 +11,121 @@ import { CreateModuleSchema, UpdateModuleSchema } from "@/lib/schema/module.sche
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuthorizedNatsRequest } from "@/lib/utils/createNatsRequest";
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001";
 
 
-// async function authorizedFetch(input: string, init?: RequestInit) {
-//     const token = await getCookie(AUTH_COOKIE_NAME);
-//     const headers = new Headers(init?.headers);
-//     if (token) headers.set("Authorization", `Bearer ${token}`);
-//     headers.set("Content-Type", "application/json");
-//     return fetch(input, { ...init, headers, cache: "no-store" });
-// }
 
-export async function getCourseWithModules(courseId: string) {
+function isRedirectError(error: any): boolean {
+    return error.digest?.startsWith('NEXT_REDIRECT');
+}
+
+async function handlePageRevalidation(): Promise<void> {
+    const headersList = await headers();
+    const referer = headersList.get('referer');
+
+    if (referer) {
+        const url = new URL(referer);
+        const pathname = url.pathname;
+        revalidatePath(pathname);
+    }
+}
+
+async function handlePageRevalidationWithRedirect(): Promise<void> {
+    const headersList = await headers();
+    const referer = headersList.get('referer');
+
+    if (referer) {
+        const url = new URL(referer);
+        const pathname = url.pathname;
+        revalidatePath(pathname);
+        redirect(pathname);
+    }
+}
+
+// Course operations
+export async function getCourseWithModules(courseId: string): Promise<ICourseWithModules> {
     try {
-        const natsClient = await connectToNats();
-
-        const idToken = await getCookie(AUTH_COOKIE_NAME);
-
-        const response = await request<any>(
-            natsClient,
-            'courses.getCourseWithModule',
-            JSON.stringify({
-                id: v7(),
-                data: {
-                    authorization: idToken,
-                    courseId
-                }
-            }),
-        );
-
-        // console.dir({ response }, { depth: null })
-
-        if ('err' in response) {
-            throw new Error((response as { err: NatsError }).err.message)
-        }
-
-        return response
+        return await createAuthorizedNatsRequest('courses.getCourseWithModule', { courseId });
     } catch (error) {
-        console.error("error frmo getCourses:", error)
-        throw new Error()
+        console.error("Error from getCourseWithModules:", error);
+        throw new Error("Failed to get course with modules");
     }
-
-
 }
 
-export async function createCourseModule(params: CreateCourseSchema & { courseId: string }): Promise<any> {
+// Module operations
+export async function createCourseModule(
+    params: CreateModuleSchema & { courseId: string }
+): Promise<any> {
     try {
-        const natsClient = await connectToNats();
-        const idToken = await getCookie(AUTH_COOKIE_NAME);
-        const response = await request<any>(
-            natsClient,
-            'course.createModule',
-            JSON.stringify({
-                id: v7(),
-                data: {
-                    authorization: idToken,
-                    ...params
-                }
-            }),
-        );
-        if ('err' in response) {
-            throw new Error((response as { err: NatsError }).err.message)
-        }
-        const headersList = await headers();
-        const referer = headersList.get('referer');
-
-        console.dir(headersList, { depth: null })
-
-        if (referer) {
-
-
-            const url = new URL(referer);
-            const pathname = url.pathname;
-            revalidatePath(pathname);
-            console.dir({ referer, pathname }, { depth: null })
-            redirect(pathname)
-        }
-        return
+        return await createAuthorizedNatsRequest('course.createModule', params);
     } catch (error: any) {
-        if (error.digest?.startsWith('NEXT_REDIRECT')) {
-            return
+        if (isRedirectError(error)) {
+            return;
         }
-        console.error("error from createCourseModule:", error)
-        throw new Error("Failed to create module")
+        console.error("Error from createCourseModule:", error);
+        throw new Error("Failed to create module");
     }
 }
 
-
-export async function getModule(moduleId: string) {
+export async function getModule(moduleId: string): Promise<any> {
     try {
-        const natsClient = await connectToNats();
-        const idToken = await getCookie(AUTH_COOKIE_NAME);
-
-        const response = await request<any>(
-            natsClient,
-            'course.getModule',
-            JSON.stringify({
-                id: v7(),
-                data: {
-                    authorization: idToken,
-                    moduleId
-                }
-            }),
-        );
-
-        if ('err' in response) {
-            throw new Error((response as { err: NatsError }).err.message)
-        }
-
-        return response
+        return await createAuthorizedNatsRequest('course.getModule', { moduleId });
     } catch (error) {
-        console.error("error from getModule:", error)
-        throw new Error("Failed to get module")
+        console.error("Error from getModule:", error);
+        throw new Error("Failed to get module");
     }
 }
 
-export async function updateModule(moduleId: string, updateData: UpdateModuleSchema) {
+export async function updateModule(
+    moduleId: string,
+    updateData: UpdateModuleSchema
+): Promise<any> {
     try {
-        const natsClient = await connectToNats();
-        const idToken = await getCookie(AUTH_COOKIE_NAME);
-        
-        const response = await request<any>(
-            natsClient,
-            'course.updateModule',
-            JSON.stringify({
-                id: v7(),
-                data: {
-                    authorization: idToken,
-                    moduleId,
-                    data: updateData
-                }
-            }),
-        );
-        
-        if ('err' in response) {
-            throw new Error((response as { err: NatsError }).err.message)
-        }
-        
-        const headersList = await headers();
-        const referer = headersList.get('referer');
+        const response = await createAuthorizedNatsRequest('course.updateModule', {
+            moduleId,
+            data: updateData,
+        });
 
-        if (referer) {
-            const url = new URL(referer);
-            const pathname = url.pathname;
-            revalidatePath(pathname);
-            redirect(pathname)
-        }
-        
-        return response
+        await handlePageRevalidationWithRedirect();
+        return response;
     } catch (error: any) {
-        if (error.digest?.startsWith('NEXT_REDIRECT')) {
-            return
+        if (isRedirectError(error)) {
+            return;
         }
-        console.error("error from updateModule:", error)
-        throw new Error("Failed to update module")
+        console.error("Error from updateModule:", error);
+        throw new Error("Failed to update module");
     }
 }
 
-export async function reorderCourseModules(courseId: string, newOrder: string[]) {
-    // const res = await authorizedFetch(`${SERVER_URL}/course/${courseId}/reorder`, {
-    //     method: "PATCH",
-    //     body: JSON.stringify({ newOrder }),
-    // });
-    // if (!res.ok) throw new Error("Failed to reorder modules");
-    return "await res.json()";
+export async function deleteModule(moduleId: string): Promise<any> {
+    try {
+        const response = await createAuthorizedNatsRequest('course.deleteModule', { moduleId });
+        await handlePageRevalidation();
+        return response;
+    } catch (error) {
+        console.error("Error from deleteModule:", error);
+        throw new Error("Failed to delete module");
+    }
 }
 
+export async function deleteModules(moduleIds: string[]): Promise<any> {
+    try {
+        const response = await createAuthorizedNatsRequest('course.deleteModules', { moduleIds });
+        await handlePageRevalidation();
+        return response;
+    } catch (error) {
+        console.error("Error from deleteModules:", error);
+        throw new Error("Failed to delete modules");
+    }
+}
 
+// TODO: Implement reorderCourseModules with NATS
+export async function reorderCourseModules(
+    courseId: string,
+    newOrder: string[]
+): Promise<string> {
+    // Placeholder implementation - needs to be implemented with NATS
+    console.warn("reorderCourseModules not yet implemented with NATS");
+    return "Module reordering not implemented";
+}

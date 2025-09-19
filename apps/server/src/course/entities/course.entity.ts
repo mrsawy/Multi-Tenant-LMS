@@ -7,7 +7,7 @@ import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 @Schema({ _id: false }) // Don't create _id for subdocuments
 export class PricingDetails {
     @Prop({ type: Number, required: true })
-    originalPice: number;
+    originalPrice: number;
 
     @Prop({ type: String, default: 'EGP', enum: Object.values(Currency) })
     originalCurrency: string;
@@ -77,8 +77,8 @@ export class StatsSchema {
     @Prop({ type: Number, default: 0 })
     totalViews: number;
 
-    @Prop({ type: Number, default: 0 })
-    completionRate: number;
+    // @Prop({ type: Number, default: 0 })
+    // completionRate: number;
 }
 
 @Schema({ timestamps: true, discriminatorKey: 'type' })
@@ -93,7 +93,7 @@ export class Course extends Document {
     createdBy: string;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Category' })
-    categories: Types.ObjectId[];
+    categoriesIds: Types.ObjectId[];
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'CourseModule', default: [] })
     modulesIds: Types.ObjectId[];
@@ -113,7 +113,10 @@ export class Course extends Document {
     @Prop()
     shortDescription: string;
 
-    @Prop({ type: String })
+    @Prop({ type: [String], required: false })
+    learningObjectives: string[]
+
+    @Prop({ type: String, required: true })
     thumbnailKey: string;
 
     // @Prop({ type: String })
@@ -123,7 +126,7 @@ export class Course extends Document {
     // Note: At least one of monthly, yearly, or one-time pricing must be provided only if isPaid is true
     @Prop({
         type: PricingSchema,
-        required: function() {
+        required: function () {
             return this.isPaid;
         },
         validate: {
@@ -147,9 +150,6 @@ export class Course extends Document {
     // Use the proper schema for stats
     @Prop({ type: StatsSchema, default: {} })
     stats: StatsSchema;
-
-    @Prop()
-    publishedAt: Date;
 
     @Prop({ type: String, required: false })
     paypalPlanId: string;

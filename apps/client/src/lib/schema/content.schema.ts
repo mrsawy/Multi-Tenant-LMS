@@ -25,6 +25,8 @@ const baseCourseContentSchema = yup.object({
   //   .min(3, 'Username must be at least 3 characters')
   //   .max(50, 'Username must not exceed 50 characters'),
 
+  _id: yup.string().optional(),
+
   type: yup
     .string()
     .oneOf(Object.values(CourseContentType), 'Invalid course type')
@@ -98,7 +100,7 @@ const videoContentSchema = yup.object({
         }),
       otherwise: (schema) => schema.optional()
     }),
-    
+
 });
 
 // Quiz content schema
@@ -148,8 +150,8 @@ const quizContentSchema = yup.object({
     .required('Questions are required')
     .test('valid-questions', 'All questions must be properly filled', function (questions) {
       if (!questions || questions.length === 0) return false;
-      
-      return questions.every(question => 
+
+      return questions.every(question =>
         question.questionText?.trim() !== '' &&
         question.options?.length >= 2 &&
         question.options.every(option => option?.trim() !== '') &&
