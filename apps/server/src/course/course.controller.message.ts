@@ -11,7 +11,9 @@ import { CreateCourseModuleDto } from "./dto/create-course-module.dto";
 import { CourseModulesService } from "./courseModules.service";
 import { CreateCourseContentDto } from "./dto/create-course-content.dto";
 import { CourseContentService } from "./courseContent.service";
-import { PaginateOptions } from "src/utils/types/PaginateOptions";
+import { PaginateOptions } from "mongoose";
+import { ICourseFilters } from "src/utils/types/CourseFilters";
+
 
 
 @Controller()
@@ -30,7 +32,7 @@ export class CourseControllerMessage {
     @MessagePattern('courses.findAllCourses')
     async findAllCourses(
         @Payload(new RpcValidationPipe())
-        payload: { options: PaginateOptions },
+        payload: { options: ICourseFilters },
     ) {
         try {
             console.log({ payload })
@@ -83,7 +85,7 @@ export class CourseControllerMessage {
         payload: { courseId: string; data?: { authorization?: string } },
     ) {
         try {
-            return (await this.courseService.findCourseWithOrderedModules(payload.courseId))[0];
+            return (await this.courseService.findCourseWithOrderedModules(payload.courseId));
 
         } catch (error) {
             handleRpcError(error)
@@ -98,13 +100,36 @@ export class CourseControllerMessage {
         payload: { courseId: string; data?: { authorization?: string } },
     ) {
         try {
-            const course = (await this.courseService.findOne(payload.courseId));
-            return course
+
+            return await this.courseService.findOne(payload.courseId);
         } catch (error) {
             handleRpcError(error)
         }
     }
 
+
+    @UseGuards(AuthGuard)
+    @MessagePattern('course.updateCourse')
+    async updateCourse(
+        @Payload(new RpcValidationPipe())
+        payload: UpdateCourseDto,
+    ) {
+        try {
+            console.log({ payload })
+
+            const result = await this.courseService.update(payload);
+
+            return {
+                success: true,
+                data: result,
+                message: 'Course updated successfully'
+            };
+        } catch (error) {
+            handleRpcError(error)
+
+
+        }
+    }
 
     @MessagePattern('course.createCourse')
     @UseGuards(AuthGuard)
@@ -307,44 +332,6 @@ export class CourseControllerMessage {
     // }
 
 
-    // @MessagePattern('courses.updateCourse')
-    // async updateCourse(
-    //     @Payload(new RpcValidationPipe())
-    //     payload: { id: string; courseId: string; data: UpdateCourseDto & { authorization?: string } },
-    // ) {
-    //     try {
-    //         // TODO: Add authorization logic here if needed
-    //         // const user = await this.validateUser(payload.data.authorization);
-
-    //         const result = await this.courseService.update(payload.courseId, payload.data);
-
-    //         return {
-    //             success: true,
-    //             data: result,
-    //             message: 'Course updated successfully'
-    //         };
-    //     } catch (error) {
-    //         if (error instanceof NotFoundException) {
-    //             throw new RpcException({
-    //                 message: error.message,
-    //                 code: 404,
-    //                 error: 'Not Found'
-    //             });
-    //         }
-    //         if (error instanceof BadRequestException) {
-    //             throw new RpcException({
-    //                 message: error.message,
-    //                 code: 400,
-    //                 error: 'Bad Request'
-    //             });
-    //         }
-    //         throw new RpcException({
-    //             message: error.message || 'An unexpected error occurred',
-    //             code: 500,
-    //             error: 'Internal Server Error'
-    //         });
-    //     }
-    // }
 
     // @MessagePattern('courses.deleteCourse')
     // async deleteCourse(

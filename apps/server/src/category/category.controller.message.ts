@@ -12,10 +12,11 @@ import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { handleRpcError } from 'src/utils/errorHandling';
-import { PaginateOptions } from 'src/utils/types/PaginateOptions';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryService } from './category.service';
+import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
+import { PaginateOptions } from 'mongoose';
 
 @Controller()
 export class CategoryMessageController {
@@ -66,8 +67,8 @@ export class CategoryMessageController {
     ) {
         try {
             return await this.categoryService.getAllWithAggregation(
-                context.userPayload.organizationId.toString(),
                 payload,
+                context.userPayload.organizationId.toString(),
             );
         } catch (error) {
             throw new RpcException({
@@ -89,8 +90,8 @@ export class CategoryMessageController {
     ) {
         try {
             return await this.categoryService.getAllFlat(
-                context.userPayload.organizationId.toString(),
                 payload,
+                context.userPayload.organizationId.toString(),
             );
         } catch (error) {
             throw new RpcException({
@@ -101,6 +102,26 @@ export class CategoryMessageController {
         }
     }
 
+    @MessagePattern('category.filter')
+    async setSearch(
+        @Payload(new RpcValidationPipe())
+        payload: PaginateOptionsWithSearch,
+    ) {
+        try {
+            if (!payload.search?.trim()) {
+                return await this.categoryService.getAllFlat({ limit: 0 });
+            }
+            return await this.categoryService.getAllFlat(
+                payload,
+            );
+        } catch (error) {
+            throw new RpcException({
+                message: error.message || 'An unexpected error occurred',
+                code: 500,
+                error: 'Internal Server Error',
+            });
+        }
+    }
 
 
     @UseGuards(AuthGuard)

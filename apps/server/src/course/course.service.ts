@@ -3,16 +3,20 @@ import { CreateCourseDto, PricingDetailsDto, PricingDto } from './dto/create-cou
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Course } from './entities/course.entity';
-import mongoose, { ClientSession, Connection, Model, PaginateModel } from 'mongoose';
+import mongoose, { ClientSession, Connection, Model, PaginateModel, PaginateOptions } from 'mongoose';
 
 import { Frequency } from 'src/utils/types/Frequency.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { CurrencyService } from 'src/currency/currency.service';
 import { Currency } from 'src/payment/enums/currency.enum';
 import { handleError } from 'src/utils/errorHandling';
-import { PaginateOptions } from 'src/utils/types/PaginateOptions';
+
 import { CourseModulesService } from './courseModules.service';
 import { FileService } from 'src/file/file.service';
+import { ICourseFilters } from 'src/utils/types/CourseFilters';
+import { CategoryService } from 'src/category/category.service';
+import { Category } from 'src/category/entities/category.entity';
+import { CategoryWithChildren } from 'src/utils/types/CategoryWithChildren ';
 
 @Injectable()
 export class CourseService {
@@ -21,25 +25,118 @@ export class CourseService {
     @InjectModel(Course.name) private readonly courseModel: PaginateModel<Course>
     , private readonly currencyService: CurrencyService,
     @Inject(forwardRef(() => CourseModulesService)) private readonly courseModuleService: CourseModulesService,
-    private readonly fileService: FileService
+    private readonly fileService: FileService,
+    private readonly categoryService: CategoryService
   ) { }
 
   async create(createCourseDto: CreateCourseDto & { organizationId: string, createdBy: string }) {
     const foundedCourse = await this.courseModel.findOne({ organizationId: createCourseDto.organizationId, name: createCourseDto.name })
     if (foundedCourse) throw new BadRequestException("Course With the same name already exist for this organization .")
-    const createdCourse = await this.courseModel.create({ ...createCourseDto, pricing: this.transformPricing(createCourseDto.pricing) });
+    if (createCourseDto.isPaid) {
+      createCourseDto.pricing = Object.fromEntries(
+        Object.entries(createCourseDto.pricing).map(([key, value]) => [
+          key,
+          {
+            ...value,
+            priceUSD: this.currencyService.convertToUSD(
+              value.originalPrice,
+              value.originalCurrency
+            )
+          }
+        ])
+      );
+    }
+    const createdCourse = await this.courseModel.create({ ...createCourseDto });
     return {
       message: 'Course created successfully',
       course: createdCourse,
     };
   }
 
-  async findAll(filters: mongoose.RootFilterQuery<Course>, options: PaginateOptions) {
-    return await this.courseModel.paginate(filters, options)
+
+
+  async findAll(filters: mongoose.RootFilterQuery<Course>, options: ICourseFilters) {
+    const {
+      maxPrice,
+      minPrice,
+      priceCurrency,
+      billingCycle,
+      minRating,
+      minModules,
+      selectedCategory,
+      ...paginateOptions
+    } = options;
+
+    // Build the query object
+    const query: mongoose.RootFilterQuery<Course> = { ...filters };
+
+    // Handle price filtering based on billing cycle (using priceUSD for consistent comparison)
+    if (billingCycle && (maxPrice !== undefined || minPrice !== undefined)) {
+      const priceField = `pricing.${billingCycle}`;
+
+      // Convert prices to USD if currency is provided, otherwise assume already in USD
+      const minPriceUSD = minPrice !== undefined
+        ? (priceCurrency ? this.currencyService.convertToUSD(minPrice, priceCurrency) : minPrice)
+        : undefined;
+
+      const maxPriceUSD = maxPrice !== undefined
+        ? (priceCurrency ? this.currencyService.convertToUSD(maxPrice, priceCurrency) : maxPrice)
+        : undefined;
+
+      if (minPriceUSD !== undefined) {
+        query[`${priceField}.priceUSD`] = {
+          ...query[`${priceField}.priceUSD`],
+          $gte: minPriceUSD
+        };
+      }
+
+      if (maxPriceUSD !== undefined) {
+        query[`${priceField}.priceUSD`] = {
+          ...query[`${priceField}.priceUSD`],
+          $lte: maxPriceUSD
+        };
+      }
+    }
+
+    // Handle rating filter
+    // if (minRating !== undefined) {
+    //   query['stats.averageRating'] = { $gte: minRating };
+    // }
+
+    // Handle modules filter
+    if (minModules !== undefined) {
+      query['modulesIds'] = { $exists: true };
+      query.$expr = { $gte: [{ $size: '$modulesIds' }, Number(minModules)] };
+    }
+
+    // Handle category search
+    if (selectedCategory) {
+      const categories = (await this.categoryService.getAllWithAggregation({ search: selectedCategory })).docs;
+
+      function flattenCategories(categories: CategoryWithChildren[]): CategoryWithChildren[] {
+        const result: CategoryWithChildren[] = [];
+        const walk = (category: CategoryWithChildren) => {
+          result.push(category);
+          category.childCategories?.forEach(walk);
+        };
+        categories.forEach(walk);
+        return result;
+      }
+      const flattenedCategories = flattenCategories(categories)
+      const flattenedCategoriesIds = flattenedCategories.map(cat => `${cat._id}`);
+
+      console.log({ categories, flattenedCategoriesIds })
+
+      query['categoriesIds'] = { $in: flattenedCategoriesIds };
+    }
+
+    console.dir({ query }, { depth: null });
+
+    return await this.courseModel.paginate(query, paginateOptions);
   }
 
   async findOne(id: string, session?: ClientSession) {
-    const query = this.courseModel.findById(id);
+    const query = this.courseModel.findById(id).populate('creator').populate('modules').populate('categories');
     if (session) query.session(session);
     const foundedCourse = await query.exec();
     if (!foundedCourse) throw new NotFoundException("Course Not Found")
@@ -47,10 +144,27 @@ export class CourseService {
   }
 
 
-  async update(id: string, updateCourseDto: UpdateCourseDto) {
+  async update(updateCourseDto: UpdateCourseDto) {
     try {
-      const result = await this.courseModel.updateOne({ _id: id }, updateCourseDto);
 
+      if (updateCourseDto.isPaid && updateCourseDto.pricing) {
+        updateCourseDto.pricing = Object.fromEntries(
+          Object.entries(updateCourseDto.pricing).map(([key, value]) => [
+            key,
+            {
+              ...value,
+              priceUSD: this.currencyService.convertToUSD(
+                value.originalPrice,
+                value.originalCurrency
+              )
+            }
+          ])
+        );
+      }
+
+      const result = await this.courseModel.updateOne({ _id: updateCourseDto.courseId }, updateCourseDto);
+      const course = await this.courseModel.findById(updateCourseDto.courseId)
+      console.log({ course })
       if (result.matchedCount === 0) {
         throw new NotFoundException('Course not found');
       }
@@ -78,38 +192,7 @@ export class CourseService {
   }
 
   async findCourseWithOrderedModules(courseId: string) {
-    return await this.courseModel.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(courseId) } },
-      {
-        $lookup: {
-          from: 'course_modules',
-          localField: 'modulesIds',
-          foreignField: '_id',
-          as: 'modules'
-        }
-      },
-      {
-        $addFields: {
-          modules: {
-            $map: {
-              input: '$modulesIds',
-              as: 'moduleId',
-              in: {
-                $arrayElemAt: [
-                  '$modules',
-                  {
-                    $indexOfArray: [
-                      '$modules._id',
-                      '$$moduleId'
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    ]);
+    return await this.courseModel.findById(courseId).populate("modules").populate('categories').populate('creator').sort({ 'modules.order': 1 }).exec()
   }
 
   async addModuleToCourse(courseId: string, moduleId: string, session?: ClientSession) {
@@ -259,44 +342,6 @@ export class CourseService {
 
 
 
-  private transformPricing(pricing?: PricingDto) {
-    if (!pricing) {
-      return {
-        [BillingCycle.MONTHLY]: undefined,
-        [BillingCycle.YEARLY]: undefined,
-        [BillingCycle.ONE_TIME]: undefined,
-      };
-    }
-
-    const transformBillingCycle = (billingCycle: any) => {
-      if (!billingCycle ||
-        typeof billingCycle.price !== 'number' ||
-        !billingCycle.currency ||
-        billingCycle.price < 0) {
-        return undefined;
-      }
-
-      try {
-        return {
-          originalPrice: billingCycle.price,
-          originalCurrency: billingCycle.currency,
-          priceUSD: this.currencyService.convertToUSD(
-            billingCycle.price,
-            billingCycle.currency
-          ),
-        };
-      } catch (error) {
-        // If currency conversion fails, return undefined
-        return undefined;
-      }
-    };
-
-    return {
-      [BillingCycle.MONTHLY]: transformBillingCycle(pricing[BillingCycle.MONTHLY]),
-      [BillingCycle.YEARLY]: transformBillingCycle(pricing[BillingCycle.YEARLY]),
-      [BillingCycle.ONE_TIME]: transformBillingCycle(pricing[BillingCycle.ONE_TIME]),
-    };
-  }
 
 
 

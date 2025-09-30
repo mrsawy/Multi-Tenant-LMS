@@ -160,6 +160,9 @@ export const CourseSchema = SchemaFactory.createForClass(Course);
 CourseSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
 CourseSchema.virtual('modules', { ref: 'CourseModule', localField: 'modulesIds', foreignField: '_id', justOne: false });
 
+CourseSchema.virtual('categories', { ref: 'Category', localField: 'categoriesIds', foreignField: '_id', justOne: false });
+
+
 CourseSchema.set('toJSON', { virtuals: true });
 CourseSchema.set('toObject', { virtuals: true });
 

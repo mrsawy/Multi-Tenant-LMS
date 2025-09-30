@@ -18,6 +18,7 @@ import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments 
 import { Type, Transform } from 'class-transformer';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
+import mongoose from 'mongoose';
 
 
 @ValidatorConstraint({ name: 'AtLeastOnePricingWithPriceAndCurrency', async: false })
@@ -31,9 +32,9 @@ class AtLeastOnePricingWithPriceAndCurrency implements ValidatorConstraintInterf
         return cycles.some((cycle) => {
             const details = pricing?.[cycle];
             return details !== undefined
-                && typeof details.price === 'number'
-                && !Number.isNaN(details.price)
-                && details.currency !== undefined;
+                && typeof details.originalPrice === 'number'
+                && !Number.isNaN(details.originalPrice)
+                && details.originalCurrency !== undefined;
         });
     }
 
@@ -47,11 +48,11 @@ export class PricingDetailsDto {
     @IsNumber()
     @IsOptional()
     @Min(0)
-    price: number;
+    originalPrice: number;
 
     @IsEnum(Currency)
     @IsOptional()
-    currency: Currency;
+    originalCurrency: Currency;
 
     @IsDate()
     @IsOptional()
@@ -130,11 +131,11 @@ export class CreateCourseDto {
 
     @IsMongoId({ each: true })
     @IsOptional()
-    categories?: string[];
+    categoriesIds?: mongoose.Types.ObjectId[];
 
     @IsMongoId({ each: true })
     @IsOptional()
-    modulesIds?: string[];
+    modulesIds?: mongoose.Types.ObjectId[];
 
     @IsMongoId()
     @IsOptional()

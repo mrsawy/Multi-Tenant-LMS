@@ -19,6 +19,7 @@ import { CurrencyModule } from 'src/currency/currency.module';
 import { CourseModulesService } from './courseModules.service';
 import { CourseModuleSchema, CourseModule as CourseModuleEntity } from './entities/course-module.entity';
 import { CourseControllerMessage } from './course.controller.message';
+import { CategoryModule } from 'src/category/category.module';
 
 
 @Module({
@@ -45,7 +46,8 @@ import { CourseControllerMessage } from './course.controller.message';
     RoleModule,
     UserModule,
     FileModule,
-    CurrencyModule
+    CurrencyModule,
+    CategoryModule
     // NestjsFormDataModule
   ],
   controllers: [CourseController , CourseControllerMessage],

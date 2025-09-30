@@ -13,5 +13,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   controllers: [CategoryHttpController , CategoryMessageController],
   providers: [CategoryService],
+  exports:[CategoryService]
 })
 export class CategoryModule { }
