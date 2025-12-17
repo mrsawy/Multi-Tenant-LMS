@@ -1,21 +1,18 @@
-import { IsMongoId, IsNotEmpty, IsOptional } from "class-validator";
+import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateCategoryDto {
+  @IsNotEmpty()
+  name: string;
 
-    @IsNotEmpty()
-    name: string
+  @IsOptional()
+  parentId?: string;
 
+  @IsOptional()
+  description?: string;
 
-    @IsOptional()
-    parentId?: string
-        
-    @IsOptional()
-    description?: string
+  @IsOptional()
+  authorization?: string;
 
-    @IsOptional()
-    authorization?: string
-
-    @IsOptional()
-    organizationId?: string
+  @IsOptional()
+  organizationId?: string;
 }
-

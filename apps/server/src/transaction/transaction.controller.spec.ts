@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TransactionController } from './transaction.controller';
+import { TransactionController } from './transaction.http.controller';
 import { TransactionService } from './transaction.service';
 
 describe('TransactionController', () => {

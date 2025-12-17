@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { FileService } from './file.service';
@@ -15,15 +15,15 @@ import { FileMessageController } from './file.controller.message';
         return {
           storage: memoryStorage(),
           limits: {
-            fileSize: 5 * 1024 * 1024, // 10MB max file size
+            fileSize: 10 * 1024 * 1024, // 10MB max file size
           },
         };
       },
     }),
-    AuthModule,
+    forwardRef(() => AuthModule),
   ],
   providers: [FileService],
-  controllers: [FileHttpController , FileMessageController],
+  controllers: [FileHttpController, FileMessageController],
   exports: [MulterModule, FileService],
 })
 export class FileModule { }

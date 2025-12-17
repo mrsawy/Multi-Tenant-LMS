@@ -1,14 +1,18 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, Min, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  Min,
+  IsMongoId,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import mongoose, { Types } from 'mongoose';
 
 export class CreateWalletDto {
-
-
   @IsMongoId()
   @IsOptional()
-  _id: mongoose.Types.ObjectId
-
+  _id: mongoose.Types.ObjectId;
 
   @IsMongoId()
   userId: Types.ObjectId;

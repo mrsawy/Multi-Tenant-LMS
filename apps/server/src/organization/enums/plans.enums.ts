@@ -1,6 +1,6 @@
 export enum Plans {
-    BASIC = 'BASIC',
-    PREMIUM = 'PREMIUM',
-    ENTERPRISE = 'ENTERPRISE',
-    NONE = "NONE"
+  BASIC = 'BASIC',
+  PREMIUM = 'PREMIUM',
+  ENTERPRISE = 'ENTERPRISE',
+  NONE = 'NONE',
 }

@@ -1,32 +1,41 @@
-import { IsString, IsOptional, IsDateString, IsEnum, IsMongoId, ValidateIf, ValidateNested, IsNotEmpty, IsEmail, IsInt, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsEnum,
+  IsMongoId,
+  ValidateIf,
+  ValidateNested,
+  IsNotEmpty,
+  IsEmail,
+  IsInt,
+  IsArray,
+} from 'class-validator';
 import { BillingCycle } from '../../utils/enums/billingCycle.enum';
 import { CreatePaymobSubscriptionPlanDto } from 'src/payment/dto/create-subscription-plan.dto';
 import { Type } from 'class-transformer';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 
-
 export class customerDto {
-    @IsNotEmpty()
-    @IsMongoId()
-    userId: string
+  @IsNotEmpty()
+  @IsMongoId()
+  userId: string;
 
-    @IsString()
-    @IsNotEmpty()
-    first_name: string;
+  @IsString()
+  @IsNotEmpty()
+  first_name: string;
 
-    @IsString()
-    @IsNotEmpty()
-    last_name: string;
-    @IsString()
-    @IsNotEmpty()
-    phone_number: string;
+  @IsString()
+  @IsNotEmpty()
+  last_name: string;
+  @IsString()
+  @IsNotEmpty()
+  phone_number: string;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
-
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 }
-
 
 // export class ExtrasDto {
 //     @IsMongoId()
@@ -42,83 +51,76 @@ export class customerDto {
 //     subscriptionType: SubscriptionType;
 // }
 
-
 export class PaymobBillingData {
-    @IsOptional()
-    @IsString()
-    apartment: string;
+  @IsOptional()
+  @IsString()
+  apartment: string;
 
-    @IsString()
-    @IsNotEmpty()
-    first_name: string;
+  @IsString()
+  @IsNotEmpty()
+  first_name: string;
 
-    @IsString()
-    @IsNotEmpty()
-    last_name: string;
+  @IsString()
+  @IsNotEmpty()
+  last_name: string;
 
-    @IsString()
-    street: string;
+  @IsString()
+  street: string;
 
-    @IsString()
-    @IsOptional()
-    building?: string;
+  @IsString()
+  @IsOptional()
+  building?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    phone_number: string;
+  @IsString()
+  @IsNotEmpty()
+  phone_number: string;
 
-    @IsString()
-    city: string;
+  @IsString()
+  city: string;
 
-    @IsString()
-    country: string;
+  @IsString()
+  country: string;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
-    @IsOptional()
-    @IsString()
-    floor?: string;
+  @IsOptional()
+  @IsString()
+  floor?: string;
 
-    // @IsString()
-    // state: string;
+  // @IsString()
+  // state: string;
 
-    @IsString()
-    @IsOptional()
-    extra_description: string;
+  @IsString()
+  @IsOptional()
+  extra_description: string;
 
-    @IsString()
-    country_code:string
-
+  @IsString()
+  country_code: string;
 }
 
-
-
-
-
 export class CreatePaymobSubscriptionDto {
-    @IsInt()
-    amount: number;
+  @IsInt()
+  amount: number;
 
-    @IsString()
-    currency: string;
+  @IsString()
+  currency: string;
 
-    @IsArray()
-    @IsInt({ each: true })
-    payment_methods: number[];
+  @IsArray()
+  @IsInt({ each: true })
+  payment_methods: number[];
 
-    @IsInt()
-    subscription_plan_id: number;
+  @IsInt()
+  subscription_plan_id: number;
 
-    @IsOptional()
-    items: any[];
+  @IsOptional()
+  items: any[];
 
-    @ValidateNested()
-    @Type(() => PaymobBillingData)
-    billing_data: PaymobBillingData;
+  @ValidateNested()
+  @Type(() => PaymobBillingData)
+  billing_data: PaymobBillingData;
 
-    @IsOptional()
-    extras: any;
-
+  @IsOptional()
+  extras: any;
 }

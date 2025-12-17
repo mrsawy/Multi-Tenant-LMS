@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, mongo } from 'mongoose';
 import { CreateOptionDto } from './dto/create-option.dto';
@@ -9,12 +13,15 @@ import { Option } from './entities/option.entity';
 export class OptionsService {
   constructor(
     @InjectModel(Option.name) private readonly optionModel: Model<Option>,
-  ) { }
+  ) {}
 
   // Create a new option
   async create(createOptionDto: CreateOptionDto): Promise<Option> {
-    const foundedOption = await this.optionModel.findOne({ key: createOptionDto.key });
-    if (foundedOption) throw new BadRequestException('Option with this key already exists');
+    const foundedOption = await this.optionModel.findOne({
+      key: createOptionDto.key,
+    });
+    if (foundedOption)
+      throw new BadRequestException('Option with this key already exists');
     const option = new this.optionModel(createOptionDto);
     return option.save();
   }
@@ -30,11 +37,15 @@ export class OptionsService {
     if (mongoose.Types.ObjectId.isValid(identifier)) {
       option = await this.optionModel.findById(identifier).exec();
     }
-    option = await this.optionModel.findOne({
-      key: identifier
-    }).exec();
+    option = await this.optionModel
+      .findOne({
+        key: identifier,
+      })
+      .exec();
     if (!option) {
-      throw new NotFoundException(`Option with identifier "${identifier}" not found`);
+      throw new NotFoundException(
+        `Option with identifier "${identifier}" not found`,
+      );
     }
     return option;
   }

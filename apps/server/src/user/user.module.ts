@@ -14,10 +14,12 @@ import { WalletModule } from 'src/wallet/wallet.module';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     forwardRef(() => AuthModule),
     RoleModule,
-    WalletModule
+    
+    forwardRef(() => WalletModule),
+
   ],
-  controllers: [UserControllerHttp , UserControllerMessage],
+  controllers: [UserControllerHttp, UserControllerMessage],
   providers: [UserService],
   exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

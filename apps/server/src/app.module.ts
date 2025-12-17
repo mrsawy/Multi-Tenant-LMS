@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { configDotenv } from 'dotenv';
+configDotenv();
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrganizationModule } from './organization/organization.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { configDotenv } from 'dotenv';
 import { UserModule } from './user/user.module';
 import { CourseModule } from './course/course.module';
 import { CategoryModule } from './category/category.module';
@@ -12,7 +13,6 @@ import { AuthModule } from './auth/auth.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
 import { PlanModule } from './plan/plan.module';
-// import { SubscriptionModule } from './subscription/subscription.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { PaymentModule } from './payment/payment.module';
 import { WalletModule } from './wallet/wallet.module';
@@ -20,10 +20,8 @@ import { OptionsModule } from './options/options.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ReviewModule } from './review/review.module';
 import { TransactionModule } from './transaction/transaction.module';
-
-configDotenv();
-
-// console.log('MongoDB URI:', process.env);
+import { PageModule } from './page/page.module';
+import { GalleryModule } from './gallery/gallery.module';
 
 @Module({
   imports: [
@@ -31,13 +29,12 @@ configDotenv();
     //   async useFactory() {
     //     const uri = process.env.NODE_ENV === 'DEVELOPMENT' ? process.env.MONGODB_URI_DEV : process.env.MONGODB_URI_PROD;
 
-
     //     return { uri };
     //   },
     // }),
     // MongooseModule.forRoot(process.env.MONGODB_URI_DEV as string),
     MongooseModule.forRootAsync({
-      useFactory: async () => ({
+      useFactory: () => ({
         uri: process.env.MONGODB_URI_DEV,
       }),
     }),
@@ -50,6 +47,8 @@ configDotenv();
     //     url: process.env.NODE_ENV === 'DEVELOPMENT' ? process.env.REDIS_URL_DEV : process.env.REDIS_URL_PROD,
     //   },
     // }),
+
+    WalletModule,
     OrganizationModule,
     UserModule,
     CourseModule,
@@ -60,14 +59,15 @@ configDotenv();
     EnrollmentModule,
     PlanModule,
     // SubscriptionModule,
-    PaymentModule,
-    WalletModule,
+    // PaymentModule,
     OptionsModule,
     CurrencyModule,
     ReviewModule,
-    TransactionModule
+    TransactionModule,
+    PageModule,
+    GalleryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

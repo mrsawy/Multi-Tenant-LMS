@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryHttpController } from './category.controller.http';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -8,11 +8,13 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
-    AuthModule
+    MongooseModule.forFeature([
+      { name: Category.name, schema: CategorySchema },
+    ]),
+    forwardRef(() => AuthModule),
   ],
-  controllers: [CategoryHttpController , CategoryMessageController],
+  controllers: [CategoryHttpController, CategoryMessageController],
   providers: [CategoryService],
-  exports:[CategoryService]
+  exports: [CategoryService],
 })
 export class CategoryModule { }

@@ -1,28 +1,51 @@
-import { Module } from '@nestjs/common';
-import { PaymobService } from './payment.paymob.service';
-import { PaymentController } from './payment.controller';
-import { PlanModule } from 'src/plan/plan.module';
-import { CourseModule } from 'src/course/course.module';
-import { OrganizationModule } from 'src/organization/organization.module';
-import { EnrollmentModule } from 'src/enrollment/enrollment.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { PaypalPaymentService } from './payment.paypal.service';
-import { PaymentWalletService } from './payment.wallet.service';
-// import { TransactionsService } from './transaction.service';
-import { CurrencyModule } from 'src/currency/currency.module';
+import { forwardRef, Module, OnModuleInit } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PaymentHttpController } from './payment.http.controller';
+import { PaymentMessageController } from './payment.message.controller';
+import { PaymentOrchestratorService } from './services/payment-orchestrator.service';
+import { PaymobStrategy } from './strategies/paymob.strategy';
+import { PaypalStrategy } from './strategies/paypal.strategy';
 import { WalletModule } from 'src/wallet/wallet.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Transaction, TransactionSchema } from './entities/Transaction.entity';
+import { AuthModule } from 'src/auth/auth.module';
+import { KashierStrategy } from './strategies/kashier.strategy';
+import { EnrollmentModule } from 'src/enrollment/enrollment.module';
+import { TransactionModule } from 'src/transaction/transaction.module';
+import { OrganizationModule } from 'src/organization/organization.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Transaction.name, schema: TransactionSchema }]),
-    PlanModule, CourseModule, OrganizationModule, EnrollmentModule, AuthModule, WalletModule
+    ConfigModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => EnrollmentModule),
+    forwardRef(() => OrganizationModule),
+    forwardRef(() => WalletModule),
   ],
-  controllers: [PaymentController],
-  providers: [PaymobService, PaypalPaymentService, PaymentWalletService, 
-    // TransactionsServic
+  controllers: [PaymentMessageController, PaymentHttpController],
+  providers: [
+    PaymentOrchestratorService,
+    PaymobStrategy,
+    PaypalStrategy,
+    KashierStrategy,
+
   ],
-  exports: [PaymobService, PaypalPaymentService, PaymentWalletService],
+  exports: [PaymentOrchestratorService], // Export for use in WalletModule
 })
-export class PaymentModule { }
+export class PaymentModule implements OnModuleInit {
+  constructor(
+    private readonly orchestrator: PaymentOrchestratorService,
+    private readonly paymobStrategy: PaymobStrategy,
+    private readonly paypalStrategy: PaypalStrategy,
+    private readonly kashierStrategy: KashierStrategy,
+  ) { }
+
+  onModuleInit() {
+    this.orchestrator.registerStrategy(this.paymobStrategy);
+    this.orchestrator.registerStrategy(this.paypalStrategy);
+    this.orchestrator.registerStrategy(this.kashierStrategy);
+
+    console.log(
+      '✅ Payment strategies registered:',
+      this.orchestrator.getAvailableProviders(),
+    );
+  }
+}

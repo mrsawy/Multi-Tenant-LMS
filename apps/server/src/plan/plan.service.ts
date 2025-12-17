@@ -8,8 +8,8 @@ import mongoose, { Model } from 'mongoose';
 @Injectable()
 export class PlanService {
   constructor(
-    @InjectModel(Plan.name) private readonly planModel: Model<Plan>
-  ) { }
+    @InjectModel(Plan.name) private readonly planModel: Model<Plan>,
+  ) {}
 
   // Create a new plan
   async create(createPlanDto: CreatePlanDto) {
@@ -24,7 +24,9 @@ export class PlanService {
 
   // Find one plan by ID
   async findOne(identifier: string) {
-    const filter = mongoose.isValidObjectId(identifier) ? { _id: identifier } : { $or: [{ tier: identifier }, { name: identifier }] };
+    const filter = mongoose.isValidObjectId(identifier)
+      ? { _id: identifier }
+      : { $or: [{ tier: identifier }, { name: identifier }] };
     const plan = await this.planModel.findOne(filter).exec();
     if (!plan) {
       throw new NotFoundException(`Plan with ID ${identifier} not found`);

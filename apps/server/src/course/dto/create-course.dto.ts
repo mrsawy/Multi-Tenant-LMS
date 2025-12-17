@@ -1,191 +1,204 @@
 import {
-    IsString,
-    IsNotEmpty,
-    IsOptional,
-    IsMongoId,
-    ValidateNested,
-    IsEnum,
-    IsNumber,
-    IsBoolean,
-    IsDate,
-    Min,
-    Max,
-    ValidateIf,
-    Validate,
-    IsDefined,
-    IsArray
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsMongoId,
+  ValidateNested,
+  IsEnum,
+  IsNumber,
+  IsBoolean,
+  IsDate,
+  Min,
+  Max,
+  ValidateIf,
+  Validate,
+  IsDefined,
+  IsArray,
 } from 'class-validator';
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+import {
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
 import mongoose from 'mongoose';
 
+@ValidatorConstraint({
+  name: 'AtLeastOnePricingWithPriceAndCurrency',
+  async: false,
+})
+class AtLeastOnePricingWithPriceAndCurrency
+  implements ValidatorConstraintInterface
+{
+  validate(pricing: PricingDto, args: ValidationArguments): boolean {
+    const obj = args.object as CreateCourseDto;
+    if (!obj?.isPaid) return true; // Not required when course is free
+    if (!pricing) return false;
 
-@ValidatorConstraint({ name: 'AtLeastOnePricingWithPriceAndCurrency', async: false })
-class AtLeastOnePricingWithPriceAndCurrency implements ValidatorConstraintInterface {
-    validate(pricing: PricingDto, args: ValidationArguments): boolean {
-        const obj = args.object as CreateCourseDto;
-        if (!obj?.isPaid) return true; // Not required when course is free
-        if (!pricing) return false;
+    const cycles = [
+      BillingCycle.MONTHLY,
+      BillingCycle.YEARLY,
+      BillingCycle.ONE_TIME,
+    ];
+    return cycles.some((cycle) => {
+      const details = pricing?.[cycle];
+      return (
+        details !== undefined &&
+        typeof details.originalPrice === 'number' &&
+        !Number.isNaN(details.originalPrice) &&
+        details.originalCurrency !== undefined
+      );
+    });
+  }
 
-        const cycles = [BillingCycle.MONTHLY, BillingCycle.YEARLY, BillingCycle.ONE_TIME];
-        return cycles.some((cycle) => {
-            const details = pricing?.[cycle];
-            return details !== undefined
-                && typeof details.originalPrice === 'number'
-                && !Number.isNaN(details.originalPrice)
-                && details.originalCurrency !== undefined;
-        });
-    }
-
-    defaultMessage(): string {
-        return 'pricing must include at least one of monthly, yearly, or one_time with price and currency when isPaid is true';
-    }
+  defaultMessage(): string {
+    return 'pricing must include at least one of monthly, yearly, or one_time with price and currency when isPaid is true';
+  }
 }
 export class PricingDetailsDto {
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    // only required if currency exists
-    @ValidateIf(o => o.originalCurrency != null)
-    originalPrice?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  // only required if currency exists
+  @ValidateIf((o) => o.originalCurrency != null)
+  originalPrice?: number;
 
-    @IsOptional()
-    @IsEnum(Currency)
-    // only required if price exists
-    @ValidateIf(o => o.originalPrice != null)
-    originalCurrency?: Currency;
+  @IsOptional()
+  @IsEnum(Currency)
+  // only required if price exists
+  @ValidateIf((o) => o.originalPrice != null)
+  originalCurrency?: Currency;
 
-    @IsOptional()
-    @IsDate()
-    discountEndDate?: Date;
+  @IsOptional()
+  @IsDate()
+  discountEndDate?: Date;
 
-    @IsOptional()
-    @IsDate()
-    discountStartDate?: Date;
+  @IsOptional()
+  @IsDate()
+  discountStartDate?: Date;
 
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    @Max(100)
-    discountPercentage?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  discountPercentage?: number;
 }
 export class PricingDto {
-    @ValidateNested()
-    @Type(() => PricingDetailsDto)
-    @IsOptional()
-    [BillingCycle.MONTHLY]?: PricingDetailsDto;
+  @ValidateNested()
+  @Type(() => PricingDetailsDto)
+  @IsOptional()
+  [BillingCycle.MONTHLY]?: PricingDetailsDto;
 
-    @ValidateNested()
-    @Type(() => PricingDetailsDto)
-    @IsOptional()
-    [BillingCycle.YEARLY]?: PricingDetailsDto;
+  @ValidateNested()
+  @Type(() => PricingDetailsDto)
+  @IsOptional()
+  [BillingCycle.YEARLY]?: PricingDetailsDto;
 
-    @ValidateNested()
-    @Type(() => PricingDetailsDto)
-    @IsOptional()
-    [BillingCycle.ONE_TIME]?: PricingDetailsDto;
+  @ValidateNested()
+  @Type(() => PricingDetailsDto)
+  @IsOptional()
+  [BillingCycle.ONE_TIME]?: PricingDetailsDto;
 }
 
 export class SettingsDto {
-    @IsBoolean()
-    @IsOptional()
-    isPublished?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  isPublished?: boolean;
 
-    @IsBoolean()
-    @IsOptional()
-    isDraft?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  isDraft?: boolean;
 
-    @IsNumber()
-    @IsOptional()
-    enrollmentLimit?: number;
+  @IsNumber()
+  @IsOptional()
+  enrollmentLimit?: number;
 
-    @IsDate()
-    @IsOptional()
-    @Type(() => Date)
-    enrollmentDeadline?: Date;
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  enrollmentDeadline?: Date;
 
-    @IsBoolean()
-    @IsOptional()
-    certificateEnabled?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  certificateEnabled?: boolean;
 
-    @IsBoolean()
-    @IsOptional()
-    discussionEnabled?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  discussionEnabled?: boolean;
 
-    @IsBoolean()
-    @IsOptional()
-    downloadEnabled?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  downloadEnabled?: boolean;
 }
 
 export class CreateCourseDto {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsString()
-    @IsOptional()
-    shortDescription?: string;
+  @IsString()
+  @IsOptional()
+  shortDescription?: string;
 
-    @IsMongoId({ each: true })
-    @IsOptional()
-    categoriesIds?: mongoose.Types.ObjectId[];
+  @IsMongoId({ each: true })
+  @IsOptional()
+  categoriesIds?: mongoose.Types.ObjectId[];
 
-    @IsMongoId({ each: true })
-    @IsOptional()
-    modulesIds?: mongoose.Types.ObjectId[];
+  @IsMongoId({ each: true })
+  @IsOptional()
+  modulesIds?: mongoose.Types.ObjectId[];
 
-    @IsMongoId()
-    @IsOptional()
-    instructor?: string;
+  @IsMongoId()
+  @IsOptional()
+  instructor?: string;
 
-    @ValidateIf(o => o.isPaid === true)
-    @IsDefined({ message: 'pricing is required when isPaid is true' })
-    @Validate(AtLeastOnePricingWithPriceAndCurrency)
-    @ValidateNested()
-    @Type(() => PricingDto)
-    pricing: PricingDto;
+  @ValidateIf((o) => o.isPaid === true)
+  @IsDefined({ message: 'pricing is required when isPaid is true' })
+  @Validate(AtLeastOnePricingWithPriceAndCurrency)
+  @ValidateNested()
+  @Type(() => PricingDto)
+  pricing: PricingDto;
 
-    @IsBoolean()
-    @IsOptional()
-    @Transform(({ value }) => value !== undefined ? value : false)
-    isPaid?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => (value !== undefined ? value : false))
+  isPaid?: boolean;
 
-    @IsMongoId({ each: true })
-    @IsOptional()
-    coInstructors?: string[];
+  @IsMongoId({ each: true })
+  @IsOptional()
+  coInstructors?: string[];
 
-    @IsString()
-    @IsOptional()
-    thumbnailKey: string;
+  @IsString()
+  @IsOptional()
+  thumbnailKey: string;
 
-    // @IsString()
-    // @IsOptional()
-    // trailer?: string;
+  // @IsString()
+  // @IsOptional()
+  // trailer?: string;
 
-    @ValidateNested()
-    @Type(() => SettingsDto)
-    @IsOptional()
-    settings?: SettingsDto;
+  @ValidateNested()
+  @Type(() => SettingsDto)
+  @IsOptional()
+  settings?: SettingsDto;
 
+  @IsOptional()
+  authorization: string;
 
-    @IsOptional()
-    authorization: string
+  @IsString()
+  @IsOptional()
+  instructorId: string;
 
-    @IsString()
-    @IsOptional()
-    instructorId: string
+  @IsArray()
+  @IsOptional()
+  coInstructorsIds?: string[];
 
-    @IsArray()
-    @IsOptional()
-    coInstructorsIds?: string[]
-
-    @IsArray()
-    @IsOptional()
-    learningObjectives?: string[]
+  @IsArray()
+  @IsOptional()
+  learningObjectives?: string[];
 }

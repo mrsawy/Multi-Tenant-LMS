@@ -6,9 +6,7 @@ import { Option, OptionSchema } from './entities/option.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Option.name, schema: OptionSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Option.name, schema: OptionSchema }]),
   ],
   controllers: [OptionsController],
   providers: [OptionsService],

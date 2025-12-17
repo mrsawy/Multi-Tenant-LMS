@@ -1,4 +1,4 @@
 export enum VideoType {
-    URL = "URL",
-    UPLOAD = "UPLOAD"
+  URL = 'URL',
+  UPLOAD = 'UPLOAD',
 }

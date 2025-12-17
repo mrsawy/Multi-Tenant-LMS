@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { PaginateModel, FilterQuery, PaginateOptions, Query } from 'mongoose';
+import mongoose, {
+  PaginateModel,
+  FilterQuery,
+  PaginateOptions,
+  Query,
+} from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
@@ -8,24 +13,27 @@ import { CategoryWithChildren } from 'src/utils/types/CategoryWithChildren ';
 import { PaginateResult } from 'mongoose';
 import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
 
-
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectModel(Category.name)
     private readonly categoryModel: PaginateModel<Category>,
-  ) { }
+  ) {}
 
-  async create(createCategoryDto: CreateCategoryDto & { organizationId: string }) {
+  async create(
+    createCategoryDto: CreateCategoryDto & { organizationId: string },
+  ) {
     const created = new this.categoryModel(createCategoryDto);
     return created.save();
   }
 
-
-  async getAllFlat(options: PaginateOptionsWithSearch, organizationId?: string,) {
-    let filters: any = {}
+  async getAllFlat(
+    options: PaginateOptionsWithSearch,
+    organizationId?: string,
+  ) {
+    let filters: any = {};
     if (organizationId) {
-      filters = { organizationId }
+      filters = { organizationId };
     }
     if (options.search) {
       filters.$or = [
@@ -34,34 +42,38 @@ export class CategoryService {
       ];
     }
 
-    console.log({ options })
+    console.log({ options });
 
-    return await this.categoryModel.paginate(filters, options)
+    return await this.categoryModel.paginate(filters, options);
   }
 
-
-  async getAllWithAggregation(options: PaginateOptionsWithSearch, organizationId?: string, parentId?: string | mongoose.Types.ObjectId | null ): Promise<PaginateResult<CategoryWithChildren>> {
+  async getAllWithAggregation(
+    options: PaginateOptionsWithSearch,
+    organizationId?: string,
+    parentId?: string | mongoose.Types.ObjectId | null,
+  ): Promise<PaginateResult<CategoryWithChildren>> {
     const limit = options.limit ?? 10;
     const page = options.page ?? 1;
 
-    let match: any = {}
+    let match: any = {};
 
     if (parentId !== undefined) {
-      match.parentId = parentId
+      match.parentId = parentId;
     }
 
     if (organizationId) {
-      match.organizationId = new this.categoryModel.base.Types.ObjectId(organizationId)
+      match.organizationId = new this.categoryModel.base.Types.ObjectId(
+        organizationId,
+      );
     }
     if (options.search) {
       match.$or = [
         { name: { $regex: options.search, $options: 'i' } },
         { description: { $regex: options.search, $options: 'i' } },
-      ]
+      ];
     }
 
-
-    console.log({ match })
+    console.log({ match });
 
     const pipeline = [
       {
@@ -96,14 +108,17 @@ export class CategoryService {
                     parentId: item.parentId,
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,
-                    childCategories: []
+                    childCategories: [],
                   };
                 }
 
                 var directChildren: any[] = [];
                 for (var id in itemMap) {
                   var item2 = itemMap[id];
-                  if (item2.parentId && item2.parentId.valueOf() === rootId.valueOf()) {
+                  if (
+                    item2.parentId &&
+                    item2.parentId.valueOf() === rootId.valueOf()
+                  ) {
                     directChildren.push(item2);
                   } else if (item2.parentId) {
                     var parent = itemMap[item2.parentId.valueOf()];
@@ -115,11 +130,11 @@ export class CategoryService {
 
                 return directChildren;
               },
-              args: ["$allDescendants", "$_id"],
-              lang: "js"
-            }
-          }
-        }
+              args: ['$allDescendants', '$_id'],
+              lang: 'js',
+            },
+          },
+        },
       },
       {
         $project: {
@@ -131,7 +146,9 @@ export class CategoryService {
     const [results, totalCount] = await Promise.all([
       this.categoryModel.aggregate<CategoryWithChildren>(pipeline),
       this.categoryModel.countDocuments({
-        organizationId: new this.categoryModel.base.Types.ObjectId(organizationId),
+        organizationId: new this.categoryModel.base.Types.ObjectId(
+          organizationId,
+        ),
         parentId: null,
       }),
     ]);
@@ -151,7 +168,6 @@ export class CategoryService {
     };
   }
 
-
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const updated = await this.categoryModel
       .findByIdAndUpdate(id, updateCategoryDto, { new: true })
@@ -170,15 +186,16 @@ export class CategoryService {
     return { success: true, deletedId: id };
   }
 
-
   async getCategoryWithRelations(organizationId: string, categoryId: string) {
     const pipeline = [
       // First, get the target category
       {
         $match: {
           _id: new this.categoryModel.base.Types.ObjectId(categoryId),
-          organizationId: new this.categoryModel.base.Types.ObjectId(organizationId)
-        }
+          organizationId: new this.categoryModel.base.Types.ObjectId(
+            organizationId,
+          ),
+        },
       },
       // Get all categories from the same organization to build the hierarchy
       {
@@ -188,12 +205,12 @@ export class CategoryService {
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ['$organizationId', '$$orgId'] }
-              }
-            }
+                $expr: { $eq: ['$organizationId', '$$orgId'] },
+              },
+            },
           ],
-          as: 'allCategories'
-        }
+          as: 'allCategories',
+        },
       },
       // Build the hierarchy for this specific category
       {
@@ -203,11 +220,13 @@ export class CategoryService {
               body: function (allCategories: any[], parentId: any): any[] {
                 function buildTree(items: any[], currentParentId: any): any[] {
                   return items
-                    .filter(item => {
+                    .filter((item) => {
                       if (!item.parentId) return false;
-                      return item.parentId.toString() === currentParentId.toString();
+                      return (
+                        item.parentId.toString() === currentParentId.toString()
+                      );
                     })
-                    .map(item => ({
+                    .map((item) => ({
                       _id: item._id,
                       name: item.name,
                       description: item.description,
@@ -215,26 +234,27 @@ export class CategoryService {
                       parentId: item.parentId,
                       createdAt: item.createdAt,
                       updatedAt: item.updatedAt,
-                      childCategories: buildTree(items, item._id)
+                      childCategories: buildTree(items, item._id),
                     }));
                 }
                 return buildTree(allCategories, parentId);
               },
               args: ['$allCategories', '$_id'],
-              lang: 'js'
-            }
-          }
-        }
+              lang: 'js',
+            },
+          },
+        },
       },
       // Remove the temporary allCategories field
       {
         $project: {
-          allCategories: 0
-        }
-      }
+          allCategories: 0,
+        },
+      },
     ];
 
-    const result = await this.categoryModel.aggregate<CategoryWithChildren>(pipeline);
+    const result =
+      await this.categoryModel.aggregate<CategoryWithChildren>(pipeline);
 
     if (!result || result.length === 0) {
       throw new NotFoundException(`Category with id ${categoryId} not found`);

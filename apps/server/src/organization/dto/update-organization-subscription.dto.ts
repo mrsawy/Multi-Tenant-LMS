@@ -1,3 +1,1 @@
-export class UpdateOrganizationSubscriptionDto {
-    
-}
+export class UpdateOrganizationSubscriptionDto {}

@@ -4,7 +4,7 @@ import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { Status } from '../enum/status.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & Document<Types.ObjectId>;
 
 @Schema({ _id: false })
 class Address {
@@ -35,8 +35,6 @@ class SocialLinks {
 
 @Schema({ _id: false })
 class Profile {
-
-
   @Prop()
   bio: string;
 
@@ -73,24 +71,20 @@ export class User {
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: false })
   organizationId: Types.ObjectId;
 
-
   @Prop({
     required: true,
     unique: true,
     index: true, // Add index for better query performance
     trim: true,
-    lowercase: true // Optional: store usernames in lowercase
+    lowercase: true, // Optional: store usernames in lowercase
   })
   username: string;
-
 
   @Prop({ required: true, unique: true })
   email: string;
 
-
   @Prop({ required: true, unique: true })
   phone: string;
-
 
   @Prop({ required: true })
   password: string;
@@ -117,21 +111,32 @@ export class User {
   lastLogin: Date;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  walletId: mongoose.Types.ObjectId
+  walletId: mongoose.Types.ObjectId;
 
   @Prop({ type: String, enum: Currency, required: true })
-  preferredCurrency: string
-
-
-
+  preferredCurrency: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.plugin(mongoosePaginate)
+UserSchema.plugin(mongoosePaginate);
 
-
-UserSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
-UserSchema.virtual('wallet', { ref: 'Wallet', localField: 'walletId', foreignField: '_id', justOne: true });
-UserSchema.virtual('role', { ref: 'Role', localField: 'roleName', foreignField: 'name', justOne: true });
+UserSchema.virtual('organization', {
+  ref: 'Organization',
+  localField: 'organizationId',
+  foreignField: '_id',
+  justOne: true,
+});
+UserSchema.virtual('wallet', {
+  ref: 'Wallet',
+  localField: 'walletId',
+  foreignField: '_id',
+  justOne: true,
+});
+UserSchema.virtual('role', {
+  ref: 'Role',
+  localField: 'roleName',
+  foreignField: 'name',
+  justOne: true,
+});
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });

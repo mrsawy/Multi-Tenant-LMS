@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   GeneratePresignedUrlDto,
   PresignedUrlResponseDto,
-  ValidateFileKeysDto
+  ValidateFileKeysDto,
 } from './dto/file.dto';
+import { ObjectCannedACL } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class FileService {
@@ -15,10 +16,6 @@ export class FileService {
   private bucketName: string;
 
   constructor(private configService: ConfigService) {
-   
-    
-
-
     // Validate environment variables
     if (!process.env.S3_BUCKET_NAME) {
       throw new Error('S3_BUCKET_NAME environment variable is required');
@@ -40,16 +37,12 @@ export class FileService {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       region: process.env.AWS_REGION,
     });
-
-
-
-
   }
 
   async generatePresignedUrl(
     generatePresignedUrlDto: GeneratePresignedUrlDto,
   ): Promise<PresignedUrlResponseDto> {
-    const { fileType, fileSize,  fileKey } = generatePresignedUrlDto;
+    const { fileType, fileSize, fileKey } = generatePresignedUrlDto;
 
     // Validate file type and size
     this.validateFile(fileType, fileSize);
@@ -63,6 +56,7 @@ export class FileService {
       Key: fileKey,
       Expires: 3600, // 1 hour
       ContentType: fileType,
+      ACL: generatePresignedUrlDto.isPublic ? ObjectCannedACL.public_read : ObjectCannedACL.private,
       // ContentLength: fileSize,
     };
 
@@ -75,7 +69,10 @@ export class FileService {
         expiresAt: new Date(Date.now() + 3600 * 1000),
       };
     } catch (error) {
-      throw new BadRequestException('Failed to generate upload URL', error.message);
+      throw new BadRequestException(
+        'Failed to generate upload URL',
+        error.message,
+      );
     }
   }
 
@@ -84,7 +81,7 @@ export class FileService {
 
     const validationPromises = fileKeys.map(async (fileKey) => {
       try {
-        console.log("validating urlKey :", fileKey)
+        console.log('validating urlKey :', fileKey);
         const result = await this.s3
           .headObject({
             Bucket: this.configService.get('S3_BUCKET_NAME') as string,
@@ -92,7 +89,7 @@ export class FileService {
           })
           .promise();
 
-        console.log("validation result :", result)
+        console.log('validation result :', result);
         return true;
       } catch (error) {
         return false;
@@ -161,7 +158,8 @@ export class FileService {
     const mimeToExtension = {
       'application/pdf': 'pdf',
       'application/msword': 'doc',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        'docx',
       'image/jpeg': 'jpg',
       'image/png': 'png',
       'video/mp4': 'mp4',
@@ -172,17 +170,12 @@ export class FileService {
   }
 
   getMimeType(fileName: string) {
-    return fileName.split(".")[1]
+    return fileName.split('.')[1];
   }
 
-
-
-
-
-
   /**
-    * Upload a file directly to S3 (server-side upload)
-    */
+   * Upload a file directly to S3 (server-side upload)
+   */
   async uploadToS3(file: Express.Multer.File, path: string) {
     const { buffer, originalname, mimetype } = file;
 
@@ -190,7 +183,9 @@ export class FileService {
     this.validateFile(mimetype, buffer.length);
 
     // Generate unique file key
-    const fileName = originalname ? this.sanitizeFileName(originalname) : `file_${Date.now()}`;
+    const fileName = originalname
+      ? this.sanitizeFileName(originalname)
+      : `file_${Date.now()}`;
     const fileKey = `${path}/${uuidv4()}_${fileName}`;
 
     const uploadParams = {
@@ -221,7 +216,9 @@ export class FileService {
       };
     } catch (error) {
       console.error('S3 upload error:', error);
-      throw new BadRequestException(`Failed to upload file to S3: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to upload file to S3: ${error.message}`,
+      );
     }
   }
 
@@ -233,13 +230,13 @@ export class FileService {
   //   return Promise.all(uploadPromises);
   // }
 
-
   async fileExists(fileKey: string): Promise<boolean> {
     try {
       await this.s3
         .headObject({
           Bucket: this.configService.get('S3_BUCKET_NAME') as string,
           Key: fileKey,
+
         })
         .promise();
       return true;
@@ -248,8 +245,6 @@ export class FileService {
     }
   }
 
-
-
   private sanitizeFileName(fileName: string): string {
     // Remove special characters and replace spaces with underscores
     return fileName
@@ -257,8 +252,4 @@ export class FileService {
       .replace(/_{2,}/g, '_')
       .replace(/^_+|_+$/g, '');
   }
-
-
-
-
 }

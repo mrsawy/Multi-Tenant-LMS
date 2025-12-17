@@ -10,6 +10,6 @@ import { Plan, PlanSchema } from './entities/plan.entity';
   ],
   controllers: [PlanController],
   providers: [PlanService],
-  exports:[PlanService]
+  exports: [PlanService],
 })
-export class PlanModule { }
+export class PlanModule {}

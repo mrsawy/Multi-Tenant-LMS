@@ -1,54 +1,60 @@
-import { IsBoolean, IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
-
 export class PaymobSubscriptionItem {
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsInt()
-    amount: number;
+  @IsInt()
+  amount: number;
 
-    @IsString()
-    description: string;
-
+  @IsString()
+  description: string;
 }
 
-
 export class CreatePaymobSubscriptionPlanDto {
-    @IsString()
-    @IsOptional()
-    token: string
+  @IsString()
+  @IsOptional()
+  token: string;
 
-    @IsOptional()
-    @IsInt()
-    @Type(() => Number)
-    reminder_days?: number | null;
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  reminder_days?: number | null;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsOptional()
-    plan_type: 'rent'; // only 'rent' is supported for now
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  plan_type: 'rent'; // only 'rent' is supported for now
 
-    @IsOptional()
-    @IsInt()
-    @Type(() => Number)
-    number_of_deductions?: number | null;
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  number_of_deductions?: number | null;
 
-    @IsInt()
-    @Type(() => Number)
-    frequency: number; // e.g. 7, 15, 30, 90, 180, 365
-    
-    @IsBoolean()
-    use_transaction_amount: boolean = true;
+  @IsInt()
+  @Type(() => Number)
+  frequency: number; // e.g. 7, 15, 30, 90, 180, 365
 
-    @IsBoolean()
-    @IsOptional()
-    is_active?: boolean = true;
+  @IsBoolean()
+  use_transaction_amount: boolean = true;
 
-    // @ValidateNested({ each: true })
-    // @Type(() => PaymobSubscriptionItem)
-    // items: PaymobSubscriptionItem[];
+  @IsBoolean()
+  @IsOptional()
+  is_active?: boolean = true;
 
-
+  // @ValidateNested({ each: true })
+  // @Type(() => PaymobSubscriptionItem)
+  // items: PaymobSubscriptionItem[];
 }

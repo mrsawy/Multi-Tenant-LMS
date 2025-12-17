@@ -5,4 +5,4 @@ import { CurrencyService } from './currency.service';
   providers: [CurrencyService],
   exports: [CurrencyService],
 })
-export class CurrencyModule { }
+export class CurrencyModule {}

@@ -7,11 +7,11 @@ export interface PaymobSubscriptionPlan {
   reminder_days: number | null;
   retrial_days: number | null;
   plan_type: 'rent'; // currently only "rent" is supported
-  number_of_deductions?: number ;
+  number_of_deductions?: number;
   amount_cents: number;
   use_transaction_amount: boolean;
   is_active: boolean;
   webhook_url: string;
   integration: number;
-  fee?: number ;
+  fee?: number;
 }

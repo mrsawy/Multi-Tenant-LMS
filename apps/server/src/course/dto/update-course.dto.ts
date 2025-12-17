@@ -3,7 +3,6 @@ import { CreateCourseDto } from './create-course.dto';
 import { IsString } from 'class-validator';
 
 export class UpdateCourseDto extends PartialType(CreateCourseDto) {
-
-    @IsString()
-    courseId: string;
+  @IsString()
+  courseId: string;
 }

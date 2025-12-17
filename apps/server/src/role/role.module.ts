@@ -8,10 +8,10 @@ import { Role, RoleSchema } from './entities/role.entity';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }])
+    MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }]),
   ],
   controllers: [RoleController],
   providers: [RoleService, CaslAbilityFactory],
-  exports: [CaslAbilityFactory, RoleService]
+  exports: [CaslAbilityFactory, RoleService],
 })
-export class RoleModule { }
+export class RoleModule {}

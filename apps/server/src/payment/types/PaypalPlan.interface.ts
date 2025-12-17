@@ -1,4 +1,9 @@
-import { IntervalUnit, PlanStatus, SetupFeeFailureAction, TenureType } from "../enums/paypal.enum";
+import {
+  IntervalUnit,
+  PlanStatus,
+  SetupFeeFailureAction,
+  TenureType,
+} from '../enums/paypal.enum';
 
 export interface FixedPrice {
   value: string; // PayPal expects string values like "44"
@@ -47,5 +52,5 @@ export interface PayPalPlan {
   billing_cycles: BillingCycle[];
   payment_preferences: PaymentPreferences;
   taxes: Taxes;
-  type: "INFINITE" | "FIXED"
+  type: 'INFINITE' | 'FIXED';
 }

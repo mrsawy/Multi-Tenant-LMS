@@ -1,51 +1,64 @@
 // src/wallet/schemas/wallet.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import * as mongoosePaginate from "mongoose-paginate-v2"
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+import { Currency } from 'src/payment/enums/currency.enum';
 @Schema({
-    timestamps: true,
-    collection: 'wallets'
+  timestamps: true,
+  collection: 'wallets',
 })
-export class Wallet extends Document {
-    @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
-    userId: Types.ObjectId;
+export class Wallet extends Document<Types.ObjectId> {
+  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  userId: Types.ObjectId;
 
-    @Prop({ required: false, type: Types.ObjectId, ref: 'Organization' })
-    organizationId: Types.ObjectId;
+  @Prop({ required: false, type: Types.ObjectId, ref: 'Organization' })
+  organizationId: Types.ObjectId;
 
-    @Prop({ required: true, default: 0, min: 0, type: Number })
-    balance: number;
+  @Prop({ required: true, default: 0, min: 0, type: Number })
+  balance: number;
 
-    @Prop({ default: 'USD' })
-    currency: string;
+  @Prop({ default: 'USD' })
+  currency: Currency;
 
-    @Prop({ default: true })
-    isActive: boolean;
+  @Prop({ default: true })
+  isActive: boolean;
 
-    @Prop({ default: false })
-    isFrozen: boolean;
+  @Prop({ default: false })
+  isFrozen: boolean;
 
-    @Prop()
-    lastTransactionDate: Date;
+  @Prop()
+  lastTransactionDate: Date;
 
-    @Prop({ type: Object })
-    metadata: Record<string, any>;
+  @Prop({ type: Object })
+  metadata: Record<string, any>;
 
-    @Prop({ default: [], ref: 'Transaction', type: [Types.ObjectId] })
-    transactionsHistoryIds: Array<Types.ObjectId>;
+  @Prop({ default: [], ref: 'Transaction', type: [Types.ObjectId] })
+  transactionsHistoryIds: Array<Types.ObjectId>;
 }
-
-
-
 
 export const WalletSchema = SchemaFactory.createForClass(Wallet);
 WalletSchema.plugin(mongoosePaginate);
 
-WalletSchema.virtual("user", { ref: "User", localField: "userId", foreignField: "_id", justOne: true })
-WalletSchema.virtual("organization", { ref: "Organization", localField: "organizationId", foreignField: "_id", justOne: true })
-WalletSchema.virtual("transactionsHistory", { ref: "Transaction", localField: "transactionsHistoryIds", foreignField: "_id", justOne: false })
-
+WalletSchema.virtual('user', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true,
+});
+WalletSchema.virtual('organization', {
+  ref: 'Organization',
+  localField: 'organizationId',
+  foreignField: '_id',
+  justOne: true,
+});
+WalletSchema.virtual('transactionsHistory', {
+  ref: 'Transaction',
+  localField: 'transactionsHistoryIds',
+  foreignField: '_id',
+  justOne: false,
+});
 
 WalletSchema.set('toJSON', { virtuals: true });
 WalletSchema.set('toObject', { virtuals: true });
+
 

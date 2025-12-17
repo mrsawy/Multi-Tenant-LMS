@@ -1,25 +1,30 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Currency } from '../enums/currency.enum';
 
 export class CreateTransactionDto {
-    @IsEnum(Currency)
-    @IsOptional()
-    currency?: Currency = Currency.USD;
+  @IsEnum(Currency)
+  @IsOptional()
+  currency?: Currency = Currency.USD;
 
-    @IsNotEmpty()
-    client_info: {
-        email: string;
-        full_name: string;
-        phone_number: string;
-    };
+  @IsNotEmpty()
+  client_info: {
+    email: string;
+    full_name: string;
+    phone_number: string;
+  };
 
-    @IsOptional()
-    reference_id?: string;
+  @IsOptional()
+  reference_id?: string;
 
-    @IsNumber()
-    amount_cents: number;
+  @IsNumber()
+  amount_cents: number;
 
-    @IsNotEmpty()
-    created_at: Date;
-
+  @IsNotEmpty()
+  created_at: Date;
 }

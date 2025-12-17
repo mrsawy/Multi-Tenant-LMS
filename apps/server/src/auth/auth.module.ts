@@ -9,9 +9,9 @@ import { WalletModule } from 'src/wallet/wallet.module';
 import { RoleModule } from 'src/role/role.module';
 import { PlanModule } from 'src/plan/plan.module';
 import { AuthControllerMessage } from './auth.controller.message';
+import { AuthGuard } from './auth.guard';
 
-
-export const JWT_SECRET = 'VERY_hard!to-guess_secret'
+export const JWT_SECRET = 'VERY_hard!to-guess_secret';
 
 @Module({
   imports: [
@@ -20,10 +20,10 @@ export const JWT_SECRET = 'VERY_hard!to-guess_secret'
     forwardRef(() => UserModule),
     forwardRef(() => WalletModule),
     RoleModule,
-    PlanModule
+    PlanModule,
   ],
-  controllers: [AuthController , AuthControllerMessage],
-  providers: [AuthService],
-  exports: [AuthService]
+  controllers: [AuthController, AuthControllerMessage],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule { }

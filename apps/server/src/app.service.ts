@@ -2,15 +2,13 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
-
 @Injectable()
 export class AppService implements OnModuleInit {
-  constructor(@InjectConnection() private readonly connection: Connection) { }
+  constructor(@InjectConnection() private readonly connection: Connection) {}
 
   onModuleInit() {
-
     console.log('Initializing AppService...');
-    
+
     this.connection.on('connected', () => {
       console.log('✅ MongoDB connected successfully');
     });

@@ -1,6 +1,20 @@
-
-
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Request, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Request,
+  InternalServerErrorException,
+  UnauthorizedException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -23,69 +37,134 @@ import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { WalletService } from 'src/wallet/wallet.service';
 
-
 @Controller('user')
 export class UserControllerMessage {
-    constructor(private readonly userService: UserService,
-        private readonly roleService: RoleService,
-        private readonly walletService: WalletService,
-        @InjectConnection() private readonly connection: Connection,
-    ) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly roleService: RoleService,
+    @Inject(forwardRef(() => WalletService)) private readonly walletService: WalletService,
+    @InjectConnection() private readonly connection: Connection,
+  ) { }
 
+  @MessagePattern('user.getOwnData')
+  @UseGuards(AuthGuard)
+  async findOwnData(@Request() req: IUserRequest) {
+    const user = req.user;
+    const foundedUser = await this.userService.findOne(user._id.toString());
+    if (!foundedUser) throw new UnauthorizedException('User not found');
+    const { password, ...userData } = foundedUser;
+    return {
+      message: 'User data fetched successfully',
+      user: userData,
+    };
+  }
 
-    @MessagePattern("user.getOwnData")
-    @UseGuards(AuthGuard)
-    async findOwnData(@Request() req: IUserRequest) {
-        const user = req.user;
-        const foundedUser = await this.userService.findOne(user._id as string);
-        if (!foundedUser) throw new UnauthorizedException('User not found')
-        const { password, ...userData } = foundedUser;
-        return {
-            message: 'User data fetched successfully',
-            user: userData,
-        };
+  @MessagePattern('users.getByOrganization')
+  @UseGuards(AuthGuard)
+  async getByOrganization(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: {
+      options: PaginateOptions;
+      filters?: mongoose.RootFilterQuery<User>;
+    },
+  ) {
+    return await this.userService.getByOrganization(
+      context.userPayload.organizationId,
+      payload.options,
+      payload.filters,
+    );
+  }
+
+  @MessagePattern('users.getSingleUserByOrganization')
+  @UseGuards(AuthGuard)
+  async getSingleUserByOrganization(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: { filters: mongoose.RootFilterQuery<User> },
+  ) {
+    return await this.userService.filterOne({
+      ...payload.filters,
+      organizationId: new mongoose.Types.ObjectId(
+        context.userPayload.organizationId,
+      ),
+    });
+  }
+
+  @MessagePattern('users.organizationCreateUser')
+  @UseGuards(AuthGuard)
+  async organizationCreateUser(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: CreateUserDto,
+  ) {
+    const session = await this.connection.startSession();
+    try {
+      session.startTransaction();
+
+      const userId = new mongoose.Types.ObjectId();
+      const walletId = new mongoose.Types.ObjectId();
+      const createdUser = await this.userService.create(
+        {
+          ...payload,
+          _id: userId,
+          organizationId: new mongoose.Types.ObjectId(
+            context.userPayload.organizationId,
+          ),
+          walletId,
+        },
+        session,
+      );
+      await this.walletService.create(
+        { _id: walletId, userId: userId, currency: payload.preferredCurrency },
+        session,
+      );
+
+      await session.commitTransaction();
+      return createdUser;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      handleRpcError(error);
     }
+  }
 
+  @MessagePattern('users.organizationUpdateUser')
+  @UseGuards(AuthGuard)
+  async organizationUpdateUser(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: { userId: string; userData: Partial<CreateUserDto> },
+  ) {
+    return await this.userService.update(
+      {
+        _id: new mongoose.Types.ObjectId(payload.userId),
+        organizationId: new mongoose.Types.ObjectId(
+          context.userPayload.organizationId,
+        ),
+      },
+      payload.userData,
+    );
+  }
 
+  @MessagePattern('users.organizationDeleteUser')
+  @UseGuards(AuthGuard)
+  async organizationDeleteUser(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: { userId: string },
+  ) {
+    const result = await this.userService.delete({
+      _id: new mongoose.Types.ObjectId(payload.userId),
+      organizationId: new mongoose.Types.ObjectId(
+        context.userPayload.organizationId,
+      ),
+    });
 
+    if (result.deletedCount == 0)
+      throw new BadRequestException('User not found');
 
-    @MessagePattern("users.getByOrganization")
-    @UseGuards(AuthGuard)
-    async getByOrganization(
-        @Ctx() context: IUserContext,
-        @Payload(new RpcValidationPipe())
-        payload: { options: PaginateOptions, filters?: mongoose.RootFilterQuery<User> },
-    ) {
-        return await this.userService.getByOrganization(context.userPayload.organizationId, payload.options, payload.filters)
-    }
-
-
-    @MessagePattern("users.organizationCreateUser")
-    @UseGuards(AuthGuard)
-    async organizationCreateUser(
-        @Ctx() context: IUserContext,
-        @Payload(new RpcValidationPipe())
-        payload: CreateUserDto,
-    ) {
-        const session = await this.connection.startSession();
-        try {
-            session.startTransaction();
-
-            const userId = new mongoose.Types.ObjectId()
-            const walletId = new mongoose.Types.ObjectId()
-            const createdUser = await this.userService.create({ ...payload, _id: userId, organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId), walletId }, session)
-            await this.walletService.create({ _id: walletId, userId: userId, currency: payload.preferredCurrency }, session)
-
-            await session.commitTransaction();
-            return createdUser
-
-
-        } catch (error) {
-            await session.abortTransaction();
-            session.endSession();
-
-            handleRpcError(error)
-        }
-    }
+    return result;
+  }
 }
-

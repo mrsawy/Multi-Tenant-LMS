@@ -21,7 +21,6 @@ export enum PlanStatus {
   ACTIVE = 'ACTIVE',
 }
 
-
 export enum ShippingPreference {
   GET_FROM_FILE = 'GET_FROM_FILE',
   NO_SHIPPING = 'NO_SHIPPING',
@@ -37,7 +36,6 @@ export enum PayeePreferred {
   IMMEDIATE_PAYMENT_REQUIRED = 'IMMEDIATE_PAYMENT_REQUIRED',
   UNRESTRICTED = 'UNRESTRICTED',
 }
-
 
 export enum PayerSelected {
   PAYPAL = 'PAYPAL',

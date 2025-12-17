@@ -13,15 +13,14 @@ import { FileService } from './file.service';
 import {
   GeneratePresignedUrlDto,
   PresignedUrlResponseDto,
-  ValidateFileKeysDto,
 } from './dto/file.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
 
-@Controller('file')
 @UseGuards(AuthGuard)
+@Controller('file')
 export class FileHttpController {
-  constructor(private readonly fileService: FileService) { }
+  constructor(private readonly fileService: FileService) {}
 
   @Post('presigned-url')
   async generatePresignedUrl(
@@ -34,23 +33,8 @@ export class FileHttpController {
     });
   }
 
-  // @Post('validate')
-  // async validateFileKeys(@Body() validateFileKeysDto: ValidateFileKeysDto) {
-  //   const isValid = await this.fileService.validateFileKeys(
-  //     validateFileKeysDto.fileKeys,
-  //   );
-  //   return { valid: isValid };
-  // }
-
-  // @Get('download/*fileKey')
-  // async getDownloadUrl(@Param('fileKey') fileKey: string) {
-  //   const downloadUrl = await this.fileService.getFileUrl(fileKey);
-  //   return { downloadUrl };
-  // }
-
-  // @Delete('*fileKey')
-  // async deleteFile(@Param('fileKey') fileKey: string) {
-  //   await this.fileService.deleteFile(fileKey);
-  //   return { message: 'File deleted successfully' };
-  // }
+  @Get('/file-url/:fileKey')
+  async getFileUrl(@Param('fileKey') fileKey: string) {
+    return await this.fileService.getFileUrl(fileKey);
+  }
 }

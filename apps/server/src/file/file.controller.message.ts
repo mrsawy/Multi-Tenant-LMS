@@ -1,85 +1,89 @@
 // src/file/file.controller.ts
 import {
-    Controller,
-    Post,
-    Body,
-    UseGuards,
-    Request,
-    Get,
-    Param,
-    Delete,
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import {
-    GeneratePresignedUrlDto,
-    PresignedUrlResponseDto,
-    ValidateFileKeysDto,
+  GeneratePresignedUrlDto,
+  PresignedUrlResponseDto,
+  ValidateFileKeysDto,
 } from './dto/file.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
-import { Ctx, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RpcException,
+} from '@nestjs/microservices';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Controller()
 export class FileMessageController {
-    constructor(private readonly fileService: FileService) { }
+  constructor(private readonly fileService: FileService) {}
 
-    @MessagePattern('file.getPreSignedUrl')
-    async generatePresignedUrl(
-        @Payload(new RpcValidationPipe())
-        generatePresignedUrlDto: GeneratePresignedUrlDto,
-        @Ctx() context: IUserContext,
+  @MessagePattern('file.getPreSignedUrl')
+  async generatePresignedUrl(
+    @Payload(new RpcValidationPipe())
+    generatePresignedUrlDto: GeneratePresignedUrlDto,
+    @Ctx() context: IUserContext,
+  ): Promise<PresignedUrlResponseDto> {
+    const user = context.userPayload;
 
-    ): Promise<PresignedUrlResponseDto> {
-        const user = context.userPayload
+    return this.fileService.generatePresignedUrl({
+      ...generatePresignedUrlDto,
+      userUserName: user.username,
+    });
+  }
 
-        return this.fileService.generatePresignedUrl({
-            ...generatePresignedUrlDto,
-            userUserName: user.username,
-        });
-    }
+  @MessagePattern('file.getFileUrl')
+  async getFileUrl(
+    @Payload(new RpcValidationPipe())
+    Payload: {
+      fileKey: string;
+    },
+  ) {
+    const result = await this.fileService.getFileUrl(Payload.fileKey);
+    return result;
+  }
 
-    @MessagePattern("file.getFileUrl")
-    @UseGuards(AuthGuard)
-    async getFileUrl(
-        @Payload(new RpcValidationPipe())
-        Payload: { fileKey: string }
-    ) {
-        const result = await this.fileService.getFileUrl(Payload.fileKey)
-        return result
-    }
+  @MessagePattern('file.deleteFile')
+  async deleteFile(
+    @Payload(new RpcValidationPipe())
+    Payload: {
+      fileKey: string;
+    },
+  ) {
+    const result = await this.fileService.deleteFile(Payload.fileKey);
+    return result;
+  }
 
+  // @Post('validate')
+  // async validateFileKeys(@Body() validateFileKeysDto: ValidateFileKeysDto) {
+  //   const isValid = await this.fileService.validateFileKeys(
+  //     validateFileKeysDto.fileKeys,
+  //   );
+  //   return { valid: isValid };
+  // }
 
-    @MessagePattern("file.deleteFile")
-    @UseGuards(AuthGuard)
-    async deleteFile(
-        @Payload(new RpcValidationPipe())
-        Payload: { fileKey: string }
-    ) {
-        const result = await this.fileService.deleteFile(Payload.fileKey)
-        return result
-    }
+  // @Get('download/*fileKey')
+  // async getDownloadUrl(@Param('fileKey') fileKey: string) {
+  //   const downloadUrl = await this.fileService.getFileUrl(fileKey);
+  //   return { downloadUrl };
+  // }
 
-
-    // @Post('validate')
-    // async validateFileKeys(@Body() validateFileKeysDto: ValidateFileKeysDto) {
-    //   const isValid = await this.fileService.validateFileKeys(
-    //     validateFileKeysDto.fileKeys,
-    //   );
-    //   return { valid: isValid };
-    // }
-
-    // @Get('download/*fileKey')
-    // async getDownloadUrl(@Param('fileKey') fileKey: string) {
-    //   const downloadUrl = await this.fileService.getFileUrl(fileKey);
-    //   return { downloadUrl };
-    // }
-
-    // @Delete('*fileKey')
-    // async deleteFile(@Param('fileKey') fileKey: string) {
-    //   await this.fileService.deleteFile(fileKey);
-    //   return { message: 'File deleted successfully' };
-    // }
+  // @Delete('*fileKey')
+  // async deleteFile(@Param('fileKey') fileKey: string) {
+  //   await this.fileService.deleteFile(fileKey);
+  //   return { message: 'File deleted successfully' };
+  // }
 }
