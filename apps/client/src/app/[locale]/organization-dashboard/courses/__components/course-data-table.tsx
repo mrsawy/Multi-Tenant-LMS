@@ -23,7 +23,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/atoms/dropdown-menu'
-import CreateCourseForm from './create-course-form';
+import CreateCourseForm from './course-form';
 import { Badge } from '@/components/atoms/badge';
 import { BillingCycle } from '@/lib/types/course/enum/BillingCycle.enum';
 import { ModulesCountCell } from './modules-count-cell';
@@ -106,11 +106,8 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
 
     // Memoize columns to prevent re-renders
     const columns: ColumnDef<ICourse>[] = useMemo(() => [
-        {
-            id: "drag",
-            header: () => null,
-            cell: ({ row }) => <DragHandle id={row.id} />,
-        },
+      
+        
         {
             id: "select",
             header: ({ table }) => (

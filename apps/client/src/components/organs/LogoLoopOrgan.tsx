@@ -1,7 +1,7 @@
 "use client"
 
 import { IconBrandNationalGeographic, IconBrandNexo, IconBrandReact, IconBrandSentry } from '@tabler/icons-react';
-import LogoLoop from '../LogoLoop';
+import LogoLoop from './LogoLoop';
 // import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss } from 'react-icons/si';
 
 const techLogos = [

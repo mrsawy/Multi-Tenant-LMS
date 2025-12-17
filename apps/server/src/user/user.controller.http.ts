@@ -31,7 +31,7 @@ export class UserControllerHttp {
   async create(@Body() createUserDto: CreateUserDto, @Request() req) {
     try {
       const organizationId = req.user.organization._id
-      const role = createUserDto.role;
+      const role = createUserDto.roleName;
       await this.roleService.findOne(role);
       const createdUserDoc = await this.userService.create({ ...createUserDto, organizationId });
       const { password, ...createdUser } = createdUserDoc;
@@ -87,7 +87,7 @@ export class UserControllerHttp {
       }
     }
 
-    if (updateUserDto.role) {
+    if (updateUserDto.roleName) {
       if (userAbility.cannot(Actions.UPDATE, Subjects.ROLE)) {
         throw new UnauthorizedException('You do not have permission to update roles');
       }

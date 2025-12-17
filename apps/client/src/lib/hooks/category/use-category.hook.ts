@@ -8,9 +8,12 @@ import {
     deleteCategory,
     updateCategory,
     getCategory,
+    filterCategories,
 } from "@/lib/actions/category/category.action";
 import { Paginated, PaginationOptions } from "@/lib/types/Paginated";
 import { ICategory } from "@/lib/types/category/ICategory";
+import { ICourseFilters } from "@/lib/types/course/ICourseFilters";
+
 
 // Query keys for categories
 export const categoryKeys = {
@@ -104,6 +107,24 @@ export function useDeleteCategory() {
                 queryKey: categoryKeys.organization(variables.organizationId),
             });
             queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+        },
+        onError: (error: any) => {
+            console.error("Error deleting category:", error);
+            toast.error("Failed to delete category");
+        },
+    });
+}
+
+export function useFilteredCategories() {
+    // const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: ICourseFilters) => filterCategories(data),
+        onSuccess: (data, variables) => {
+            // toast.success("Category deleted successfully");
+            // queryClient.invalidateQueries({
+            //     queryKey: categoryKeys.organization(variables.organizationId),
+            // });
+            // queryClient.invalidateQueries({ queryKey: categoryKeys.all });
         },
         onError: (error: any) => {
             console.error("Error deleting category:", error);

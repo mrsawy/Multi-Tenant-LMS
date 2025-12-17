@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
-import { InitiateSubscriptionDto } from './dto/create-subscription.dto';
+// import { InitiateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { PlanService } from 'src/plan/plan.service';
 import { CourseService } from 'src/course/course.service';
@@ -20,6 +20,7 @@ import { restore, shorten } from 'src/utils/encrypt';
 import { PayPalBillingInfo, PayPalSaleResource, PayPalSubscriptionResource, PayPalWebhookBody, PayPalWebhookBodyType } from './types/paybalWebhookBody.interface';
 import { subtractDays } from 'src/utils/dateUtils';
 import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
+import { InitiateSubscriptionDto } from 'src/enrollment/dto/create-enrollment.dto';
 
 
 @Injectable()

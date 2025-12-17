@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WalletController } from './wallet.controller';
+import { WalletController } from './wallet.http.controller';
 import { WalletService } from './wallet.service';
 
 describe('WalletController', () => {

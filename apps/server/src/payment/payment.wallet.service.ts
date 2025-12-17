@@ -4,7 +4,7 @@ import { UpdatePaymentDto } from './dto/update-payment.dto';
 import axios, { AxiosError } from 'axios';
 import { CreatePaymobSubscriptionPlanDto } from './dto/create-subscription-plan.dto';
 import { PaymobSubscriptionPlan } from './types/PaymobSubscriptionPlan.interface';
-import { CreatePaymobSubscriptionDto, InitiateSubscriptionDto } from './dto/create-subscription.dto';
+// import { CreatePaymobSubscriptionDto, InitiateSubscriptionDto } from './dto/create-subscription.dto';
 import { PaymobPaymentIntentionResponse } from './types/PaymobSubscription.interface';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { PlanService } from 'src/plan/plan.service';
@@ -22,7 +22,7 @@ import { PaymobService } from './payment.paymob.service';
 import { CreateWalletCreditUrlDto } from './dto/create-wallet-credit-url';
 import { User, UserDocument } from 'src/user/entities/user.entity';
 import { PaymobPaymentLinkBody, PaymobPaymentLinkResponse } from './types/PaymobPaymentLink.interface';
-import { TransactionsService } from './transaction.service';
+// import { TransactionsService } from './transaction.service';
 import { Connection } from 'mongoose';
 import { Currency } from './enums/currency.enum';
 import { WalletService } from 'src/wallet/wallet.service';
@@ -75,63 +75,63 @@ export class PaymentWalletService {
     return { url: data.client_url, expiresAt: data.expires_at };
   }
 
-  async subscribeWithWallet(initiateSubscriptionDto: InitiateSubscriptionDto, user: UserDocument) {
+  // async subscribeWithWallet(initiateSubscriptionDto: InitiateSubscriptionDto, user: UserDocument) {
 
-    const session = await this.connection.startSession();
-    session.startTransaction();
-    try {
-      const { subscriptionType, courseId } = initiateSubscriptionDto
-      if (subscriptionType !== SubscriptionType.USER_COURSE) throw new Error("Only subscription type is allowed for wallet credit")
-      if (!courseId) throw new Error("CourseId is required for user course subscription")
-      const course = await this.courseService.findOne(courseId);
-      if (!course) throw new NotFoundException("Course not found");
-      if (!course.isPaid) throw new BadRequestException("Course is not paid");
+  //   const session = await this.connection.startSession();
+  //   session.startTransaction();
+  //   try {
+  //     const { subscriptionType, courseId } = initiateSubscriptionDto
+  //     if (subscriptionType !== SubscriptionType.USER_COURSE) throw new Error("Only subscription type is allowed for wallet credit")
+  //     if (!courseId) throw new Error("CourseId is required for user course subscription")
+  //     const course = await this.courseService.findOne(courseId);
+  //     if (!course) throw new NotFoundException("Course not found");
+  //     if (!course.isPaid) throw new BadRequestException("Course is not paid");
 
-      const priceUSD = course.pricing[initiateSubscriptionDto.billingCycle]?.priceUSD;
-      if (priceUSD === undefined) throw new BadRequestException("Course price for the selected billing cycle is not available");
+  //     const priceUSD = course.pricing[initiateSubscriptionDto.billingCycle]?.priceUSD;
+  //     if (priceUSD === undefined) throw new BadRequestException("Course price for the selected billing cycle is not available");
 
 
-      const subscription = {
-        status: SubscriptionStatus.ACTIVE,
-        starts_at: (new Date()).toISOString(),
-        createdAt: (new Date()).toISOString(),
-        updatedAt: (new Date()).toISOString(),
-        billing: {
-          amount: priceUSD,
-          currency: Currency.USD,
-          billingCycle: initiateSubscriptionDto.billingCycle,
-          email: user.email,
-          first_name: user.firstName,
-          last_name: user.lastName,
-          phone_number: user.phone,
-        },
-      };
+  //     const subscription = {
+  //       status: SubscriptionStatus.ACTIVE,
+  //       starts_at: (new Date()).toISOString(),
+  //       createdAt: (new Date()).toISOString(),
+  //       updatedAt: (new Date()).toISOString(),
+  //       billing: {
+  //         amount: priceUSD,
+  //         currency: Currency.USD,
+  //         billingCycle: initiateSubscriptionDto.billingCycle,
+  //         email: user.email,
+  //         first_name: user.firstName,
+  //         last_name: user.lastName,
+  //         phone_number: user.phone,
+  //       },
+  //     };
 
-      const enrollment = await this.enrollmentService.enrollUserToCourse(
-        user._id as string,
-        courseId,
-        undefined,
-        subscription
-      );
+  //     const enrollment = await this.enrollmentService.enrollUserToCourse(
+  //       user._id as string,
+  //       courseId,
+  //       undefined,
+  //       subscription
+  //     );
 
-      await this.walletService.debit({
-        userId: user._id as string,
-        transactionDto: {
-          amount: priceUSD,
-          currency: Currency.USD,
-        },
-        session
-      });
+  //     await this.walletService.debit({
+  //       userId: user._id as string,
+  //       transactionDto: {
+  //         amount: priceUSD,
+  //         currency: Currency.USD,
+  //       },
+  //       session
+  //     });
 
-      await session.commitTransaction();
-      session.endSession();
+  //     await session.commitTransaction();
+  //     session.endSession();
 
-      return enrollment
+  //     return enrollment
 
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw error;
-    }
-  }
+  //   } catch (error) {
+  //     await session.abortTransaction();
+  //     session.endSession();
+  //     throw error;
+  //   }
+  // }
 }

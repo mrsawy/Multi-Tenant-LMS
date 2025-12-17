@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/atoms/select';
 import { UserStatus } from '@/lib/schema/user.schema';
 import { useDeleteUser, useDeleteUsers, useUpdateUserStatus, useUsersByOrganization } from '@/lib/hooks/user/use-user.hook';
+import { getFileFullUrl } from '@/lib/utils/getFileFullUrl';
 
 // User role icon mapping
 const getRoleIcon = (role: string) => {
@@ -49,25 +50,18 @@ const getStatusColor = (status: string) => {
     }
 };
 
-interface UserDataTableProps {
-    organizationId?: string;
-}
 
-function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
+function UserDataTable() {
     const [openRowId, setOpenRowId] = useState<string | null>(null);
     const [tempStatus, setTempStatus] = useState<string>('');
     const [globalFilter, setGlobalFilter] = useState<string>('');
 
     // Use custom hooks for user management
-    const { data: users = [], isLoading, error } = useUsersByOrganization(organizationId || '');
-    const [userData, setUserData] = useState<IUser[]>([]);
-    const emptyRef = useRef<IUser[]>([]);
-    const normalizedUserData = useMemo(() => users ?? emptyRef.current, [users]);
+    const { data: users = { docs: [] }, isLoading, error } = useUsersByOrganization({ page: 1, limit: 10 });
 
-    useEffect(() => {
-        setUserData(normalizedUserData);
-        console.log({ normalizedUserData });
-    }, [normalizedUserData]);
+
+
+
 
     const deleteUsersMutation = useDeleteUsers();
     const deleteUserMutation = useDeleteUser();
@@ -92,10 +86,6 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
         deleteUsersMutation.mutate(ids);
     }, [deleteUsersMutation]);
 
-    const handleReorder = useCallback((newUsers: IUser[]) => {
-        setUserData(newUsers);
-        // TODO: Add API call to update user order on the server if needed
-    }, []);
 
     const handleDeleteUser = useCallback((userId: string) => {
         deleteUserMutation.mutate(userId);
@@ -103,12 +93,12 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
 
     // Handle opening the dialog and initializing temp status
     const handleOpenStatusDialog = useCallback((userId: string) => {
-        const user = userData.find(u => u._id === userId);
+        const user = users.docs.find(u => u._id === userId);
         if (user) {
             setTempStatus(user.status || UserStatus.ACTIVE);
             setOpenRowId(userId);
         }
-    }, [userData]);
+    }, [users]);
 
     // Handle closing dialog and resetting temp state
     const handleCloseDialog = useCallback(() => {
@@ -146,11 +136,7 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
 
     // Memoize columns to prevent re-renders
     const columns: ColumnDef<IUser>[] = useMemo(() => [
-        {
-            id: "drag",
-            header: () => null,
-            cell: ({ row }) => <DragHandle />,
-        },
+
         {
             id: "select",
             header: ({ table }) => (
@@ -162,15 +148,18 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
                         }
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all"
+                        className='border-primary'
                     />
                 </div>
             ),
             cell: ({ row }) => (
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center my-3">
                     <Checkbox
                         checked={row.getIsSelected()}
                         onCheckedChange={(value) => row.toggleSelected(!!value)}
                         aria-label="Select row"
+                        className='border-primary'
+
                     />
                 </div>
             ),
@@ -185,7 +174,7 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
                 return (
                     <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.profile?.avatar} alt={`${user.firstName} ${user.lastName}`} />
+                            <AvatarImage src={getFileFullUrl(user.profile?.avatar)} alt={`${user.firstName} ${user.lastName}`} />
                             <AvatarFallback>
                                 {getUserInitials(user.firstName as string, user.lastName as string)}
                             </AvatarFallback>
@@ -220,8 +209,8 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
             header: "Role",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    {getRoleIcon(row.original.role)}
-                    <span className="capitalize">{row.original.role}</span>
+                    {getRoleIcon(row.original.role.name)}
+                    <span className="capitalize">{row.original.role.name}</span>
                 </div>
             )
         },
@@ -356,10 +345,10 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
                 <div>
                     <h2 className="text-xl font-medium">Users</h2>
                     <p className="text-sm text-muted-foreground">
-                        Manage users in your organization ({userData.length} total)
+                        Manage users in your organization ({users.docs.length} total)
                     </p>
                 </div>
-                <Link href="/organization-dashboard/users/add-new" className='cursor-pointer'>
+                <Link href="/organization-dashboard/users/create" className='cursor-pointer'>
                     <Button variant="default">
                         <PlusIcon className="mr-2 h-4 w-4" />
                         Add User
@@ -388,7 +377,7 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Students</p>
                                 <p className="text-2xl font-bold text-purple-600">
-                                    {userData.filter(u => u.role.toLowerCase().includes('student')).length}
+                                    {users.docs.filter(u => u.role.name.toLowerCase().includes('student')).length}
                                 </p>
                             </div>
                             <User className="h-8 w-8 text-purple-500" />
@@ -398,14 +387,14 @@ function UserDataTable({ organizationId = "1" }: UserDataTableProps) {
             </div>
 
             <DataTable<IUser>
-                data={userData}
+                data={users.docs}
                 columns={columns}
-                onReorder={handleReorder}
+                // onReorder={users}
                 getRowId={(row) => row._id as any}
                 onDeleteSelected={deleteSelected}
                 globalFilter={globalFilter}
                 onGlobalFilterChange={setGlobalFilter}
-                onChangeData={setUserData}
+                onChangeData={() => { }}
                 pageSize={50}
             />
 

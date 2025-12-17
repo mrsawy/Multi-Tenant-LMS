@@ -21,16 +21,45 @@ interface Props {
     title?: string
     data: { value: string, label: string }[]
     defaultValue?: { value: string, label: string }
+    value?: string
     buttonClassName?: string
     contentClassName?: string
     placeholder: string
     buttonStyles?: React.CSSProperties
     onValueChange?: (value: string) => void
+    onSearch?: (value: string) => void
+    isLoading?: boolean
+    customTitleBeforeSearch?: string
 }
 
-export function Combobox({ title, data, defaultValue, buttonClassName, contentClassName, placeholder, buttonStyles, onValueChange }: Props) {
+export function Combobox({ 
+    isLoading, 
+    title, 
+    data, 
+    defaultValue, 
+    value: controlledValue,
+    buttonClassName, 
+    contentClassName, 
+    placeholder, 
+    buttonStyles, 
+    onValueChange, 
+    onSearch, 
+    customTitleBeforeSearch = "No Data found." 
+}: Props) {
     const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState(defaultValue?.value ?? "")
+    const [value, setValue] = React.useState(controlledValue ?? defaultValue?.value ?? "")
+    const [searched, setIsSearched] = React.useState(false)
+
+    // Update internal state when controlled value changes
+    React.useEffect(() => {
+        if (controlledValue !== undefined) {
+            setValue(controlledValue)
+        }
+    }, [controlledValue])
+
+    // Find the label for the current value
+    const selectedItem = data.find(d => d.value === value)
+    const displayText = selectedItem ? selectedItem.label : (title || "Select...")
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -42,27 +71,33 @@ export function Combobox({ title, data, defaultValue, buttonClassName, contentCl
                     className={cn("w-full justify-between lg:placeholder:text-xs", buttonClassName)}
                     style={buttonStyles}
                 >
-                    {value
-                        ? data.find((d) => d.value === value)?.label
-                        : title}
+                    {displayText}
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className={cn(" p-0", contentClassName)}>
+            <PopoverContent className={cn("p-0", contentClassName)}>
                 <Command>
-                    <CommandInput placeholder={placeholder} className="h-9" />
+                    <CommandInput 
+                        onValueChange={(v) => { 
+                            onSearch?.(v); 
+                            setIsSearched(true) 
+                        }} 
+                        placeholder={placeholder} 
+                        className="h-9" 
+                    />
                     <CommandList>
-                        <CommandEmpty>No Data found.</CommandEmpty>
+                        <CommandEmpty>
+                            {isLoading ? "Loading..." : !searched ? customTitleBeforeSearch : "No Data found."}
+                        </CommandEmpty>
                         <CommandGroup>
                             {data.map((d) => (
                                 <CommandItem
                                     key={d.value}
-                                    value={d.value}
-                                    onSelect={(currentValue) => {
-                                        const newValue = currentValue === value ? "" : currentValue
-                                        setValue(newValue)
+                                    value={d.label}
+                                    onSelect={() => {
+                                        setValue(d.value)
                                         setOpen(false)
-                                        onValueChange?.(newValue)
+                                        onValueChange?.(d.value)
                                     }}
                                 >
                                     {d.label}

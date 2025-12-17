@@ -68,7 +68,7 @@ export class CourseController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.courseService.findCourseWithOrderedModules(id);
+    return this.courseService.getCourseWithOrderedModules(id);
   }
 
 

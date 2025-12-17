@@ -3,7 +3,7 @@ import { PaymobService } from './payment.paymob.service';
 import { PaypalPaymentService } from './payment.paypal.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
-import { InitiateSubscriptionDto } from './dto/create-subscription.dto';
+// import { InitiateSubscriptionDto } from './dto/create-subscription.dto';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
@@ -32,10 +32,10 @@ export class PaymentController {
   }
 
 
-  @Post("/paymob/subscription/initiate")
-  async initiate(@Body() initiateSubscriptionDto: InitiateSubscriptionDto) {
-    return await this.PaymobService.getPaymentUrl(initiateSubscriptionDto);
-  }
+  // @Post("/paymob/subscription/initiate")
+  // async initiate(@Body() initiateSubscriptionDto: InitiateSubscriptionDto) {
+  //   return await this.PaymobService.getPaymentUrl(initiateSubscriptionDto);
+  // }
 
 
   @Post("/paymob/subscription/webhook")
@@ -47,11 +47,11 @@ export class PaymentController {
 
 
 
-  @UseGuards(AuthGuard)
-  @Post("paypal/subscription/initiate")
-  async initiatePaypal(@Body() initiateSubscriptionDto: InitiateSubscriptionDto, @Req() req: IUserRequest) {
-    return await this.paypalPaymentService.getPaymentUrl(initiateSubscriptionDto, req.user);
-  }
+  // @UseGuards(AuthGuard)
+  // @Post("paypal/subscription/initiate")
+  // async initiatePaypal(@Body() initiateSubscriptionDto: InitiateSubscriptionDto, @Req() req: IUserRequest) {
+  //   return await this.paypalPaymentService.getPaymentUrl(initiateSubscriptionDto, req.user);
+  // }
 
 
 
@@ -78,13 +78,14 @@ export class PaymentController {
   }
 
 
-
+  // create credit-card credit url with credit-card as payment method
   @UseGuards(AuthGuard)
   @Post("wallet/paymob/credit-card-url")
   async createWalletCreditPaymobUrl(@Body() createWalletCreditUrlDto: CreateWalletCreditUrlDto, @Req() req: IUserRequest) {
     return await this.paymentWalletService.createPaymobPaymentLink(createWalletCreditUrlDto, req.user)
   }
 
+  // create wallet credit url with mobile wallet as payment method
   @UseGuards(AuthGuard)
   @Post("wallet/paymob/wallet-url")
   async createWalletCreditWalletPaymobUrl(@Body() createWalletCreditUrlDto: CreateWalletCreditUrlDto, @Req() req: IUserRequest) {
@@ -93,7 +94,7 @@ export class PaymentController {
     })
   }
 
-
+  //  the webhook to credit the wallet after payment is done with the mobile wallet or cred
   @Post("/wallet/paymob/credit-url/webhook")
   async webhookPaymentController(@Body() webhookBody: PaymobPaymentLinWebHookBody) {
     try {
@@ -110,12 +111,13 @@ export class PaymentController {
     }
   }
 
-  @UseGuards(AuthGuard)
-  @Post("wallet/subscription/create")
-  async creditWalletSubscription(@Body() initiateSubscriptionDto: InitiateSubscriptionDto, @Req() req: IUserRequest) {
-    return await this.paymentWalletService.subscribeWithWallet(initiateSubscriptionDto, req.user);
+  //  should be at enrollment controller
+  // @UseGuards(AuthGuard)
+  // @Post("wallet/subscription/create")
+  // async creditWalletSubscription(@Body() initiateSubscriptionDto: InitiateSubscriptionDto, @Req() req: IUserRequest) {
+  //   return await this.paymentWalletService.subscribeWithWallet(initiateSubscriptionDto, req.user);
 
 
-  }
+  // }
 
 }

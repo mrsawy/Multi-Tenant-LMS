@@ -36,8 +36,8 @@ const NavBar: React.FC = () => {
       bgColor: "#0D0716",
       textColor: "#fff",
       links: [
-        { label: "Company", href: "/", ariaLabel: "About Company" },
-        { label: "Careers", href: "/", ariaLabel: "About Careers" }
+        { label: "Company", href: "/about", ariaLabel: "About Company" },
+        { label: "Careers", href: "/about", ariaLabel: "About Careers" }
       ]
     },
     {
@@ -45,8 +45,8 @@ const NavBar: React.FC = () => {
       bgColor: "#170D27",
       textColor: "#fff",
       links: [
-        { label: "Featured", href: "/", ariaLabel: "Featured Projects" },
-        { label: "Case Studies", href: "/", ariaLabel: "Project Case Studies" }
+        { label: "Featured", href: "/Projects", ariaLabel: "Featured Projects" },
+        { label: "Case Studies", href: "/Projects", ariaLabel: "Project Case Studies" }
       ]
     },
     {
@@ -54,9 +54,9 @@ const NavBar: React.FC = () => {
       bgColor: "#271E37",
       textColor: "#fff",
       links: [
-        { label: "Email", href: "/", ariaLabel: "Email us" },
-        { label: "Twitter", href: "/", ariaLabel: "Twitter" },
-        { label: "LinkedIn", href: "/", ariaLabel: "LinkedIn" }
+        { label: "Email", href: "/Contact", ariaLabel: "Email us" },
+        { label: "Twitter", href: "/Contact", ariaLabel: "Twitter" },
+        { label: "LinkedIn", href: "/Contact", ariaLabel: "LinkedIn" }
       ]
     }
   ];

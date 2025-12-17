@@ -5,39 +5,49 @@ import { connectToNats, request } from '@/lib/nats/client';
 import { v7 } from "uuid";
 import { uploadFile } from "@/lib/utils/uploadFile";
 import { slugify } from "@/lib/utils/slugify";
-import { AUTH_COOKIE_NAME } from "@/middleware";
+
 import { getCookie, deleteFromS3 } from "@/lib/utils/serverUtils";
 import { getAuthUser } from "../user/user.action";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
-export const handleUpdateCourse = async (courseId: string, formData: FormData) => {
-    const courseData: any = {};
-    for (const [key, value] of formData.entries()) {
-        if (typeof value === 'string') {
-            try {
-                const parsed = JSON.parse(value);
-                courseData[key] = parsed;
-            } catch {
+export const handleUpdateCourse = async (courseId: string, formData: FormData, oldThumbKey?: string) => {
+
+
+
+    let uploadedThumbnailKey: string | undefined;
+
+    try {
+
+        const courseData: any = {};
+        for (const [key, value] of formData.entries()) {
+            console.log({ key, value })
+            if (typeof value === 'string') {
+                try {
+                    const parsed = JSON.parse(value);
+                    courseData[key] = parsed;
+                } catch {
+                    courseData[key] = value;
+                }
+            } else {
                 courseData[key] = value;
             }
-        } else {
-            courseData[key] = value;
         }
-    }
-    
-    const idToken = await getCookie(AUTH_COOKIE_NAME);
-    if (!idToken) throw new Error("Invalid Token")
 
-    const user = await getAuthUser()
-    if (!user) throw new Error("User Not Found")
+        const idToken = await getCookie(AUTH_COOKIE_NAME);
+        if (!idToken) throw new Error("Invalid Token")
 
-    const natsClient = await connectToNats();
-    let uploadedThumbnailKey: string | undefined;
-    
-    try {
+        const user = await getAuthUser()
+        if (!user) throw new Error("User Not Found")
+
+        const natsClient = await connectToNats();
+
         if (courseData.thumbnail instanceof File) {
+
+            if (oldThumbKey) await deleteFromS3(oldThumbKey);
+
             const fileExtension = courseData.thumbnail.name.split('.').pop() || 'jpg';
             const thumbnailUrl = await uploadFile(
                 await courseData.thumbnail.arrayBuffer(),
@@ -48,6 +58,7 @@ export const handleUpdateCourse = async (courseId: string, formData: FormData) =
             uploadedThumbnailKey = thumbnailUrl;
             delete courseData.thumbnail;
         }
+        console.log({ courseData })
 
         const response = await request<any>(
             natsClient,

@@ -1,7 +1,10 @@
-import { Types } from 'mongoose';
+
 import { BillingCycle } from './enum/BillingCycle.enum';
 import { Currency } from '@/lib/data/currency.enum';
-import { IModule } from "./modules.interface";
+import { IModule, IModuleWithContents } from "./modules.interface";
+import { ICategory } from '../category/ICategory';
+import { IContent } from './content.interface';
+import { IUser } from '../user/user.interface';
 
 // ----- Subdocuments -----
 
@@ -41,17 +44,18 @@ export interface StatsSchema {
 // ----- Main Course Interface -----
 
 export interface ICourse {
-    _id?: Types.ObjectId;
-    organizationId: Types.ObjectId;
+    _id?: string;
+    organizationId: string;
 
     name: string;
 
     createdBy: string; // username (refPath)
-    instructorId?: Types.ObjectId;
-    coInstructors?: Types.ObjectId[];
-
-    categories?: Types.ObjectId[];
-    modulesIds?: Types.ObjectId[];
+    instructorId?: string;
+    coInstructorsIds?: string[];
+    coInstructors?: IUser[];
+    categoriesIds?: string[];
+    categories?: ICategory[];
+    modulesIds?: string[];
 
     isPaid: boolean;
 
@@ -68,8 +72,15 @@ export interface ICourse {
     publishedAt?: Date;
     paypalPlanId?: string;
 
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: string;
+    updatedAt: string;
+
+    instructor?: IUser
+
+    learningObjectives: string[]
+
+    duration?: string
+    language?: string
 }
 
 
@@ -78,4 +89,7 @@ export interface ICourseWithModules extends ICourse {
     modules: IModule[]
 }
 
+export interface ICourseOverview extends ICourse {
+    modules: IModuleWithContents[];
+}
 // export interface ICourseWithContents 

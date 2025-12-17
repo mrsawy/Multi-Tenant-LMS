@@ -7,12 +7,14 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CaslAbilityFactory } from 'src/role/permissions.factory';
 import { RoleModule } from 'src/role/role.module';
 import { UserControllerMessage } from './user.controller.message';
+import { WalletModule } from 'src/wallet/wallet.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     forwardRef(() => AuthModule),
-    RoleModule
+    RoleModule,
+    WalletModule
   ],
   controllers: [UserControllerHttp , UserControllerMessage],
   providers: [UserService],

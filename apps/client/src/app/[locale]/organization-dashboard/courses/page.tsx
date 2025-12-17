@@ -5,9 +5,6 @@ import { ICourse } from "@/lib/types/course/course.interface";
 export default async function CoursePage() {
     try {
         const response = await getCourses()
-        // console.log('Courses:', response)
-        
-        // The response is already the courses array when successful
         const courses = Array.isArray(response.docs) ? response.docs : [];
         
         return (

@@ -1,6 +1,6 @@
 "use server";
 
-import { AUTH_COOKIE_NAME } from "@/middleware";
+
 import { deleteFromS3, getCookie } from "@/lib/utils/serverUtils";
 import { connectToNats, request } from "@/lib/nats/client";
 import { v7 } from "uuid";
@@ -13,6 +13,7 @@ import { CourseContentType } from "@/lib/types/course/enum/CourseContentType.enu
 import { VideoType } from "@/lib/types/course/enum/VideoType.enum";
 import { IModuleWithContents } from "@/lib/types/course/modules.interface";
 import { IContent } from "@/lib/types/course/content.interface";
+import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
 export async function createContent(moduleId: string, courseId: string, data: CourseContentFormData, fileKey?: string) {
     try {

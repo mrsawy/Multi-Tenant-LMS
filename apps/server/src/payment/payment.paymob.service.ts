@@ -4,7 +4,7 @@ import { UpdatePaymentDto } from './dto/update-payment.dto';
 import axios, { AxiosError } from 'axios';
 import { CreatePaymobSubscriptionPlanDto } from './dto/create-subscription-plan.dto';
 import { PaymobSubscriptionPlan } from './types/PaymobSubscriptionPlan.interface';
-import { CreatePaymobSubscriptionDto, InitiateSubscriptionDto } from './dto/create-subscription.dto';
+import { CreatePaymobSubscriptionDto } from './dto/create-subscription.dto';
 import { PaymobPaymentIntentionResponse } from './types/PaymobSubscription.interface';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { PlanService } from 'src/plan/plan.service';
@@ -19,6 +19,7 @@ import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { AccessType } from 'src/enrollment/enum/accessType.enum';
 import { Currency } from './enums/currency.enum';
+import { InitiateSubscriptionDto } from 'src/enrollment/dto/create-enrollment.dto';
 
 @Injectable()
 export class PaymobService {

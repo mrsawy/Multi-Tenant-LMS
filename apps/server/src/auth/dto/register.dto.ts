@@ -11,7 +11,7 @@ export class RegisterDto {
     userDto: CreateUserDto
 
     // @IsOptional()
-    @ValidateIf(o => o.userDto.role !== "STUDENT")
+    @ValidateIf(o => o.userDto.roleName !== "STUDENT")
     @ValidateNested()
     @IsNotEmpty()
     @Type(() => CreateOrganizationDto)

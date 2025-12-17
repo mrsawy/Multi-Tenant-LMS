@@ -162,9 +162,9 @@ const quizContentSchema = yup.object({
 
   quizStartDate: yup
     .date()
-    .required('Quiz start date is required')
-    .min(new Date(), 'Quiz start date must be in the future'),
-
+    .required('Quiz start date is required').default(new Date())
+  // .min(new Date(), 'Quiz start date must be in the future')
+  ,
   quizEndDate: yup
     .date()
     .required('Quiz end date is required')

@@ -20,6 +20,13 @@ import { IUser } from "@/lib/types/user/user.interface";
 import { useCreateUser, useUpdateUser } from "@/lib/hooks/user/use-user.hook";
 import { Status } from "@/lib/types/user/status.enum";
 import { Currency } from "@/lib/data/currency.enum";
+import BasicUserDataForm from "./basic-user-data-form";
+import { Country } from "@/lib/data/country.enum";
+import ProfileUserForm from "./profile-user-form";
+import SecurityUserForm from "./security-user-form";
+import PreferencesUserForm from "./prefrences-user-form";
+import { extractErrorMessages } from "@/lib/utils/extractErrorMessages";
+
 
 
 interface CreateUserFormProps {
@@ -28,9 +35,7 @@ interface CreateUserFormProps {
 }
 
 export default function CreateUserForm({ mode = "create", initialUser = null }: CreateUserFormProps) {
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const router = useRouter();
+    // const router = useRouter();
 
     const createUserMutation = useCreateUser();
     const updateUserMutation = useUpdateUser();
@@ -44,9 +49,9 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
         watch,
         setValue,
         reset
-    } = useForm({
+    } = useForm<CreateUserFormData>({
         resolver: yupResolver(schema as any),
-        defaultValues: initialUser
+        defaultValues: initialUser && mode === "edit"
             ? {
                 _id: initialUser._id,
                 username: initialUser.username,
@@ -54,10 +59,10 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
                 phone: initialUser.phone,
                 firstName: initialUser.firstName,
                 lastName: initialUser.lastName,
-                role: initialUser.role,
+                roleName: initialUser.roleName,
                 organizationId: initialUser.organizationId,
                 status: initialUser.status,
-                preferredCurrency: initialUser.preferredCurrency,
+                country: initialUser.profile?.address?.country as Country,
                 profile: {
                     bio: initialUser.profile?.bio || "",
                     shortBio: initialUser.profile?.shortBio || "",
@@ -82,8 +87,8 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
                 },
             }
             : {
-                status: UserStatus.ACTIVE,
-                preferredCurrency: UserCurrency.USD,
+                status: Status.ACTIVE,
+                country: Country.Egypt,
                 preferences: {
                     language: "en",
                     emailNotifications: true,
@@ -92,30 +97,20 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
             },
     });
 
-    useEffect(() => {
-        console.log({ errors });
-    }, [errors]);
-
     const onSubmit = async (values: any) => {
-        console.log({ values });
-        try {
-            useGeneralStore.setState({ generalIsLoading: true });
-
-            if (mode === "edit" && initialUser?._id) {
-                // Remove confirmPassword from update data
-                const { confirmPassword, ...updateData } = values;
-                updateUserMutation.mutate({
-                    userId: initialUser._id,
-                    updateData: updateData as Partial<EditUserFormData>,
-                });
-            } else {
-                createUserMutation.mutate(values as CreateUserFormData);
-            }
-        } catch (error: any) {
-            toast.error(error.message || "Something went wrong, please try again later");
-        } finally {
-            useGeneralStore.setState({ generalIsLoading: false });
+        console.dir({ values }, { depth: null });
+        if (mode === "edit" && initialUser?._id) {
+            // Remove confirmPassword from update data
+            // const { confirmPassword, ...updateData } = values;
+            // updateUserMutation.mutate({
+            //     userId: initialUser._id,
+            //     updateData: updateData as Partial<EditUserFormData>,
+            // });
+        } else {
+            createUserMutation.mutate(values as CreateUserFormData);
         }
+
+
     };
 
     const getUserStatusColor = (status: string) => {
@@ -150,7 +145,7 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
                         </div>
                         <div className="flex items-center space-x-3">
                             <Button
-                                onClick={handleSubmit(onSubmit)}
+                                onClick={handleSubmit(onSubmit, (err => extractErrorMessages(err).forEach(e => toast.error(e))))}
                                 size="sm"
                             >
                                 <Save className="h-4 w-4 mr-2" />
@@ -185,483 +180,22 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
 
                             {/* Basic Information Tab */}
                             <TabsContent value="basic" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Basic Information</CardTitle>
-                                        <CardDescription>
-                                            Essential user details and account information
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {/* Username */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Username *
-                                                </label>
-                                                <Input
-                                                    {...register("username")}
-                                                    placeholder="Enter username"
-                                                    className="w-full"
-                                                />
-                                                {errors.username && (
-                                                    <p className="text-sm text-red-600">{errors.username.message}</p>
-                                                )}
-                                            </div>
-
-                                            {/* Email */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Email *
-                                                </label>
-                                                <Input
-                                                    {...register("email")}
-                                                    type="email"
-                                                    placeholder="Enter email address"
-                                                    className="w-full"
-                                                />
-                                                {errors.email && (
-                                                    <p className="text-sm text-red-600">{errors.email.message}</p>
-                                                )}
-                                            </div>
-
-                                            {/* First Name */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    First Name *
-                                                </label>
-                                                <Input
-                                                    {...register("firstName")}
-                                                    placeholder="Enter first name"
-                                                    className="w-full"
-                                                />
-                                                {errors.firstName && (
-                                                    <p className="text-sm text-red-600">{errors.firstName.message}</p>
-                                                )}
-                                            </div>
-
-                                            {/* Last Name */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Last Name *
-                                                </label>
-                                                <Input
-                                                    {...register("lastName")}
-                                                    placeholder="Enter last name"
-                                                    className="w-full"
-                                                />
-                                                {errors.lastName && (
-                                                    <p className="text-sm text-red-600">{errors.lastName.message}</p>
-                                                )}
-                                            </div>
-
-                                            {/* Phone */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Phone Number *
-                                                </label>
-                                                <Input
-                                                    {...register("phone")}
-                                                    placeholder="Enter phone number"
-                                                    className="w-full"
-                                                />
-                                                {errors.phone && (
-                                                    <p className="text-sm text-red-600">{errors.phone.message}</p>
-                                                )}
-                                            </div>
-
-                                            {/* Role */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Role *
-                                                </label>
-                                                <Select onValueChange={(value) => setValue("role", value)}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select role" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="admin">Admin</SelectItem>
-                                                        <SelectItem value="instructor">Instructor</SelectItem>
-                                                        <SelectItem value="student">Student</SelectItem>
-                                                        <SelectItem value="manager">Manager</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.role && (
-                                                    <p className="text-sm text-red-600">{errors.role.message}</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Status and Currency */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {/* Status */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Status
-                                                </label>
-                                                <Select
-                                                    onValueChange={(value) => setValue("status", value as Status | UserStatus | undefined)}
-                                                    defaultValue={UserStatus.ACTIVE}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select status" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
-                                                        <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
-                                                        <SelectItem value={UserStatus.SUSPENDED}>Suspended</SelectItem>
-                                                        <SelectItem value={UserStatus.PENDING}>Pending</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            {/* Preferred Currency */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">
-                                                    Preferred Currency *
-                                                </label>
-                                                <Select
-                                                    onValueChange={(value) => setValue("preferredCurrency", value as Currency | UserCurrency)}
-                                                    defaultValue={UserCurrency.USD}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select currency" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value={UserCurrency.USD}>USD</SelectItem>
-                                                        <SelectItem value={UserCurrency.EUR}>EUR</SelectItem>
-                                                        <SelectItem value={UserCurrency.GBP}>GBP</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.preferredCurrency && (
-                                                    <p className="text-sm text-red-600">{errors.preferredCurrency.message}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                <BasicUserDataForm errors={errors} register={register} setValue={setValue} watch={watch} />
                             </TabsContent>
 
                             {/* Profile Tab */}
                             <TabsContent value="profile" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Profile Information</CardTitle>
-                                        <CardDescription>
-                                            Additional profile details and social links
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6">
-                                        {/* Bio */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">Bio</label>
-                                            <Textarea
-                                                {...register("profile.bio")}
-                                                placeholder="Tell us about yourself..."
-                                                rows={4}
-                                                className="w-full"
-                                            />
-                                        </div>
-
-                                        {/* Short Bio */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">Short Bio</label>
-                                            <Input
-                                                {...register("profile.shortBio")}
-                                                placeholder="A brief description..."
-                                                className="w-full"
-                                            />
-                                        </div>
-
-                                        {/* Avatar URL */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">Avatar URL</label>
-                                            <Input
-                                                {...register("profile.avatar")}
-                                                placeholder="https://example.com/avatar.jpg"
-                                                className="w-full"
-                                            />
-                                        </div>
-
-                                        {/* Date of Birth */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">Date of Birth</label>
-                                            <Input
-                                                {...register("profile.dateOfBirth")}
-                                                type="date"
-                                                className="w-full"
-                                            />
-                                        </div>
-
-                                        {/* Address */}
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-medium">Address</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <Input
-                                                    {...register("profile.address.street")}
-                                                    placeholder="Street address"
-                                                />
-                                                <Input
-                                                    {...register("profile.address.city")}
-                                                    placeholder="City"
-                                                />
-                                                <Input
-                                                    {...register("profile.address.state")}
-                                                    placeholder="State/Province"
-                                                />
-                                                <Input
-                                                    {...register("profile.address.zipCode")}
-                                                    placeholder="ZIP/Postal code"
-                                                />
-                                                <div className="md:col-span-2">
-                                                    <Input
-                                                        {...register("profile.address.country")}
-                                                        placeholder="Country"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Social Links */}
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-medium">Social Links</h3>
-                                            <div className="space-y-4">
-                                                <Input
-                                                    {...register("profile.socialLinks.linkedin")}
-                                                    placeholder="LinkedIn URL"
-                                                />
-                                                <Input
-                                                    {...register("profile.socialLinks.twitter")}
-                                                    placeholder="Twitter URL"
-                                                />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                <ProfileUserForm errors={errors} register={register} setValue={setValue} watch={watch} mode={mode} initialUser={initialUser} />
                             </TabsContent>
 
                             {/* Security Tab */}
                             <TabsContent value="security" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center">
-                                            <Shield className="h-5 w-5 mr-2" />
-                                            Security Settings
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {mode === "edit" ? "Update password and security settings" : "Set password and security settings"}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6">
-                                        {mode === "create" && (
-                                            <>
-                                                {/* Password */}
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium">
-                                                        Password *
-                                                    </label>
-                                                    <div className="relative">
-                                                        <Input
-                                                            {...register("password" as any)}
-                                                            type={showPassword ? "text" : "password"}
-                                                            placeholder="Enter password"
-                                                            className="w-full pr-10"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                        >
-                                                            {showPassword ? (
-                                                                <EyeOff className="h-4 w-4 text-gray-400" />
-                                                            ) : (
-                                                                <Eye className="h-4 w-4 text-gray-400" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                    {/* {errors.password && (
-                                                        <p className="text-sm text-red-600">{errors?.password?.message}</p>
-                                                    )} */}
-                                                </div>
-
-                                                {/* Confirm Password */}
-                                                {/* <div className="space-y-2">
-                                                    <label className="text-sm font-medium">
-                                                        Confirm Password *
-                                                    </label>
-                                                    <div className="relative">
-                                                        <Input
-                                                            {...register("confirmPassword")}
-                                                            type={showConfirmPassword ? "text" : "password"}
-                                                            placeholder="Confirm password"
-                                                            className="w-full pr-10"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                        >
-                                                            {showConfirmPassword ? (
-                                                                <EyeOff className="h-4 w-4 text-gray-400" />
-                                                            ) : (
-                                                                <Eye className="h-4 w-4 text-gray-400" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                    {errors.confirmPassword && (
-                                                        <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
-                                                    )}
-                                                </div> */}
-                                            </>
-                                        )}
-
-                                        {mode === "edit" && (
-                                            <>
-                                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                                    <p className="text-sm text-yellow-800">
-                                                        Leave password fields empty if you don't want to change the password.
-                                                    </p>
-                                                </div>
-
-                                                {/* New Password */}
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium">
-                                                        New Password
-                                                    </label>
-                                                    <div className="relative">
-                                                        <Input
-                                                            {...register("password" as any)}
-                                                            type={showPassword ? "text" : "password"}
-                                                            placeholder="Enter new password"
-                                                            className="w-full pr-10"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                        >
-                                                            {showPassword ? (
-                                                                <EyeOff className="h-4 w-4 text-gray-400" />
-                                                            ) : (
-                                                                <Eye className="h-4 w-4 text-gray-400" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                    {/* {errors.password && (
-                                                        <p className="text-sm text-red-600">{errors.password.message}</p>
-                                                    )} */}
-                                                </div>
-
-                                                {/* Confirm New Password */}
-                                                {/* <div className="space-y-2">
-                                                    <label className="text-sm font-medium">
-                                                        Confirm New Password
-                                                    </label>
-                                                    <div className="relative">
-                                                        <Input
-                                                            {...register("confirmPassword")}
-                                                            type={showConfirmPassword ? "text" : "password"}
-                                                            placeholder="Confirm new password"
-                                                            className="w-full pr-10"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                        >
-                                                            {showConfirmPassword ? (
-                                                                <EyeOff className="h-4 w-4 text-gray-400" />
-                                                            ) : (
-                                                                <Eye className="h-4 w-4 text-gray-400" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                    {errors.confirmPassword && (
-                                                        <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
-                                                    )}
-                                                </div> */}
-                                            </>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                <SecurityUserForm errors={errors} register={register} setValue={setValue} watch={watch} mode={mode} />
                             </TabsContent>
 
                             {/* Preferences Tab */}
                             <TabsContent value="preferences" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center">
-                                            <Settings className="h-5 w-5 mr-2" />
-                                            User Preferences
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Configure user preferences and settings
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-6">
-                                        {/* Language */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium">
-                                                Language
-                                            </label>
-                                            <Select
-                                                onValueChange={(value) => setValue("preferences.language", value)}
-                                                defaultValue="en"
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select language" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="en">English</SelectItem>
-                                                    <SelectItem value="es">Spanish</SelectItem>
-                                                    <SelectItem value="fr">French</SelectItem>
-                                                    <SelectItem value="de">German</SelectItem>
-                                                    <SelectItem value="it">Italian</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        {/* Email Notifications */}
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <label className="text-sm font-medium">
-                                                    Email Notifications
-                                                </label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Receive email notifications for important updates
-                                                </p>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant={watch("preferences.emailNotifications") ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setValue("preferences.emailNotifications", !watch("preferences.emailNotifications"))}
-                                            >
-                                                {watch("preferences.emailNotifications") ? "Enabled" : "Disabled"}
-                                            </Button>
-                                        </div>
-
-                                        {/* Dark Mode */}
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <label className="text-sm font-medium">
-                                                    Dark Mode
-                                                </label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Use dark theme for the interface
-                                                </p>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant={watch("preferences.darkMode") ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setValue("preferences.darkMode", !watch("preferences.darkMode"))}
-                                            >
-                                                {watch("preferences.darkMode") ? "Dark" : "Light"}
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                <PreferencesUserForm errors={errors} register={register} setValue={setValue} watch={watch} />
                             </TabsContent>
                         </Tabs>
                     </div>
@@ -683,7 +217,7 @@ export default function CreateUserForm({ mode = "create", initialUser = null }: 
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm">Role</span>
                                     <Badge variant="outline">
-                                        {watch("role") || "Not Selected"}
+                                        {watch("roleName") || "Not Selected"}
                                     </Badge>
                                 </div>
                             </CardContent>

@@ -4,9 +4,8 @@ import { Button } from "@/components/atoms/button";
 import { Clock, Users, Star, Play, BookOpen, TrendingUp } from "lucide-react";
 import { Paginated } from "@/lib/types/Paginated";
 import { ICourse } from "@/lib/types/course/course.interface";
-import Image from "next/image";
-import { getFileFullUrl } from "@/lib/utils/getFileFullUrl";
-import CourseCard from "../__components/course-card";
+import CourseCard from "../../courses/__components/course-card";
+
 
 const CoursesSection = ({ courses }: { courses: Paginated<ICourse> }) => {
 

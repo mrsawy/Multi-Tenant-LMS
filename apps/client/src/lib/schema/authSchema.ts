@@ -11,7 +11,7 @@ export const signupSchema = Yup.object().shape({
     lastName: Yup.string()
         .required('Last name is required')
         .min(3, 'Last name must be at least 3 characters'),
-        
+
     email: Yup.string()
         .email('Invalid email format')
         .required('Email is required'),
@@ -41,7 +41,7 @@ export const signupSchema = Yup.object().shape({
     //     .oneOf([Yup.ref('password')], 'Passwords must match')
     //     .required('Please confirm your password'),
 
-    role: Yup.string()
+    roleName: Yup.string()
         .oneOf(Object.values(UserMainRoles), 'Invalid role')
         .required('Role is required'),
 

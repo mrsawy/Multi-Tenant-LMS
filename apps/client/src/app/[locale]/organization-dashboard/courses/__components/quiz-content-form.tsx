@@ -24,6 +24,7 @@ import { CourseContentFormData } from "@/lib/schema/content.schema";
 import Calendar05 from "@/components/molecules/calendar-05";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { v7 } from "uuid";
 
 interface QuizContentFormProps {
   register: any;
@@ -56,7 +57,7 @@ export default function QuizContentForm({ register, errors, setValue, watch, ini
 
   const addQuestion = () => {
     const newQuestion: Question = {
-      id: (questions.length + 1).toString(),
+      id: v7(),
       questionText: "",
       options: ["", ""],
       correctOption: 0

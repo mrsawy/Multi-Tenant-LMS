@@ -94,7 +94,7 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsString()
-    role: string
+    roleName: string
 
     @IsNotEmpty()
     @IsEmail()
@@ -129,4 +129,13 @@ export class CreateUserDto {
 
     @IsEnum(Currency)
     preferredCurrency: Currency
+
+
+    @IsOptional()
+    authorization?: string
+
+    @IsEnum(Status)
+    status: Status;
+
+    
 }

@@ -1,10 +1,10 @@
 "use server"
 
 import { getCookie } from "./serverUtils";
-import { AUTH_COOKIE_NAME } from "@/middleware";
 import { v7 } from "uuid";
 import { connectToNats, request } from "@/lib/nats/client";
 import NatsError from "../nats/error";
+import { AUTH_COOKIE_NAME } from "../data/constants";
 
 
 interface NatsRequestPayload<T = any> {

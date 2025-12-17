@@ -1,11 +1,12 @@
 'use server';
 
-import { AUTH_COOKIE_NAME } from '@/middleware';
+
 import { getCookie } from '@/lib/utils/serverUtils';
 import { connectToNats, request } from '@/lib/nats/client';
 import { v7 } from 'uuid';
 import { NatsError } from 'nats';
 import { ICourse } from '@/lib/types/course/course.interface';
+import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
 
 export async function getCourse(courseId: string) {
     try {

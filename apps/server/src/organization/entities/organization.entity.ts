@@ -2,11 +2,11 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Plans } from "../enums/plans.enums";
 import { Status } from "../enums/subscription.enum";
 import * as mongoosePaginate from 'mongoose-paginate-v2';
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { SubscriptionTypeDef } from "src/utils/types/Subscription.interface";
 
 @Schema({ timestamps: true })
-export class Organization {
+export class Organization extends Document {
 
     @Prop({ required: true, unique: true })
     name: string;
@@ -17,8 +17,8 @@ export class Organization {
     @Prop({ required: true, unique: true })
     slug: string;
 
-    @Prop()
-    domain?: string;
+   
+    
 
     @Prop({ required: true, type: String })
     planName: string;
@@ -70,3 +70,4 @@ OrganizationSchema.plugin(mongoosePaginate);
 
 OrganizationSchema.virtual('plan', { ref: 'Plan', localField: 'planName', foreignField: 'name', justOne: true });
 OrganizationSchema.virtual('superAdmin', { ref: 'User', localField: 'superAdminId', foreignField: '_id', justOne: true });
+OrganizationSchema.virtual('course', { ref: 'Course', localField: 'courseId', foreignField: '_id', justOne: true });

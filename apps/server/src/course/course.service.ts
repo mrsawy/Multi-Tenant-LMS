@@ -66,30 +66,21 @@ export class CourseService {
       selectedCategory,
       ...paginateOptions
     } = options;
-
-    // Build the query object
     const query: mongoose.RootFilterQuery<Course> = { ...filters };
-
-    // Handle price filtering based on billing cycle (using priceUSD for consistent comparison)
     if (billingCycle && (maxPrice !== undefined || minPrice !== undefined)) {
       const priceField = `pricing.${billingCycle}`;
-
-      // Convert prices to USD if currency is provided, otherwise assume already in USD
       const minPriceUSD = minPrice !== undefined
         ? (priceCurrency ? this.currencyService.convertToUSD(minPrice, priceCurrency) : minPrice)
         : undefined;
-
       const maxPriceUSD = maxPrice !== undefined
         ? (priceCurrency ? this.currencyService.convertToUSD(maxPrice, priceCurrency) : maxPrice)
         : undefined;
-
       if (minPriceUSD !== undefined) {
         query[`${priceField}.priceUSD`] = {
           ...query[`${priceField}.priceUSD`],
           $gte: minPriceUSD
         };
       }
-
       if (maxPriceUSD !== undefined) {
         query[`${priceField}.priceUSD`] = {
           ...query[`${priceField}.priceUSD`],
@@ -97,22 +88,16 @@ export class CourseService {
         };
       }
     }
-
     // Handle rating filter
     // if (minRating !== undefined) {
     //   query['stats.averageRating'] = { $gte: minRating };
     // }
-
-    // Handle modules filter
     if (minModules !== undefined) {
       query['modulesIds'] = { $exists: true };
       query.$expr = { $gte: [{ $size: '$modulesIds' }, Number(minModules)] };
     }
-
-    // Handle category search
     if (selectedCategory) {
-      const categories = (await this.categoryService.getAllWithAggregation({ search: selectedCategory })).docs;
-
+      const categories = (await this.categoryService.getAllWithAggregation({ search: selectedCategory }, undefined, undefined)).docs;
       function flattenCategories(categories: CategoryWithChildren[]): CategoryWithChildren[] {
         const result: CategoryWithChildren[] = [];
         const walk = (category: CategoryWithChildren) => {
@@ -129,9 +114,6 @@ export class CourseService {
 
       query['categoriesIds'] = { $in: flattenedCategoriesIds };
     }
-
-    console.dir({ query }, { depth: null });
-
     return await this.courseModel.paginate(query, paginateOptions);
   }
 
@@ -191,9 +173,47 @@ export class CourseService {
     return `This action removes a #${id} course`;
   }
 
-  async findCourseWithOrderedModules(courseId: string) {
-    return await this.courseModel.findById(courseId).populate("modules").populate('categories').populate('creator').sort({ 'modules.order': 1 }).exec()
+
+  async getCourseWithOrderedModules(
+    courseId: string,
+    includeContents = false,
+    contentSelect?: string // e.g. "title type" or "-_id title"
+  ) {
+    const populateConfig: any = {
+      path: "modules",
+      options: { sort: { order: 1 } },
+    };
+
+    if (includeContents) {
+      populateConfig.populate = {
+        path: "contentsIds",
+        model: "CourseContent",
+        ...(contentSelect ? { select: contentSelect } : {}), // select fields if provided
+      };
+    }
+
+    const course = await this.courseModel.findById(courseId).populate("categories").populate("instructor").populate("coInstructors").populate(populateConfig);
+
+    if (!course) throw new NotFoundException("Course not found");
+
+    // If contents included, restore order manually
+    if (includeContents) {
+      (course as any).modules.forEach(module => {
+        module.contentsIds = module.contentsIds.sort(
+          (a, b) =>
+            module.contentsIds
+              .map(id => id._id.toString())
+              .indexOf(a._id.toString()) -
+            module.contentsIds
+              .map(id => id._id.toString())
+              .indexOf(b._id.toString())
+        );
+      });
+    }
+
+    return course;
   }
+
 
   async addModuleToCourse(courseId: string, moduleId: string, session?: ClientSession) {
     try {

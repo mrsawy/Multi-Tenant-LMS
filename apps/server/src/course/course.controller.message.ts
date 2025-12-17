@@ -78,19 +78,21 @@ export class CourseControllerMessage {
         }
     }
 
-    @UseGuards(AuthGuard)
+
     @MessagePattern('courses.getCourseWithModule')
     async getCourseById(
         @Payload(new RpcValidationPipe())
-        payload: { courseId: string; data?: { authorization?: string } },
+        payload: { courseId: string, includeContents?: boolean, contentSelect?: string },
     ) {
         try {
-            return (await this.courseService.findCourseWithOrderedModules(payload.courseId));
+            return (await this.courseService.getCourseWithOrderedModules(payload.courseId, payload.includeContents, payload.contentSelect));
 
         } catch (error) {
             handleRpcError(error)
         }
     }
+
+
 
 
     @UseGuards(AuthGuard)

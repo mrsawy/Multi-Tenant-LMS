@@ -30,6 +30,9 @@ export class Wallet extends Document {
 
     @Prop({ type: Object })
     metadata: Record<string, any>;
+
+    @Prop({ default: [], ref: 'Transaction', type: [Types.ObjectId] })
+    transactionsHistoryIds: Array<Types.ObjectId>;
 }
 
 
@@ -40,6 +43,7 @@ WalletSchema.plugin(mongoosePaginate);
 
 WalletSchema.virtual("user", { ref: "User", localField: "userId", foreignField: "_id", justOne: true })
 WalletSchema.virtual("organization", { ref: "Organization", localField: "organizationId", foreignField: "_id", justOne: true })
+WalletSchema.virtual("transactionsHistory", { ref: "Transaction", localField: "transactionsHistoryIds", foreignField: "_id", justOne: false })
 
 
 WalletSchema.set('toJSON', { virtuals: true });

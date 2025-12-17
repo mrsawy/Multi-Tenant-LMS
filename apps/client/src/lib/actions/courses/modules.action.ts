@@ -1,6 +1,6 @@
 "use server";
 
-import { AUTH_COOKIE_NAME } from "@/middleware";
+
 import { getCookie } from "@/lib/utils/serverUtils";
 import { connectToNats, request } from "@/lib/nats/client";
 import { ICourse, ICourseWithModules } from "@/lib/types/course/course.interface";

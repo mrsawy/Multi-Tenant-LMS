@@ -12,6 +12,7 @@ import { SidebarInset, SidebarProvider } from '@/components/atoms/sidebar';
 
 import { OrgSidebar } from '../organization-dashboard/__components/OrgSidebar';
 import { getAuthUser } from '@/lib/actions/user/user.action';
+<<<<<<< HEAD
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -42,3 +43,36 @@ export default async function OrgDashboardLayout({
     </div>
   );
 }
+=======
+import { StudentSidebar } from './__components/StudentSideBar';
+
+export const metadata: Metadata = {
+    title: 'Dashboard',
+    description: 'Control your data',
+};
+
+export default async function OrgDashboardLayout({
+    children,
+}: LayoutProps<'/[locale]/student-dashboard'>) {
+    const initialUser = await getAuthUser();
+
+    return (
+        <div>
+            <SidebarProvider
+                style={
+                    {
+                        '--sidebar-width': 'calc(var(--spacing) * 72)',
+                        '--header-height': 'calc(var(--spacing) * 12)',
+                    } as React.CSSProperties
+                }
+            >
+                <StudentSidebar user={initialUser} />
+                <SidebarInset>
+                    <SiteHeader />
+                    {children}
+                </SidebarInset>
+            </SidebarProvider>
+        </div>
+    );
+}
+>>>>>>> 33fafe4 (Categories logic + User addition + user enrollment + enrolled courses page)

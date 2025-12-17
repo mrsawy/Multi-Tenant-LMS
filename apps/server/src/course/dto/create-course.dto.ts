@@ -12,7 +12,8 @@ import {
     Max,
     ValidateIf,
     Validate,
-    IsDefined
+    IsDefined,
+    IsArray
 } from 'class-validator';
 import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
@@ -42,28 +43,30 @@ class AtLeastOnePricingWithPriceAndCurrency implements ValidatorConstraintInterf
         return 'pricing must include at least one of monthly, yearly, or one_time with price and currency when isPaid is true';
     }
 }
-
 export class PricingDetailsDto {
-
+    @IsOptional()
     @IsNumber()
-    @IsOptional()
     @Min(0)
-    originalPrice: number;
+    // only required if currency exists
+    @ValidateIf(o => o.originalCurrency != null)
+    originalPrice?: number;
 
+    @IsOptional()
     @IsEnum(Currency)
-    @IsOptional()
-    originalCurrency: Currency;
+    // only required if price exists
+    @ValidateIf(o => o.originalPrice != null)
+    originalCurrency?: Currency;
 
-    @IsDate()
     @IsOptional()
+    @IsDate()
     discountEndDate?: Date;
 
-    @IsDate()
     @IsOptional()
+    @IsDate()
     discountStartDate?: Date;
 
-    @IsNumber()
     @IsOptional()
+    @IsNumber()
     @Min(0)
     @Max(100)
     discountPercentage?: number;
@@ -173,4 +176,16 @@ export class CreateCourseDto {
 
     @IsOptional()
     authorization: string
+
+    @IsString()
+    @IsOptional()
+    instructorId: string
+
+    @IsArray()
+    @IsOptional()
+    coInstructorsIds?: string[]
+
+    @IsArray()
+    @IsOptional()
+    learningObjectives?: string[]
 }

@@ -5,9 +5,10 @@ import { connectToNats, request } from '@/lib/nats/client';
 import { v7 } from "uuid";
 import { uploadFile } from "@/lib/utils/uploadFile";
 import { slugify } from "@/lib/utils/slugify";
-import { AUTH_COOKIE_NAME } from "@/middleware";
+
 import { getCookie, deleteFromS3 } from "@/lib/utils/serverUtils";
 import { getAuthUser } from "../user/user.action";
+import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
 
 export const handleCreateCourse = async (formData: FormData) => {
@@ -35,7 +36,6 @@ export const handleCreateCourse = async (formData: FormData) => {
     let uploadedThumbnailKey: string | undefined;
     try {
         if (courseData.thumbnail instanceof File) {
-
             const fileExtension = courseData.thumbnail.name.split('.').pop() || 'jpg';
             const thumbnailUrl = await uploadFile(
                 await courseData.thumbnail.arrayBuffer(),
@@ -61,7 +61,6 @@ export const handleCreateCourse = async (formData: FormData) => {
 
         if ('err' in response) {
             console.dir({ response }, { depth: null })
-            if (uploadedThumbnailKey) await deleteFromS3(uploadedThumbnailKey);
             throw new Error(response.err.message)
         }
         return response

@@ -2,7 +2,7 @@
 
 import { ICategory } from "@/lib/types/category/ICategory";
 import { PaginationOptions, withDefaults } from "@/lib/types/Paginated";
-import { createAuthorizedNatsRequest } from "@/lib/utils/createNatsRequest";
+import { createAuthorizedNatsRequest, createNatsRequest } from "@/lib/utils/createNatsRequest";
 
 
 
@@ -15,6 +15,14 @@ export const createCategory = async (
 ) => {
     return createAuthorizedNatsRequest("category.create", options);
 };
+
+export const getAllFlatCategories = async (
+    options: PaginationOptions
+) => {
+    const payload = withDefaults(options);
+    return createAuthorizedNatsRequest("category.getAllFlat", payload);
+};
+
 
 export const getAllCategories = async (
     options: PaginationOptions<{ organizationId: string }>
@@ -39,4 +47,13 @@ export const updateCategory = async (
 ) => {
     const payload = withDefaults(options);
     return createAuthorizedNatsRequest("category.update", payload);
+};
+
+
+
+export const filterCategories = async (
+    options: PaginationOptions
+) => {
+    const payload = withDefaults(options);
+    return createNatsRequest("category.filter", payload);
 };

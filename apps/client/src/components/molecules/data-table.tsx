@@ -75,7 +75,8 @@ export function DataTable<TData>({
   onGlobalFilterChange,
 }: DataTableProps<TData> & {
   onReorder?: (newData: TData[]) => void,
-  onDeleteSelected?: (data: string[]) => void, onChangeData: (data: TData[]) => void
+  onDeleteSelected?: (data: string[]) => void,
+   onChangeData: (data: TData[]) => void
 }) {
   // const [data, setData] = React.useState<TData[]>(() => initialData)
   const [isDragging, setIsDragging] = React.useState(false)
@@ -270,7 +271,7 @@ export function DataTable<TData>({
         value="outline"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
-        <div className="overflow-hidden rounded-lg border  bg-zinc-50 dark:bg-zinc-900">
+        <div className="overflow-hidden rounded-lg border  ">
           <DndContext
             key={dataIds.join('-')}
             collisionDetection={closestCenter}

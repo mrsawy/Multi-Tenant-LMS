@@ -7,20 +7,27 @@ import { BillingCycle } from '../types/course/enum/BillingCycle.enum';
 
 // Pricing details schema
 export const pricingDetailsSchema = Yup.object().shape({
-    price: Yup.number()
+    originalPrice: Yup.number()
         .min(0, 'Price must be greater than or equal to 0')
         .optional()
         .nullable(),
-    currency: Yup.string()
+
+    originalCurrency: Yup.string()
         .oneOf(Object.values(Currency), 'Invalid currency')
-        .optional()
-        .nullable(),
-    discountEndDate: Yup.date()
-        .optional()
-        .nullable(),
-    discountStartDate: Yup.date()
-        .optional()
-        .nullable(),
+        .nullable()
+        .when('originalPrice', {
+            is: (price: number | null | undefined) => price == null, // no price
+            then: (schema) =>
+                schema.test(
+                    'currency-requires-price',
+                    'Currency cannot be set without a price',
+                    (val) => val == null
+
+                ), // must be null if no price
+        }),
+
+    discountEndDate: Yup.date().optional().nullable(),
+    discountStartDate: Yup.date().optional().nullable(),
     discountPercentage: Yup.number()
         .min(0, 'Discount percentage must be at least 0')
         .max(100, 'Discount percentage cannot exceed 100')
@@ -55,6 +62,11 @@ export const settingsSchema = Yup.object().shape({
 // Create course schema
 export const createCourseSchema = Yup.object().shape({
 
+    instructorId: Yup.string()
+        .optional()
+        .nullable(),
+
+    coInstructorsIds: Yup.array().of(Yup.string()).optional(),
     name: Yup.string()
         .required('Course name is required')
         .min(3, 'Course name must be at least 3 characters')
@@ -69,7 +81,7 @@ export const createCourseSchema = Yup.object().shape({
         .optional()
         .nullable(),
 
-    categories: Yup.array()
+    categoriesIds: Yup.array()
         .of(Yup.string().required())
         .optional(),
 
@@ -88,7 +100,7 @@ export const createCourseSchema = Yup.object().shape({
             .test('at-least-one-pricing', 'At least one pricing option must be provided', function (value) {
                 const { MONTHLY, YEARLY, ONE_TIME } = BillingCycle;
                 const hasAtLeastOne = [MONTHLY, YEARLY, ONE_TIME].some((cycle) => {
-                    return value?.[cycle]?.price != null && value?.[cycle]?.currency;
+                    return value?.[cycle]?.originalPrice != null && value?.[cycle]?.originalCurrency;
                 });
                 return hasAtLeastOne;
             })
@@ -120,6 +132,9 @@ export const createCourseSchema = Yup.object().shape({
         .nullable(),
 
     settings: settingsSchema.optional(),
+    learningObjectives: Yup.array().of(Yup.string().required()).optional()
+
+    // categories: Yup.array().of(Yup.string().required()).optional(),
 });
 
 // Update course schema (all fields optional)

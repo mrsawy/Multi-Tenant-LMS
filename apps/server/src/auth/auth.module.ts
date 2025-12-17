@@ -18,8 +18,8 @@ export const JWT_SECRET = 'VERY_hard!to-guess_secret'
     JwtModule.register({ secret: JWT_SECRET }),
     OrganizationModule,
     forwardRef(() => UserModule),
+    forwardRef(() => WalletModule),
     RoleModule,
-    WalletModule,
     PlanModule
   ],
   controllers: [AuthController , AuthControllerMessage],

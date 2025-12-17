@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, InternalServerError
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { ClientSession, Model } from 'mongoose';
+import mongoose, { ClientSession, Model, PaginateModel, PaginateOptions } from 'mongoose';
 import { User, UserDocument } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { handleError } from 'src/utils/errorHandling';
@@ -14,7 +14,7 @@ const saltRounds = 10;
 export class UserService {
 
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>
+    @InjectModel(User.name) private readonly userModel: PaginateModel<User>
   ) { }
   async create(createUserDto: CreateUserDto & { organizationId?: mongoose.Types.ObjectId }, session?: ClientSession) {
     try {
@@ -25,6 +25,7 @@ export class UserService {
       await createdUser.save({ session });
       return createdUser
     } catch (error) {
+      console.error(error);
       if (error.code === 11000) {
         const field = Object.keys(error.keyValue)[0];
         throw new ConflictException(`${field} "${error.keyValue[field]}" already exists.`);
@@ -42,7 +43,7 @@ export class UserService {
     let foundedUser: UserDocument | null = null;
 
     if (mongoose.Types.ObjectId.isValid(identifier)) {
-      foundedUser = await this.userModel.findById(identifier).populate({ path: 'role', model: 'Role', localField: 'role', foreignField: 'name' })
+      foundedUser = await this.userModel.findById(identifier).populate({ path: 'role', model: 'Role', localField: 'roleName', foreignField: 'name' })
         .populate("organization");
     } else {
       foundedUser = await this.userModel
@@ -89,5 +90,18 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async getByOrganization(organizationId: mongoose.Types.ObjectId, options: PaginateOptions, filters?: mongoose.RootFilterQuery<User>) {
+
+    const result = await this.userModel.paginate(
+      { ...filters, organizationId: new mongoose.Types.ObjectId(organizationId) },
+      options
+    );
+
+    // Manually populate 'role' virtuals for paginated docs
+    result.docs = await this.userModel.populate(result.docs, { path: 'role' });
+
+    return result;
   }
 }

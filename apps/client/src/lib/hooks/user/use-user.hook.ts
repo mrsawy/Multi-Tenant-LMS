@@ -7,27 +7,32 @@ import { CreateUserFormData, EditUserFormData } from '@/lib/schema/user.schema';
 import { toast } from 'react-toastify';
 import { useRouter } from "@/i18n/navigation";
 import useGeneralStore from '@/lib/store/generalStore';
+import { PaginationOptions } from '@/lib/types/Paginated';
+import { getUsersByOrganization } from '@/lib/actions/user/getUsersByOrganization.action';
+import { createUserAction } from '@/lib/actions/user/user.action';
 
 
 // Query keys
 export const userKeys = {
     all: ['users'] as const,
-    organization: (organizationId: string) => [...userKeys.all, 'organization', organizationId] as const,
+    organization: () => [...userKeys.all, 'organization'] as const,
     user: (userId: string) => [...userKeys.all, 'user', userId] as const,
     role: (role: string) => [...userKeys.all, 'role', role] as const,
     status: (status: string) => [...userKeys.all, 'status', status] as const,
 };
 
 // Custom hook for fetching users by organization
-export function useUsersByOrganization(organizationId: string) {
+export function useUsersByOrganization(options: PaginationOptions, filters?: any) {
     return useQuery({
-        queryKey: userKeys.organization(organizationId),
+        queryKey: userKeys.organization(),
         queryFn: async () => {
-            // const users = await getUsersByOrganization(organizationId);
-            // return users;
+            const users = await getUsersByOrganization(options , filters);
+            return users;
         },
-        enabled: !!organizationId,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        // enabled: !!organization,
+        staleTime: 5 * 60 * 1000, // 5 minutes        refetchOnMount: true, // Refetch when component mounts
+        refetchOnMount: true, // Refetch when component mounts
+
     });
 }
 
@@ -50,23 +55,18 @@ export function useCreateUser() {
 
     return useMutation({
         mutationFn: async (userData: CreateUserFormData) => {
-            // return await createUser(userData);
+            return await createUserAction(userData);
         },
-        onSuccess: (data, variables) => {
+        onSuccess: async (data, variables) => {
             console.log({ data, variables });
             toast.success("User created successfully");
-
-            // Invalidate organization users query if organizationId is provided
-            if (variables.organizationId) {
-                queryClient.invalidateQueries({ queryKey: userKeys.organization(variables.organizationId) });
-            }
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
+            await queryClient.invalidateQueries({ queryKey: userKeys.organization() });
+            await queryClient.invalidateQueries({ queryKey: userKeys.all });
 
             router.push('/organization-dashboard/users');
         },
         onError: (error) => {
-            console.error('Error creating user:', error);
-            toast.error('Failed to create user');
+            toast.error(typeof error.message == "string" ? error.message : 'Failed to create user');
         },
         onMutate: () => {
             useGeneralStore.setState({ generalIsLoading: true });

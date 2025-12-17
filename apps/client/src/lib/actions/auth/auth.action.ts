@@ -1,6 +1,6 @@
 'use server';
 
-import { AUTH_COOKIE_NAME } from '@/middleware';
+
 
 import { connectToNats, request } from '@/lib/nats/client';
 import { v7 as uuidv7 } from 'uuid';
@@ -11,18 +11,19 @@ import { getPreferredCurrency } from '@/lib/utils/getPreferredCurrency';
 import { UserMainRoles } from '@/lib/data/userRole.enum';
 import { setCookie } from '@/lib/utils/serverUtils';
 import { RegisterResponse } from '@/lib/types/auth/auth.type';
+import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
 
 export async function handleSignup(signUpData: SignupSchema) {
     const natsClient = await connectToNats();
-    const { username, role, email, phoneNumber, password, firstName, lastName, country, organizationName, organizationSlug } = signUpData
+    const { username, roleName, email, phoneNumber, password, firstName, lastName, country, organizationName, organizationSlug } = signUpData
     const preferredCurrency = getPreferredCurrency(country);
     const userDto = {
-        username, role, email, phone: phoneNumber, password, firstName, lastName, preferredCurrency,
+        username, roleName, email, phone: phoneNumber, password, firstName, lastName, preferredCurrency,
         profile: { address: { country } }
     };
 
     let organizationDto;
-    if (role !== UserMainRoles.STUDENT) {
+    if (roleName !== UserMainRoles.STUDENT) {
         organizationDto = { name: organizationName, slug: organizationSlug };
     }
     const data = organizationDto ? { userDto, organizationDto } : { userDto }
@@ -49,8 +50,7 @@ export async function handleSignup(signUpData: SignupSchema) {
         maxAge: 60 * 60 * 24 * 7, // One week
         path: '/',
     });
-
-    redirect(response.user.role == "STUDENT" ? '/student-dashboard' : "organization-dashboard");
+    return response.user
 }
 
 
@@ -79,7 +79,10 @@ export async function handleLogin(loginData: LoginSchema) {
         path: '/',
     });
 
-    redirect(response.user.role == "STUDENT" ? '/student-dashboard' : "organization-dashboard");
+    console.dir({ response }, { depth: null })
+
+    return response.user
+
 }
 
 

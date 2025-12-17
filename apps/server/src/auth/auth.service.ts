@@ -6,7 +6,7 @@ import * as jwt from 'jsonwebtoken';
 import { User } from 'src/user/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { InjectConnection } from '@nestjs/mongoose';
-import mongoose, { Connection } from 'mongoose';
+import mongoose, { Connection, ObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { WalletService } from 'src/wallet/wallet.service';
 import { RoleService } from 'src/role/role.service';
@@ -35,7 +35,7 @@ export class AuthService {
     const session = await this.connection.startSession();
     session.startTransaction();
 
-    const userType = registerDto.userDto.role;
+    const userType = registerDto.userDto.roleName;
     const isStudent = userType == "STUDENT"
 
     try {
@@ -56,11 +56,13 @@ export class AuthService {
           ...userDto,
           _id: userId,
           organizationId: isStudent ? undefined : organizationId,
-          role: foundedRole.name,
+          roleName: foundedRole.name,
           walletId
         },
         session,
       );
+
+      await user.populate("role")
 
       const { organization } = isStudent ? { organization: undefined } : await this.organizationService.create({
         ...organizationDto!, superAdminId: userId, _id: organizationId,
@@ -83,7 +85,7 @@ export class AuthService {
       }, session);
 
 
-      await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization?._id })
+      await this.walletService.create({ _id: walletId, userId: user._id, organizationId: organization?._id as mongoose.Types.ObjectId, currency: user.preferredCurrency }, session);
 
 
       const payload = { ...user.toObject(), password: undefined };
@@ -131,6 +133,7 @@ export class AuthService {
       if (!isMatch) {
         throw new Error("Wrong Password")
       }
+      await foundedUser.populate("role")
 
       const payload = { ...foundedUser.toObject(), password: undefined }
 

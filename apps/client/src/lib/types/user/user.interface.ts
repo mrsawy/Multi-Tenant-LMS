@@ -22,7 +22,7 @@ export interface Profile {
   dateOfBirth?: Date;
   address?: Address;
   socialLinks?: SocialLinks;
-  shortBio?:string
+  shortBio?: string
 }
 
 export interface Preferences {
@@ -31,18 +31,26 @@ export interface Preferences {
   darkMode?: boolean;
 }
 
+export interface Role {
+  _id: string;
+  name: string;
+  permissions: { action: string, subject: string }[];
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
 export interface IUser {
-  _id?: string;
+  _id: string;
   organizationId?: string;
 
   username: string;
   email: string;
   phone: string;
-  password: string;
+  password?: string;
 
-  firstName?: string;
-  lastName?: string;
-  role: string;
+  firstName: string;
+  lastName: string;
+  roleName: string;
 
   profile?: Profile;
   preferences?: Preferences;
@@ -56,6 +64,8 @@ export interface IUser {
   createdAt?: Date;
   updatedAt?: Date;
   organization?: Organization
+  role: Role;
+  
 
 
 }

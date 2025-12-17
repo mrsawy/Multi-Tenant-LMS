@@ -36,4 +36,8 @@ export default async function Page() {
     </div>
 
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 33fafe4 (Categories logic + User addition + user enrollment + enrolled courses page)

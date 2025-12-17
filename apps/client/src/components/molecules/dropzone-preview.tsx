@@ -2,10 +2,10 @@
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/atoms/dropzone';
 import { useState } from 'react';
 import { DropzoneOptions } from 'react-dropzone';
-const DropzoneWithPreview = ({ className, files, setFiles, handleDrop, filePreview, setFilePreview, accept, maxFiles }: {
+const DropzoneWithPreview = ({ className, files, setFiles, handleDrop, filePreview, setFilePreview, accept, maxFiles, label }: {
     handleDrop: (files: File[]) => void, filePreview: string | undefined, setFilePreview: React.Dispatch<React.SetStateAction<string | undefined>>,
-    className?: string, files: File[] | undefined, setFiles: React.Dispatch<React.SetStateAction<File[] | undefined>>,
-     accept: DropzoneOptions['accept'], maxFiles: DropzoneOptions['maxFiles']
+    className?: string, files: File[] | undefined, setFiles: React.Dispatch<React.SetStateAction<File[] | undefined>>, label?: string
+    accept: DropzoneOptions['accept'], maxFiles: DropzoneOptions['maxFiles']
 }) => {
     // const [files, setFiles] = useState<File[] | undefined>();
     // const [filePreview, setFilePreview] = useState<string | undefined>();
@@ -33,6 +33,7 @@ const DropzoneWithPreview = ({ className, files, setFiles, handleDrop, filePrevi
             src={files}
             className={className}
             maxFiles={maxFiles ? maxFiles : 1}
+            
         >
             <DropzoneEmptyState />
             <DropzoneContent>

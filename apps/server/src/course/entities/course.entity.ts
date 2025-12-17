@@ -105,7 +105,7 @@ export class Course extends Document {
     instructorId: Types.ObjectId;
 
     @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
-    coInstructors: Types.ObjectId[];
+    coInstructorsIds: Types.ObjectId[];
 
     @Prop()
     description: string;
@@ -157,7 +157,11 @@ export class Course extends Document {
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
 
+CourseSchema.virtual('modules', { ref: 'CourseModule', localField: 'modulesIds', foreignField: '_id', justOne: false });
+CourseSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
 CourseSchema.virtual('creator', { ref: 'User', localField: 'createdBy', foreignField: 'username', justOne: true });
+CourseSchema.virtual('instructor', { ref: 'User', localField: 'instructorId', foreignField: '_id', justOne: true });
+CourseSchema.virtual('coInstructors', { ref: 'User', localField: 'coInstructorsIds', foreignField: '_id', justOne: false });
 CourseSchema.virtual('modules', { ref: 'CourseModule', localField: 'modulesIds', foreignField: '_id', justOne: false });
 
 CourseSchema.virtual('categories', { ref: 'Category', localField: 'categoriesIds', foreignField: '_id', justOne: false });

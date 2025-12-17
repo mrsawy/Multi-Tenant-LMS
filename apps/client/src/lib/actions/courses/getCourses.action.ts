@@ -1,6 +1,5 @@
 'use server';
 
-import { AUTH_COOKIE_NAME } from '@/middleware';
 
 import { getCookie } from '@/lib/utils/serverUtils';
 import { redis } from '@/lib/redis/client';
@@ -10,10 +9,12 @@ import { v7 } from 'uuid';
 import { NatsError } from 'nats';
 import { ICourse } from '@/lib/types/course/course.interface';
 import { Paginated } from '@/lib/types/Paginated';
+import { ICourseFilters } from '@/lib/types/course/ICourseFilters';
+import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
 
 
 
-export async function findCourses(page: number = 1, limit: number = 10) {
+export async function findCourses(filters: ICourseFilters) {
     try {
         const natsClient = await connectToNats();
         const response = await request<Paginated<ICourse>>(
@@ -22,12 +23,12 @@ export async function findCourses(page: number = 1, limit: number = 10) {
             JSON.stringify({
                 id: v7(),
                 data: {
-                    options: { page, limit }
+                    options: filters
                 }
             }),
         );
 
-        console.dir({ response }, { depth: null })
+        // console.dir({ response }, { depth: null })
         if ('err' in response) {
             throw new Error((response as { err: NatsError }).err.message)
         }

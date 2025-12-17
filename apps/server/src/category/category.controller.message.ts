@@ -69,6 +69,7 @@ export class CategoryMessageController {
             return await this.categoryService.getAllWithAggregation(
                 payload,
                 context.userPayload.organizationId.toString(),
+                null
             );
         } catch (error) {
             throw new RpcException({

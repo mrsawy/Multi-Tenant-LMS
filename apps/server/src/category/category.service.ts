@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginateModel, FilterQuery, PaginateOptions, Query } from 'mongoose';
+import mongoose, { PaginateModel, FilterQuery, PaginateOptions, Query } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
@@ -40,12 +40,14 @@ export class CategoryService {
   }
 
 
-  async getAllWithAggregation(options: PaginateOptionsWithSearch, organizationId?: string,): Promise<PaginateResult<CategoryWithChildren>> {
+  async getAllWithAggregation(options: PaginateOptionsWithSearch, organizationId?: string, parentId?: string | mongoose.Types.ObjectId | null ): Promise<PaginateResult<CategoryWithChildren>> {
     const limit = options.limit ?? 10;
     const page = options.page ?? 1;
 
-    const match: any = {
-      parentId: null,
+    let match: any = {}
+
+    if (parentId !== undefined) {
+      match.parentId = parentId
     }
 
     if (organizationId) {
@@ -57,6 +59,9 @@ export class CategoryService {
         { description: { $regex: options.search, $options: 'i' } },
       ]
     }
+
+
+    console.log({ match })
 
     const pipeline = [
       {

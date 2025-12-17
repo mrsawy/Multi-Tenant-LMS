@@ -7,7 +7,7 @@ const UsersPage: React.FC = async () => {
 
     return (
         <div>
-            <UserDataTable organizationId={user?.organizationId} />
+            <UserDataTable />
 
         </div>
     );

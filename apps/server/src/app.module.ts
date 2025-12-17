@@ -19,6 +19,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { OptionsModule } from './options/options.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ReviewModule } from './review/review.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 configDotenv();
 
@@ -63,7 +64,8 @@ configDotenv();
     WalletModule,
     OptionsModule,
     CurrencyModule,
-    ReviewModule
+    ReviewModule,
+    TransactionModule
   ],
   controllers: [AppController],
   providers: [AppService],

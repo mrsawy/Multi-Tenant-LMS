@@ -1,11 +1,12 @@
 
 "use server";
 
-import { AUTH_COOKIE_NAME } from "@/middleware";
+
 import { getCookie } from "@/lib/utils/serverUtils";
 import { connectToNats, request } from "@/lib/nats/client";
 import { v7 } from "uuid";
 import NatsError from "@/lib/nats/error";
+import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
 export const deleteS3File = async (fileKey:string) => {
     try {

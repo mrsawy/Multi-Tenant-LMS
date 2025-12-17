@@ -1,12 +1,6 @@
 "use client"
 
-import { Button } from '@/components/atoms/button';
-import DotGrid from '@/components/DotGrid';
-import LiquidEther from '@/components/LiquidEther';
-import PrismaticBurst from '@/components/PrismaticBurst';
-import ScrollStack, { ScrollStackItem } from '@/components/ScrollStack'
-import Squares from '@/components/Squares';
-import { ArrowRight, Sparkles, Zap } from 'lucide-react';
+import LiquidEther from '@/components/organs/LiquidEther';
 import HeroWithDashboard from './hero-with-dashboard-image';
 // import CardSwap, { Card } from '@/components/CardSwap'
 
@@ -16,32 +10,28 @@ const HeroSection: React.FC = () => {
     return (
         <>
             <div className="absolute inset-0 -z-10  min-[2500px]:hidden">
-                <LiquidEther
-                    colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-                    mouseForce={20}
-                    cursorSize={100}
-                    isViscous={false}
-                    viscous={30}
-                    iterationsViscous={32}
-                    iterationsPoisson={32}
-                    resolution={0.5}
-                    isBounce={false}
-                    autoDemo={true}
-                    autoSpeed={0.5}
-                    autoIntensity={2.2}
-                    takeoverDuration={0.25}
-                    autoResumeDelay={3000}
-                    autoRampDuration={0.6}
-                />
+
             </div>
 
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
                 {/* Liquid Ether Background */}
                 <div className="absolute inset-0 opacity-40">
                     <LiquidEther
-                        colors={["#3b82f6", "#8b5cf6", "#06b6d4"]}
-                        mouseForce={25}
-                        cursorSize={120}
+                        colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+                        mouseForce={20}
+                        cursorSize={100}
+                        isViscous={false}
+                        viscous={30}
+                        iterationsViscous={32}
+                        iterationsPoisson={32}
+                        resolution={0.5}
+                        isBounce={false}
+                        autoDemo={true}
+                        autoSpeed={0.5}
+                        autoIntensity={2.2}
+                        takeoverDuration={0.25}
+                        autoResumeDelay={3000}
+                        autoRampDuration={0.6}
                     />
                 </div>
 

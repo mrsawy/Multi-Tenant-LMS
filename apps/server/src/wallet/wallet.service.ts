@@ -20,7 +20,7 @@ export class WalletService {
 
   ) { }
 
-  async create(createWalletDto: CreateWalletDto): Promise<Wallet> {
+  async create(createWalletDto: CreateWalletDto, session?: ClientSession): Promise<Wallet> {
     const existingWallet = await this.walletModel.findOne({
       userId: createWalletDto.userId
     });
@@ -34,7 +34,7 @@ export class WalletService {
       walletAddress
     });
 
-    return await wallet.save();
+    return await wallet.save({ session });
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ wallets: Wallet[], total: number }> {
@@ -58,32 +58,35 @@ export class WalletService {
     if (!foundedUser) {
       throw new NotFoundException('User not found');
     }
+
+
     if (!foundedUser.walletId) throw new NotFoundException('Wallet not found for this user');
-    return await this.findOne(foundedUser.walletId.toString());
+    const foundedWallet = await this.findOne(foundedUser.walletId.toString())
+    return foundedWallet.populate("transactionsHistory");
   }
 
-  async findOne(id: string): Promise<Wallet> {
+  async findOne(id: string, session?: ClientSession): Promise<Wallet> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid wallet ID format');
     }
+    console.log({ id })
 
-    const wallet = await this.walletModel
-      .findById(id)
-      .populate('userId', 'email username')
-      .exec();
+    const wallet = await this.walletModel.findOne({ _id: id }, null, { session })
 
     if (!wallet) throw new NotFoundException(`Wallet with ID ${id} not found`);
+
+    console.log({ wallet })
 
     return wallet;
   }
 
-  async findByUserId(userId: string): Promise<Wallet> {
+  async findByUserId(userId: string, session?: ClientSession): Promise<Wallet> {
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
     const wallet = await this.walletModel
-      .findOne({ userId: new Types.ObjectId(userId) })
+      .findOne({ userId: new Types.ObjectId(userId) }, null, { session })
       .populate('userId', 'email username')
       .exec();
 
@@ -126,7 +129,7 @@ export class WalletService {
     if (!result) throw new NotFoundException(`Wallet with ID ${id} not found`);
 
   }
-  async credit({ transactionDto, id, userId, }: { transactionDto: WalletTransactionDto; id?: string; userId?: string; }): Promise<Wallet> {
+  async credit({ transactionDto, id, userId, session }: { transactionDto: WalletTransactionDto; id?: string; userId?: string; session?: ClientSession }): Promise<Wallet> {
     if (!id && !userId) {
       throw new BadRequestException("Must specify id or userId");
     }
@@ -134,13 +137,11 @@ export class WalletService {
     let wallet: Wallet | null = null;
 
     if (id) {
-      wallet = await this.findOne(id);
-    } else if (userId) wallet = await this.findByUserId(userId);
+      wallet = await this.findOne(id, session);
+    } else if (userId) wallet = await this.findByUserId(userId, session);
 
     if (!wallet) throw new NotFoundException("Wallet not found");
-
     if (wallet.isFrozen) throw new BadRequestException("Wallet is frozen and cannot be credited");
-
     if (!wallet.isActive) throw new BadRequestException("Wallet is not active");
 
     if (transactionDto.currency !== Currency.USD) {
@@ -148,39 +149,49 @@ export class WalletService {
       transactionDto.amount = amountInUsd;
     }
 
-    wallet.balance = +(+wallet.balance + +transactionDto.amount).toFixed(2);
+    wallet.balance = +(+wallet.balance + +this.currencyService.convertFromUSD(transactionDto.amount, wallet.currency)).toFixed(2);
 
-    wallet.lastTransactionDate = new Date();
-    return wallet.save();
-  }
-
-  async debit({ transactionDto, id, userId, session }: { transactionDto: WalletTransactionDto, id?: string, userId?: string, session?: ClientSession },): Promise<Wallet> {
-    if (!id && !userId) {
-      throw new BadRequestException("Must specify id or userId");
-    }
-
-    let wallet: Wallet | null = null;
-
-    if (id) {
-      wallet = await this.findOne(id);
-    } else if (userId) wallet = await this.findByUserId(userId);
-
-    if (!wallet) throw new NotFoundException("Wallet not found");
-
-    if (wallet.isFrozen) throw new BadRequestException("Wallet is frozen and cannot be credited");
-
-    if (!wallet.isActive) throw new BadRequestException("Wallet is not active");
-
-    if (transactionDto.currency !== Currency.USD) {
-      const amountInUsd = this.currencyService.convertToUSD(transactionDto.amount, transactionDto.currency);
-      transactionDto.amount = amountInUsd;
-    }
-    if (wallet.balance < transactionDto.amount) throw new BadRequestException("Insufficient balance");
-
-    wallet.balance = +(+wallet.balance - +transactionDto.amount).toFixed(2);
     wallet.lastTransactionDate = new Date();
     return wallet.save({ session });
+  }
 
+  async debit({
+    transactionDto,
+    id,
+    userId,
+    session
+  }: {
+    transactionDto: WalletTransactionDto,
+    id?: string,
+    userId?: string,
+    session?: ClientSession
+  }): Promise<Wallet> {
+    if (!id && !userId) {
+      throw new BadRequestException("Must specify id or userId");
+    }
+    let wallet: Wallet | null = null;
+    if (id) { wallet = await this.findOne(id, session); }
+    else if (userId) { wallet = await this.findByUserId(userId, session); }
+    if (!wallet) throw new NotFoundException("Wallet not found");
+    if (wallet.isFrozen) throw new BadRequestException("Wallet is frozen");
+    if (!wallet.isActive) throw new BadRequestException("Wallet is not active");
+
+    if (transactionDto.currency !== Currency.USD) {
+      const amountInUsd = this.currencyService.convertToUSD(
+        transactionDto.amount,
+        transactionDto.currency
+      );
+      transactionDto.amount = amountInUsd;
+    }
+
+    if (this.currencyService.convertToUSD(wallet.balance, Currency.USD) < transactionDto.amount) {
+      throw new BadRequestException("Insufficient balance");
+    }
+
+    wallet.balance = +(wallet.balance - this.currencyService.convertFromUSD(transactionDto.amount, wallet.currency)).toFixed(2);
+
+    wallet.lastTransactionDate = new Date();
+    return wallet.save({ session });
   }
 
   async freezeWallet(id: string): Promise<Wallet> {

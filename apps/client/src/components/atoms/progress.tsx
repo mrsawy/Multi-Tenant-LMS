@@ -28,4 +28,8 @@ function Progress({
   )
 }
 
+<<<<<<< HEAD
 export { Progress }
+=======
+export { Progress }
+>>>>>>> 33fafe4 (Categories logic + User addition + user enrollment + enrolled courses page)

@@ -13,7 +13,7 @@ export class RpcValidationPipe extends ValidationPipe {
                     return new RpcException(formatValidationErrors(errors));
                 }),
             whitelist: options?.whitelist ?? true,
-            forbidNonWhitelisted: options?.forbidNonWhitelisted ?? true,
+            forbidNonWhitelisted: options?.forbidNonWhitelisted ?? false,
         });
     }
 }

@@ -102,7 +102,7 @@ export class User {
   lastName: string;
   // 👇 Link to role by name instead of ID
   @Prop({ type: String, ref: 'Role', required: true })
-  role: string;
+  roleName: string;
 
   @Prop({ type: Profile, required: false })
   profile: Profile;
@@ -132,5 +132,6 @@ UserSchema.plugin(mongoosePaginate)
 
 UserSchema.virtual('organization', { ref: 'Organization', localField: 'organizationId', foreignField: '_id', justOne: true });
 UserSchema.virtual('wallet', { ref: 'Wallet', localField: 'walletId', foreignField: '_id', justOne: true });
+UserSchema.virtual('role', { ref: 'Role', localField: 'roleName', foreignField: 'name', justOne: true });
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });

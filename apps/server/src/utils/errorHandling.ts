@@ -1,4 +1,4 @@
-import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { RpcException } from '@nestjs/microservices';
 
 export const handleError = (error: Error) => {
@@ -18,6 +18,13 @@ export const handleError = (error: Error) => {
 }
 
 export const handleRpcError = (error: unknown) => {
+    if (error instanceof ConflictException) {
+        throw new RpcException({
+            message: error.message,
+            code: 409,
+            error: 'Conflict'
+        });
+    }
     if (error instanceof NotFoundException) {
         throw new RpcException({
             message: error.message,

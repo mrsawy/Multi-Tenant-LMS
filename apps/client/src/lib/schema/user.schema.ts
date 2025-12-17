@@ -2,6 +2,7 @@ import * as yup from 'yup';
 
 import { Status } from '@/lib/types/user/status.enum';
 import { Currency } from '../data/currency.enum';
+import { Country } from '../data/country.enum';
 
 // Address schema
 const addressSchema = yup.object({
@@ -22,7 +23,18 @@ const socialLinksSchema = yup.object({
 const profileSchema = yup.object({
   bio: yup.string().max(1000, 'Bio must be less than 1000 characters').optional(),
   shortBio: yup.string().max(200, 'Short bio must be less than 200 characters').optional(),
-  avatar: yup.string().url('Invalid avatar URL').optional(),
+  // avatar: yup.string().url('Invalid avatar URL').optional(),
+  avatarFile: yup.mixed<File>()
+    .test('fileType', 'Only image files are allowed', (value) => {
+      if (!value) return true; // Allow null or optional
+      return ['image/jpeg', 'image/png', 'image/webp'].includes(value.type);
+    })
+    .nullable()
+    .optional(),
+
+
+  avatar: yup.string().optional(),
+
   dateOfBirth: yup.date().max(new Date(), 'Date of birth cannot be in the future').optional(),
   address: addressSchema.optional(),
   socialLinks: socialLinksSchema.optional(),
@@ -50,19 +62,24 @@ const baseUserSchema = yup.object({
   phone: yup
     .string()
     .required('Phone number is required')
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Invalid phone number format'),
+    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Invalid phone number format').min(9, "Invalid phone number"),
   firstName: yup.string().required('First name is required').min(2, 'First name must be at least 2 characters'),
   lastName: yup.string().required('Last name is required').min(2, 'Last name must be at least 2 characters'),
-  role: yup.string().required('Role is required'),
+  roleName: yup.string().required('Role is required'),
   organizationId: yup.string().optional(),
   profile: profileSchema.optional(),
   preferences: preferencesSchema.optional(),
   status: yup.string().oneOf(Object.values(Status)).default(Status.ACTIVE),
-  preferredCurrency: yup.string().oneOf(Object.values(Currency)).required('Preferred currency is required'),
+  preferredCurrency: yup.string().oneOf(Object.values(Currency)).optional(),
+  studentIdentifier: yup.string().optional(),
+  country: yup.string()
+    .oneOf(Object.values(Country), 'Please select a valid country')
+    .required('Country is required'),
 });
 
 // Create user schema (includes password)
 export const createUserSchema = baseUserSchema.shape({
+  _id: yup.string().optional(),
   password: yup
     .string()
     .required('Password is required')
@@ -96,45 +113,7 @@ export type CreateUserFormData = yup.InferType<typeof createUserSchema>;
 export type EditUserFormData = yup.InferType<typeof editUserSchema>;
 
 // User interface (matching your Mongoose model)
-export interface IUser {
-  _id: string;
-  organizationId?: string;
-  username: string;
-  email: string;
-  phone: string;
-  password?: string; // Optional in responses for security
-  firstName: string;
-  lastName: string;
-  role: string;
-  profile?: {
-    bio?: string;
-    shortBio?: string;
-    avatar?: string;
-    dateOfBirth?: Date;
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      zipCode?: string;
-      country?: string;
-    };
-    socialLinks?: {
-      linkedin?: string;
-      twitter?: string;
-    };
-  };
-  preferences?: {
-    language: string;
-    emailNotifications: boolean;
-    darkMode: boolean;
-  };
-  status: string;
-  lastLogin?: Date;
-  walletId?: string;
-  preferredCurrency: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+
 
 // Enums (you'll need to create these files)
 export enum UserStatus {

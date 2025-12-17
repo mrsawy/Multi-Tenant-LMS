@@ -5,7 +5,7 @@ import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 import { CourseService } from 'src/course/course.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Enrollment } from './entities/enrollment.entity';
-import { PaginateModel } from 'mongoose';
+import mongoose, { mongo, PaginateModel } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { AccessType } from './enum/accessType.enum';
 import { Wallet } from 'src/wallet/entities/wallet.entity';
@@ -13,6 +13,7 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { Course } from 'src/course/entities/course.entity';
 import { Currency } from 'src/payment/enums/currency.enum';
+import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
 
 @Injectable()
 export class EnrollmentService {
@@ -27,6 +28,7 @@ export class EnrollmentService {
 
 
   async enrollUserToCourse(userId: string, courseId: string, accessType: AccessType = AccessType.SUBSCRIPTION, subscription?: SubscriptionTypeDef) {
+
     const course = await this.courseService.findOne(courseId);
     await this.userService.findOne(userId);
 
@@ -34,14 +36,30 @@ export class EnrollmentService {
       throw new Error(course.isPaid ? "Paid courses should have subscriptions" : "Unpaid courses should not have subscriptions");
     }
     const createdEnrollment = await this.enrollmentModel.create({
-      userId, courseId, organizationId: course.organizationId, accessType, subscription,
+      userId: new mongoose.Types.ObjectId(userId), courseId: new mongoose.Types.ObjectId(courseId), organizationId: course.organizationId, accessType, subscription,
     })
-    if (course.isPaid && subscription?.billing.amount) {
-      await this.walletService.credit({ userId: course.createdBy, transactionDto: { amount: subscription.billing.amount, currency: subscription.billing.currency } })
-    }
 
     return createdEnrollment
   }
+
+
+  async getUserEnrollments(userId: string, options: PaginateOptionsWithSearch) {
+    return await this.enrollmentModel.paginate(
+      { userId: new mongoose.Types.ObjectId(userId) },
+      {
+        ...options,
+        populate: {
+          path: "course", // 👈 virtual you defined in schema
+          // select: "title description thumbnail category", // optional: limit fields
+          populate: {
+            path: "categories", // if you also want nested populate
+            // select: "name"
+          }
+        }
+      }
+    );
+  }
+
 
   async updateUserSubscription(userId: string, courseId: string, subscription: Partial<SubscriptionTypeDef>) {
     const enrollment = await this.enrollmentModel.findOne({ userId, courseId });
