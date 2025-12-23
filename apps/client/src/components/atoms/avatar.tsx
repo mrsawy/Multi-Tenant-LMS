@@ -36,8 +36,12 @@ function AvatarImage({
 
 function AvatarFallback({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+  if(typeof children == "string"){
+    children = children.split(" ").map((word) => word[0].toUpperCase()).join("").slice(0, 2)
+  }
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
@@ -45,6 +49,7 @@ function AvatarFallback({
         "bg-muted flex size-full items-center justify-center rounded-full",
         className
       )}
+      children={children}
       {...props}
     />
   )

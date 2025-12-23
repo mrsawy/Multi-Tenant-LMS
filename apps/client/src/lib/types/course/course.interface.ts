@@ -11,7 +11,7 @@ import { IUser } from '../user/user.interface';
 export interface PricingDetails {
     originalPrice: number; // Typo in schema? Should be originalPrice?
     originalCurrency: Currency; // EGP, USD, etc.
-    priceUSD?: number;
+    priceUSD: number;
     discountEndDate?: Date;
     discountStartDate?: Date;
     discountPercentage?: number; // 0-100
@@ -39,12 +39,28 @@ export interface StatsSchema {
     averageRating: number;
     totalViews: number;
     completionRate: number;
+    enrolledStudentsCount: number;
+}
+
+export interface TimeSlot {
+    _id?: string;
+    startTime: string; // Format: HH:MM am/pm (e.g., 02:00 pm)
+    endTime: string; // Format: HH:MM am/pm (e.g., 11:30 am)
+    dayOfWeek: string; // e.g., Monday, Tuesday, etc.
+    instructorsIds?: string[];
+    coInstructorsIds?: string[];
+    studentsIds?: string[];
+}
+
+export interface AttendanceSettings {
+    requireAttendance?: boolean;
+    offlineSchedule?: TimeSlot[];
 }
 
 // ----- Main Course Interface -----
 
 export interface ICourse {
-    _id?: string;
+    _id: string;
     organizationId: string;
 
     name: string;
@@ -63,11 +79,12 @@ export interface ICourse {
     shortDescription?: string;
 
     thumbnailKey?: string;
-    trailer?: string;
+    trailerKey?: string;
 
     pricing: PricingSchema;
     settings?: SettingsSchema;
     stats?: StatsSchema;
+    attendanceSettings?: AttendanceSettings;
 
     publishedAt?: Date;
     paypalPlanId?: string;

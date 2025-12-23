@@ -27,15 +27,12 @@ export async function findCourses(filters: ICourseFilters) {
                 }
             }),
         );
-
-        // console.dir({ response }, { depth: null })
         if ('err' in response) {
             throw new Error((response as { err: NatsError }).err.message)
         }
 
         return response
     } catch (error) {
-        console.error("error frmo getCourses:", error)
         throw new Error()
     }
 

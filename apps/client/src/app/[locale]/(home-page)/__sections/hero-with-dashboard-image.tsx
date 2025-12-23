@@ -1,4 +1,5 @@
 import { Button } from "@/components/atoms/button";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -40,7 +41,7 @@ const HeroWithDashboard = () => {
                                             target="_blank"
                                             className="flex items-center gap-4 rounded-md px-6 py-[14px] text-base font-medium  transition duration-300 ease-in-out hover:text-dark"
                                         >
-                                            <Button className="outline border text-accent">
+                                            <Button className="outline border dark:text-black text-white ">
 
                                                 <svg
                                                     className="fill-current"

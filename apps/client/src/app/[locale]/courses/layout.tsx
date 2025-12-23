@@ -1,5 +1,7 @@
+import { Navbar02 } from "@/components/molecules/nav-bar";
+import HomeNave from "@/components/organs/home-nav";
+import { getAuthUser } from "@/lib/actions/user/user.action";
 import type { Metadata } from "next";
-import NavBar from "../(home-page)/__sections/nav-bar";
 
 // import { redirect } from 'next/navigation';
 // import { routing } from '@/i18n/routing';
@@ -28,10 +30,10 @@ export default async function LocaleLayout({
 
     //   const messages = await getMessages(); // will load messages for current locale
 
-
+const user = await getAuthUser()
     return (
         <>
-            {/* <NavBar /> */}
+            <HomeNave user={user} />
             {children}
         </>
 

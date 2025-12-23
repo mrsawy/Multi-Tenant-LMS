@@ -1,11 +1,13 @@
 "use client"
 
+import { Calendar } from "@/components/atoms/calendar";
 import { AppSidebar } from "@/components/molecules/app-sidebar";
+import Calendar05 from "@/components/molecules/calendar-05";
+import CalendarWithTodayButton from "@/components/molecules/calendar-with-today-button";
+import FullCalendar from "@/components/organs/full-calendar";
 import { IUser } from "@/lib/types/user/user.interface";
-
-
-
 import {
+  IconCalendarUser,
   IconCamera,
   IconCategory,
   IconChartBar,
@@ -22,8 +24,8 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconWallet,
 } from "@tabler/icons-react"
-import { Wallet2Icon } from "lucide-react";
 
 export const data = {
 
@@ -37,8 +39,14 @@ export const data = {
     {
       title: "Wallet",
       url: "/student-dashboard/wallet",
-      icon: Wallet2Icon,
+      icon: IconWallet,
       key: "Wallet",
+    },
+    {
+      title: "Calendar",
+      url: "/student-dashboard/calendar",
+      icon: IconCalendarUser,
+      key: "calendar",
     },
     // {
     //   title: "Users",
@@ -102,6 +110,8 @@ export const data = {
       icon: IconSearch,
     },
   ],
+
+  documentComponent: <CalendarWithTodayButton />
 }
 
 

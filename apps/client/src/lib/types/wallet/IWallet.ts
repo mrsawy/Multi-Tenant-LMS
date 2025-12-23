@@ -1,25 +1,26 @@
-import { IUser } from "../user/user.interface";
-
-
+import { Currency } from '@/lib/data/currency.enum';
+import { Transaction } from '../transaction/ITransaction.interface';
+import { IUser } from '../user/user.interface';
 
 export interface IWallet {
-    _id: string;
-    userId: string;
-    organizationId?: string;
-    balance: number;
-    currency: string;
-    isActive: boolean;
-    isFrozen: boolean;
-    lastTransactionDate: Date |string;
-    metadata?: Record<string, any>;
-    transactionsHistoryIds: string[];
+  _id: string;
+  userId: string;
+  organizationId?: string;
+  balance: number;
+  currency: Currency;
+  isActive: boolean;
+  isFrozen: boolean;
 
-    // Virtuals
-    user?: IUser;
-    // organization?: IOrganization;
-    // transactionsHistory?: ITransaction[];
+  metadata?: Record<string, any>;
+  transactionsHistory: Transaction[];
+  lastTransactionDate?: string;
 
-    createdAt?: Date;
-    updatedAt?: Date;
+  // Virtuals
+  user?: IUser;
+  // organization?: IOrganization;
+  // transactionsHistory?: ITransaction[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 

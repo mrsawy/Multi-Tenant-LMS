@@ -13,11 +13,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
-export const handleUpdateCourse = async (courseId: string, formData: FormData, oldThumbKey?: string) => {
+export const handleUpdateCourse = async (courseId: string, formData: FormData, oldThumbKey?: string, oldTrailerKey?: string) => {
 
 
 
     let uploadedThumbnailKey: string | undefined;
+    let uploadedTrailerKey: string | undefined;
 
     try {
 
@@ -58,6 +59,21 @@ export const handleUpdateCourse = async (courseId: string, formData: FormData, o
             uploadedThumbnailKey = thumbnailUrl;
             delete courseData.thumbnail;
         }
+
+        if (courseData.trailer instanceof File) {
+
+            if (oldTrailerKey) await deleteFromS3(oldTrailerKey);
+
+            const fileExtension = courseData.trailer.name.split('.').pop() || 'mp4';
+            const trailerUrl = await uploadFile(
+                await courseData.trailer.arrayBuffer(),
+                `${user?.organization?.name}/courses/${courseData.name}/${slugify(courseData.name)}_${v7()}_trailer.${fileExtension}`,
+                courseData.trailer.type,
+            );
+            courseData.trailerKey = trailerUrl;
+            uploadedTrailerKey = trailerUrl;
+            delete courseData.trailer;
+        }
         console.log({ courseData })
 
         const response = await request<any>(
@@ -96,6 +112,7 @@ export const handleUpdateCourse = async (courseId: string, formData: FormData, o
             return
         }
         if (uploadedThumbnailKey) await deleteFromS3(uploadedThumbnailKey);
+        if (uploadedTrailerKey) await deleteFromS3(uploadedTrailerKey);
         throw error;
     }
 }

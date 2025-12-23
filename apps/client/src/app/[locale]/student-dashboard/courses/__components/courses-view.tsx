@@ -2,7 +2,6 @@
 import { Input } from "@/components/atoms/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/select";
 import { IEnrollment } from "@/lib/types/enrollment/enrollment.interface";
-import { SubscriptionStatus } from "@/lib/types/subscription/subscription.enum";
 import { BookOpen, Filter, Search, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { EnrollmentCard } from "./enrollment-card";
@@ -34,59 +33,59 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
     const totalTimeSpent = enrollments.reduce((sum, enrollment) => sum + enrollment.timeSpentMinutes, 0);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="min-h-screen bg-gradient-to-br  ">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">My Learning Dashboard</h1>
-                    <p className="text-gray-600">Track your progress and continue your learning journey</p>
+                    <h1 className="text-3xl font-bold  mb-2">My Learning Dashboard</h1>
+                    <p  >Track your progress and continue your learning journey</p>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="  p-6 rounded-lg shadow-sm border">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-lg">
+                            <div className="p-2  rounded-lg">
                                 <BookOpen className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Enrolled Courses</p>
+                                <p className="text-sm ">Enrolled Courses</p>
                                 <p className="text-2xl font-bold text-gray-900">{enrollments.length}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="  p-6 rounded-lg shadow-sm border">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-lg">
+                            <div className="p-2   rounded-lg">
                                 <TrendingUp className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Average Progress</p>
+                                <p className="text-sm ">Average Progress</p>
                                 <p className="text-2xl font-bold text-gray-900">{Math.round(totalProgress)}%</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="  p-6 rounded-lg shadow-sm border">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                                <BookOpen className="w-5 h-5 text-purple-600" />
+                            <div className="p-2  rounded-lg">
+                                <BookOpen className="w-5 h-5 " />
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Completed</p>
+                                <p className="text-sm ">Completed</p>
                                 <p className="text-2xl font-bold text-gray-900">{completedCourses}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="  p-6 rounded-lg shadow-sm border">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-orange-100 rounded-lg">
                                 <TrendingUp className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Time Spent</p>
+                                <p className="text-sm ">Time Spent</p>
                                 <p className="text-2xl font-bold text-gray-900">{Math.floor(totalTimeSpent / 60)}h</p>
                             </div>
                         </div>
@@ -94,10 +93,10 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                 </div>
 
                 {/* Search and Filter */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+                <div className="  p-6 rounded-lg shadow-sm border mb-6">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2  w-4 h-4" />
                             <Input
                                 placeholder="Search your courses..."
                                 value={searchTerm}
@@ -127,7 +126,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                             key={enrollment._id}
                             enrollment={enrollment}
 
-                            />
+                        />
                     ))}
                 </div>
 
@@ -135,7 +134,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                     <div className="text-center py-12">
                         <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-                        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                        <p className="">Try adjusting your search or filter criteria</p>
                     </div>
                 )}
             </div>

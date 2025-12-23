@@ -28,7 +28,7 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
 
 
     return (
-        <div className="pt-36">
+        <div className="">
             <div className="bg-gradient-dark border-b border-lms-dark-accent">
                 <div className="container mx-auto px-4 py-8">
                     <h1 className="text-4xl font-bold text-lms-text-primary mb-2">Explore Courses</h1>
@@ -39,8 +39,8 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
             {/* Search & Filter Bar */}
             <div className="bg-lms-dark-secondary border-b border-lms-dark-accent">
                 <div className="container mx-auto px-4 py-6">
-                    <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-                        <div className="relative flex-1 max-w-2xl">
+                    <div className="flex flex-col lg:flex-row gap-4 items-center lg:items-center ">
+                        <div className="relative flex-1 max-w-2xl w-full">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lms-text-muted h-5 w-5" />
                             <Input
                                 placeholder="Search courses, instructors, or topics..."
@@ -101,7 +101,7 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
 
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto pt-20">
-                        {courses.map(course => <CourseCard course={course} />)}
+                        {courses.map(course => <CourseCard key={course._id} course={course} />)}
                     </div>
 
                 </div>

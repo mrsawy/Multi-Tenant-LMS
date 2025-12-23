@@ -4,6 +4,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+
+
 :root {
   --background: oklch(0.9578 0.0058 264.5321);
   --foreground: oklch(0.4355 0.0430 279.3250);
@@ -60,7 +63,7 @@
   --letter-spacing: 0em;
 }
 
-.dark {
+html.dark {
   --background: oklch(0.2155 0.0254 284.0647);
   --foreground: oklch(0.8787 0.0426 272.2767);
   --card: oklch(0.2429 0.0304 283.9110);
@@ -236,4 +239,14 @@
   @media (width >=2500px) {
     display: none;
   }
+}
+
+.rbc-off-range-bg {
+  background-color: var(--shadow-color) !important;
+}
+
+.rbc-today {
+  background-color: var(--shadow-color) !important;
+  color: #000;
+
 }

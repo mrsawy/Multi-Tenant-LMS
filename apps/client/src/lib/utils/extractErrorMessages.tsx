@@ -13,6 +13,8 @@ export function extractErrorMessages(
   prefix: string[] = [],
   visited = new WeakSet()
 ): string[] {
+
+  console.log({errors},isPlainObject(errors))
   if (!isPlainObject(errors)) return [];
 
   if (visited.has(errors)) return [];
@@ -26,6 +28,15 @@ export function extractErrorMessages(
     // Case 1: direct error message
     if (value?.message) {
       messages.push(`${[...prefix, key].join(".")}: ${value.message}`);
+    }
+
+    if (Array.isArray(value)) {
+      for (const err of value) {
+        if (!!err && "message" in err) {
+          messages.push(`${[...prefix, key].join(".")}: ${err.message}`);
+        }
+      }
+      return messages
     }
 
     // Case 2: nested plain object (skip DOM objects like CSSStyleSheet, HTMLElement, etc.)

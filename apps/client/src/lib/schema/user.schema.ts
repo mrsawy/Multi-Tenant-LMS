@@ -62,7 +62,7 @@ const baseUserSchema = yup.object({
   phone: yup
     .string()
     .required('Phone number is required')
-    .matches(/^[\+]?[1-9][\d]{0,15}$/, 'Invalid phone number format').min(9, "Invalid phone number"),
+    .matches(/^[\+]?[0-9]\d{8,14}$/, 'Invalid phone number format').min(9, "Invalid phone number"),
   firstName: yup.string().required('First name is required').min(2, 'First name must be at least 2 characters'),
   lastName: yup.string().required('Last name is required').min(2, 'Last name must be at least 2 characters'),
   roleName: yup.string().required('Role is required'),

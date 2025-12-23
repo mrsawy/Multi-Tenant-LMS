@@ -9,10 +9,11 @@ import { Roles } from "@/lib/types/user/roles.enum";
 export default async function CreateCoursePage() {
     const flatCategories = (await getAllFlatCategories({ limit: 100, page: 1 })) as Paginated<ICategory>;
     const instructors = await getUsersByOrganization({ page: 1, limit: 100 }, { roleName: Roles.INSTRUCTOR });
+    const students = await getUsersByOrganization({ page: 1, limit: 100 }, { roleName: Roles.STUDENT });
 
     return (
         <div className="flex flex-1 flex-col p-5">
-            <CourseForm mode="create" flatCategories={flatCategories.docs} instructors={instructors.docs} />
-        </div> 
+            <CourseForm mode="create" flatCategories={flatCategories.docs} instructors={instructors.docs} students={students.docs} />
+        </div>
     )
 }

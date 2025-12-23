@@ -18,14 +18,11 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                     <div className={`h-72 ${course.thumbnailKey} relative overflow-hidden`}>
                         <Image src={getFileFullUrl(course.thumbnailKey ?? "")} alt="Course Thumbnail" fill className="object-cover object-center fixed top-0 size-full" />
                         <div className="absolute inset-0 " />
-
                         {/* Trending Badge */}
-                        {/* {course.trending && ( */}
                         <Badge className="absolute top-4 left-4 bg-brand-purple ">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             Trending
                         </Badge>
-                        {/* )} */}
 
                         {/* Play Button */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -33,7 +30,6 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                                 <Play className="w-6 h-6  ml-1" />
                             </div>
                         </div>
-
                         {/* Category */}
                         <Badge className="absolute bottom-4 left-4   backdrop-blur-sm  border-white/30">
                             {/* {course.category} */}
@@ -46,10 +42,7 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
             <CardContent className="p-2 px-6">
                 {/* Course Info */}
                 <div className="flex items-center justify-between mb-3">
-                    <Badge variant="outline"
-                    // className={getLevelColor(course.level)}
-                    >
-                        {/* {course.level} */}
+                    <Badge variant="outline" >
                         Course Level
                     </Badge>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -70,7 +63,7 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
 
                 <p className="text-sm text-brand-purple font-medium mb-4">
                     by Instructor
-                    {/* {course.instructor} */}
+                    {course.instructor?.firstName} {course.instructor?.lastName}
                 </p>
 
                 {/* Course Stats */}
@@ -86,7 +79,6 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                         <Users className="w-4 h-4" />
                         <span>
                             {course.stats?.totalEnrollments}
-                            {/* {course.students.toLocaleString()} */}
                         </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -96,7 +88,6 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                     <div className="flex items-center gap-2">
                         <Star className="w-4 h-4" />
                         <span>
-                            {/* {course.projects} */}
                             {course.modulesIds?.length}
                             projects</span>
                     </div>
@@ -114,9 +105,11 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                 <div className="text-left">
                     <span className="text-2xl font-bold text-foreground">{course.isPaid ? "$" + course.pricing.MONTHLY?.originalPrice : <p className="p-1 px-2 rounded-2xl bg-green-600 text-white text-sm">FREE</p>}</span>
                 </div>
-                <ButtonArrowRight>
-                    Enroll Now
-                </ButtonArrowRight>
+                <Link href={"/courses/" + course._id}>
+                    <ButtonArrowRight>
+                        Enroll Now
+                    </ButtonArrowRight>
+                </Link>
             </CardFooter>
         </Card>
     );

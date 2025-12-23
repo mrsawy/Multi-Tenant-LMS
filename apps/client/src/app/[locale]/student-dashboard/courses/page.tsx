@@ -11,7 +11,6 @@ const CoursesPage: React.FC<{ searchParams: Promise<PaginationOptions> }> = asyn
 
     const enrollments = await createAuthorizedNatsRequest("enrollment.getUserEnrollments", { options }) as Paginated<IEnrollment>
 
-    console.log({ enrollments })
     return (
         <div>
             <Enrollments enrollments={enrollments.docs} />

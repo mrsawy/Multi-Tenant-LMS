@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation';
 import { LoginSchema, SignupSchema } from '@/lib/schema/authSchema';
 import { getPreferredCurrency } from '@/lib/utils/getPreferredCurrency';
 import { UserMainRoles } from '@/lib/data/userRole.enum';
-import { setCookie } from '@/lib/utils/serverUtils';
+import { getCookie, removeCookie, setCookie } from '@/lib/utils/serverUtils';
 import { RegisterResponse } from '@/lib/types/auth/auth.type';
 import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
 
@@ -89,13 +89,13 @@ export async function handleLogin(loginData: LoginSchema) {
 
 
 
-// export async function logout(redirectAfterLogin = true) {
-//   const idToken = await getCookie(AUTH_COOKIE_NAME);
-//   if (idToken) {
-//     await redis.del(`auth-${idToken}`);
-//   }
-//   await removeCookie(AUTH_COOKIE_NAME);
-//   if (redirectAfterLogin) {
-//     throw new Error(redirect('/login'));
-//   }
-// }
+export async function logout(redirectAfterLogin = true) {
+    const idToken = await getCookie(AUTH_COOKIE_NAME);
+    if (idToken) {
+        await redis.del(`auth-${idToken}`);
+    }
+    await removeCookie(AUTH_COOKIE_NAME);
+    if (redirectAfterLogin) {
+        throw new Error(redirect('/'));
+    }
+}

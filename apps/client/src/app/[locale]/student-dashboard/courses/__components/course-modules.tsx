@@ -1,4 +1,5 @@
 import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/card";
 import { ChartLegendContent } from "@/components/atoms/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/atoms/collapsible";
@@ -7,6 +8,11 @@ import { IModuleWithContents } from "@/lib/types/course/modules.interface";
 import { BookOpenCheck, CheckCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { ContentViewer } from "./content-viewer";
+import { ReviewModal } from "@/components/organs/review-modal";
+import { ReviewType } from "@/lib/types/review/review.types";
+import { Star } from "lucide-react";
+import { DiscussionSection } from "@/components/organs/discussion-section";
+import { DiscussionType } from "@/lib/types/discussion/discussion.types";
 
 
 
@@ -89,6 +95,12 @@ export function CourseModules({
                                         </div>
 
                                         <div className="flex items-center gap-3">
+                                            <div onClick={(e) => e.stopPropagation()}>
+                                                <ReviewModal
+                                                    type={ReviewType.MODULE}
+                                                    entityId={module._id}
+                                                />
+                                            </div>
                                             <Badge variant="outline" className="flex items-center gap-1">
                                                 <BookOpenCheck className="w-3 h-3" />
                                                 {module.contents.length} items
@@ -138,6 +150,16 @@ export function CourseModules({
                                                 isCompleted={completedContents.includes(content._id)}
                                             />
                                         ))}
+                                    </div>
+
+                                    {/* Module Discussions */}
+                                    <div className="mt-4">
+                                        <DiscussionSection
+                                            type={DiscussionType.MODULE}
+                                            entityId={module._id}
+                                            moduleId={module._id}
+                                            title="Module Discussions"
+                                        />
                                     </div>
                                 </CardContent>
                             </CollapsibleContent>

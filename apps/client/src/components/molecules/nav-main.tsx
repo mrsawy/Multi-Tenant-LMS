@@ -11,7 +11,8 @@ import {
   SidebarMenuItem,
 } from "@/components/atoms/sidebar"
 import { ModeToggle } from "./theme-switcher"
-import { Link } from "@/i18n/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
+import { cn } from "@/lib/utils"
 
 export function NavMain({
   items,
@@ -23,6 +24,8 @@ export function NavMain({
     key: string
   }[]
 }) {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -51,9 +54,14 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
-            <Link href={item.url}  key={item.key}>
-              <SidebarMenuItem key={item.title} >
-                <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
+            <Link href={item.url} key={item.key}
+            >
+              <SidebarMenuItem key={item.title} className=""
+              >
+                <SidebarMenuButton
+                  className={cn("cursor-pointer", pathname.includes(item.url) ? "bg-accent/95 text-secondary" : "")}
+
+                  tooltip={item.title} >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                 </SidebarMenuButton>

@@ -18,12 +18,17 @@ import useGeneralStore from "@/lib/store/generalStore"
 import { Link, useRouter } from "@/i18n/navigation"
 import { Combobox } from "@/components/molecules/combobox"
 import { PhoneInput } from "@/components/organs/phone-input"
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
 export function SignupForm({
-  className,
+  redirectUrl,
+  onSuccess,
+  className, onLoginClick,
   ...props
-}: React.ComponentProps<"form">) {
+}: React.ComponentProps<"form"> & { redirectUrl?: string, onLoginClick?: () => void, onSuccess?: () => void }) {
 
+  const [showPassword, setShowPassword] = useState(false)
 
   const router = useRouter()
 
@@ -69,9 +74,10 @@ export function SignupForm({
         }
         return toast.error(response.err.message)
       }
-      router.push(response.role.name === UserMainRoles.STUDENT ? '/student-dashboard' : '/organization-dashboard')
-    } catch(error){
-      console.log({error})
+      onSuccess?.()
+      router.push(redirectUrl ? redirectUrl : response.roleName === UserMainRoles.STUDENT ? '/student-dashboard' : '/organization-dashboard')
+    } catch (error) {
+      console.log({ error })
       setError('root', { message: 'Something went wrong.' });
       toast.error('Something went wrong.')
     } finally {
@@ -189,18 +195,33 @@ export function SignupForm({
 
               </div>
 
-
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col items-start">
                   <Label className="text-sm lg:text-medium" htmlFor="password">Password</Label>
                 </div>
-                <Input type="password" className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" {...register("password")} />
-                {(errors.password) ? (
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium pr-10"
+                    placeholder="your password..."
+                    {...register("password")}
+                  />
+
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(prev => !prev)}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>              {(errors.password) ? (
                   <p className="text-left text-sm text-red-400">
                     {errors.password?.message}
                   </p>
                 ) : null}
               </div>
+
+
 
 
               {/* Organization Inputs - Only show when role is organization */}
@@ -242,9 +263,21 @@ export function SignupForm({
             </div>
             <div className="text-center text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="underline underline-offset-4  hover:text-blue-800 transition-all">
-                Login
-              </Link>
+
+
+              {onLoginClick ? (
+                <button
+                  type="button"
+                  onClick={onLoginClick}
+                  className="underline underline-offset-4 hover:text-blue-800 transition-all cursor-pointer"
+                >
+                  Login
+                </button>
+              ) : (
+                <Link href="/login" className="underline underline-offset-4  hover:text-blue-800 transition-all cursor-pointer">
+                  Login
+                </Link>
+              )}
             </div>
           </form>
           <div className="bg-muted relative hidden md:block rounded-2xl">

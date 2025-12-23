@@ -8,6 +8,11 @@ import { ArrowLeft, Award, BookOpen, Clock, Star, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CourseModules } from "./course-modules";
 import { useRouter } from "next/navigation";
+import { ReviewModal } from "@/components/organs/review-modal";
+import { ReviewType } from "@/lib/types/review/review.types";
+import { UserRatingDisplay } from "@/components/organs/user-rating-display";
+import { DiscussionSection } from "@/components/organs/discussion-section";
+import { DiscussionType } from "@/lib/types/discussion/discussion.types";
 
 
 
@@ -59,6 +64,13 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to My Courses
                     </Button>
+
+                    <div className="flex justify-end mb-4">
+                        <UserRatingDisplay 
+                            reviewType={ReviewType.COURSE} 
+                            entityId={course._id} 
+                        />
+                    </div>
 
                     <div className=" rounded-lg shadow-sm border p-6">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -175,6 +187,14 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                         completedContents={enrollment.progress.completedContents ?? []}
                     />
                 </div>
+
+                {/* Course Discussions */}
+                <DiscussionSection
+                    type={DiscussionType.COURSE}
+                    entityId={course._id}
+                    courseId={course._id}
+                    title="Course Discussions"
+                />
             </div>
         </div>
     );

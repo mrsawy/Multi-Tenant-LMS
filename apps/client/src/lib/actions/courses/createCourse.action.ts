@@ -34,6 +34,7 @@ export const handleCreateCourse = async (formData: FormData) => {
 
     const natsClient = await connectToNats();
     let uploadedThumbnailKey: string | undefined;
+    let uploadedTrailerKey: string | undefined;
     try {
         if (courseData.thumbnail instanceof File) {
             const fileExtension = courseData.thumbnail.name.split('.').pop() || 'jpg';
@@ -45,6 +46,18 @@ export const handleCreateCourse = async (formData: FormData) => {
             courseData.thumbnailKey = thumbnailUrl;
             uploadedThumbnailKey = thumbnailUrl;
             delete courseData.thumbnail;
+        }
+
+        if (courseData.trailer instanceof File) {
+            const fileExtension = courseData.trailer.name.split('.').pop() || 'mp4';
+            const trailerUrl = await uploadFile(
+                await courseData.trailer.arrayBuffer(),
+                `${user?.organization?.name}/courses/${courseData.name}/${slugify(courseData.name)}_${v7()}_trailer.${fileExtension}`,
+                courseData.trailer.type,
+            );
+            courseData.trailerKey = trailerUrl;
+            uploadedTrailerKey = trailerUrl;
+            delete courseData.trailer;
         }
 
         const response = await request<any>(
@@ -66,6 +79,7 @@ export const handleCreateCourse = async (formData: FormData) => {
         return response
     } catch (error) {
         if (uploadedThumbnailKey) await deleteFromS3(uploadedThumbnailKey);
+        if (uploadedTrailerKey) await deleteFromS3(uploadedTrailerKey);
         throw error;
     }
 

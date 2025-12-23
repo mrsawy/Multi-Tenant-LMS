@@ -66,7 +66,7 @@ const AddEnrollmentDialog: React.FC = () => {
     try {
       useGeneralStore.setState({ generalIsLoading: true });
 
-      await createAuthorizedNatsRequest('enrollment.enrollToCourseBgOrg', {
+      await createAuthorizedNatsRequest('enrollment.enrollToCourseByOrg', {
         userId: data.user,
         courseId: data.course,
       });

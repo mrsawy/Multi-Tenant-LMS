@@ -21,6 +21,8 @@ import { toggleContentComplete } from "@/lib/actions/courses/toggleContentComple
 
 import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
+import { DiscussionSection } from "@/components/organs/discussion-section";
+import { DiscussionType } from "@/lib/types/discussion/discussion.types";
 
 
 interface ContentViewProps {
@@ -144,6 +146,14 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                 <div className="rounded-lg shadow-sm border p-8">
                     {renderContent()}
                 </div>
+
+                {/* Content Discussions */}
+                <DiscussionSection
+                    type={DiscussionType.CONTENT}
+                    entityId={content._id}
+                    contentId={content._id}
+                    title="Content Discussions"
+                />
             </div>
         </div>
     );

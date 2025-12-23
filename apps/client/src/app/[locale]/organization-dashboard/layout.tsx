@@ -34,6 +34,7 @@ export default async function OrgDashboardLayout({
 
     const initialUser = await getAuthUser();
 
+    console.log({initialUser})
 
 
     return (

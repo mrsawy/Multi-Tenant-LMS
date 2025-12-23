@@ -16,15 +16,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/atoms/sidebar"
-import { ModeToggle } from "./theme-switcher"
-
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   data: {
     navMain?: any[];
     documents?: any[];
     navSecondary?: any[];
     user?: any;
+    documentComponent?: React.ReactNode;
   };
 }
 
@@ -41,7 +39,7 @@ export function AppSidebar({ data, ...props }: AppSidebarProps) {
               <a href="#">
                 {/* <IconInnerShadowTop className="!size-5" /> */}
 
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Sahla LMS</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -50,6 +48,7 @@ export function AppSidebar({ data, ...props }: AppSidebarProps) {
       <SidebarContent>
         {data.navMain && <NavMain items={data.navMain} />}
         {data.documents && <NavDocuments items={data.documents} />}
+        {data.documentComponent && data.documentComponent}
         {data.navSecondary && <NavSecondary items={data.navSecondary} className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   IconCreditCard,
@@ -6,13 +6,9 @@ import {
   IconLogout,
   IconNotification,
   IconUserCircle,
-} from "@tabler/icons-react"
+} from '@tabler/icons-react';
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/atoms/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,24 +17,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/atoms/dropdown-menu"
+} from '@/components/atoms/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/atoms/sidebar"
+} from '@/components/atoms/sidebar';
+import { logout } from '@/lib/actions/auth/auth.action';
+import useGeneralStore from '@/lib/store/generalStore';
+import { useIsMobile } from '@/lib/hooks/use-mobile';
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
+  const isMobile = useIsMobile();
 
   return (
     <SidebarMenu>
@@ -64,7 +63,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -98,7 +97,18 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  useGeneralStore.setState({ generalIsLoading: true });
+                  await logout();
+                } catch (error) {
+                  console.error({ error });
+                } finally {
+                  useGeneralStore.setState({ generalIsLoading: false });
+                }
+              }}
+            >
               <IconLogout />
               Log out
             </DropdownMenuItem>
@@ -106,5 +116,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

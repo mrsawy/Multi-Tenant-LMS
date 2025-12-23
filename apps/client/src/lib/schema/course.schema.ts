@@ -126,13 +126,36 @@ export const createCourseSchema = Yup.object().shape({
 
     thumbnailKey: Yup.string().optional(),
 
-    trailer: Yup.string()
-        .url('Please enter a valid URL for trailer')
-        .optional()
-        .nullable(),
+    trailerKey: Yup.string().optional(),
+
+    trailer: Yup.mixed<File>()
+        .test('fileType', 'Only video files are allowed', (value) => {
+            if (!value) return true; // Allow null or optional
+            return ['video/mp4', 'video/mpeg', 'video/webm', 'video/quicktime'].includes(value.type);
+        })
+        .nullable()
+        .optional(),
 
     settings: settingsSchema.optional(),
-    learningObjectives: Yup.array().of(Yup.string().required()).optional()
+    learningObjectives: Yup.array().of(Yup.string().required()).optional(),
+
+    attendanceSettings: Yup.object().shape({
+        requireAttendance: Yup.boolean().optional(),
+        offlineSchedule: Yup.array().of(
+            Yup.object().shape({
+                startTime: Yup.string()
+                    .matches(/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i, 'Time must be in format HH:MM am/pm (e.g., 02:00 pm)')
+                    .required('Start time is required'),
+                endTime: Yup.string()
+                    .matches(/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i, 'Time must be in format HH:MM am/pm (e.g., 11:30 am)')
+                    .required('End time is required'),
+                dayOfWeek: Yup.string().required('Day of week is required'),
+                instructorsIds: Yup.array().of(Yup.string()).optional(),
+                coInstructorsIds: Yup.array().of(Yup.string()).optional(),
+                studentsIds: Yup.array().of(Yup.string()).optional(),
+            })
+        ).optional(),
+    }).optional(),
 
     // categories: Yup.array().of(Yup.string().required()).optional(),
 });

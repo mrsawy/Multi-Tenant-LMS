@@ -57,12 +57,7 @@ function UserDataTable() {
     const [globalFilter, setGlobalFilter] = useState<string>('');
 
     // Use custom hooks for user management
-    const { data: users = { docs: [] }, isLoading, error } = useUsersByOrganization({ page: 1, limit: 10 });
-
-
-
-
-
+    const { data: users = { docs: [] }, isLoading, error } = useUsersByOrganization({ page: 1, limit: 10 })
     const deleteUsersMutation = useDeleteUsers();
     const deleteUserMutation = useDeleteUser();
     const updateUserStatusMutation = useUpdateUserStatus();
@@ -272,35 +267,32 @@ function UserDataTable() {
                             <span className="sr-only">Open menu</span>
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Link
-                                href={`/organization-dashboard/users/${row.original._id}/edit`}
-                                className="flex items-center"
-                            >
-                                <Edit className="mr-2 h-4 w-4" />
+                    <DropdownMenuContent align="end" className=" w-full cursor-pointer">
+                        <Link
+                            href={`/organization-dashboard/users/${row.original._id}/edit`}
+                            className="flex items-center cursor-pointer  w-full"
+                        >
+                            <DropdownMenuItem className='w-full cursor-pointer'>
+                                <Edit className="mr-2 size-4 " />
                                 Edit
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
+                            </DropdownMenuItem>
+                        </Link>
+                        {/* <DropdownMenuItem>
                             <Mail className="mr-2 h-4 w-4" />
                             Send Email
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                             onClick={() => handleOpenStatusDialog(row.original._id as any)}
                         >
                             <Shield className="mr-2 h-4 w-4" />
                             Change Status
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             variant="destructive"
                             onClick={() => handleDeleteUser(row.original._id as any)}
+                            className='cursor-pointer'
                         >
                             Delete User
                         </DropdownMenuItem>

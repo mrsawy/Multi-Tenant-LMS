@@ -4,7 +4,7 @@ From node:22
 WORKDIR /app
 
 # Copy package.json and pnpm-lock.yaml files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json  ./
 # Install pnpm globally
 RUN npm install -g pnpm
 # Install dependencies

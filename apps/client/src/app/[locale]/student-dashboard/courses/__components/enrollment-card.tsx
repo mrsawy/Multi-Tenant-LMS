@@ -1,3 +1,5 @@
+"use client"
+
 import { IEnrollment } from "@/lib/types/enrollment/enrollment.interface";
 import { SubscriptionStatus } from "@/lib/types/subscription/subscription.enum";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/card";
@@ -6,6 +8,9 @@ import { Progress } from "@/components/atoms/progress";
 import { Button } from "@/components/atoms/button";
 import { Calendar } from "@/components/atoms/calendar";
 import { Award, BookOpen, Clock } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { UserRatingDisplay } from "@/components/organs/user-rating-display";
+import { ReviewType } from "@/lib/types/review/review.types";
 
 
 interface EnrollmentCardProps {
@@ -13,7 +18,7 @@ interface EnrollmentCardProps {
 
 }
 
-export function EnrollmentCard({ enrollment,   }: EnrollmentCardProps) {
+export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
     const { course, progressPercentage, timeSpentMinutes, subscription, certificate } = enrollment;
 
     if (!course) return null;
@@ -37,6 +42,9 @@ export function EnrollmentCard({ enrollment,   }: EnrollmentCardProps) {
         const mins = minutes % 60;
         return `${hours}h ${mins}m`;
     };
+
+
+    const router = useRouter()
 
     return (
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -84,12 +92,19 @@ export function EnrollmentCard({ enrollment,   }: EnrollmentCardProps) {
                     </div>
                 </div>
 
-                {course.stats && (
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>⭐ {course.stats.averageRating.toFixed(1)}</span>
-                        <span>{course.stats.totalEnrollments.toLocaleString()} students</span>
-                    </div>
-                )}
+                <div className="flex items-center justify-between">
+                    {course.stats && (
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>⭐ {course.stats.averageRating.toFixed(1)}</span>
+                            <span>{course.stats.totalEnrollments.toLocaleString()} students</span>
+                        </div>
+                    )}
+                    <UserRatingDisplay
+                        reviewType={ReviewType.COURSE}
+                        entityId={course._id}
+                        showLabel={false}
+                    />
+                </div>
 
                 <div className="flex justify-between items-center pt-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -97,7 +112,8 @@ export function EnrollmentCard({ enrollment,   }: EnrollmentCardProps) {
                         <span>Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
                     </div>
                     <Button
-                        // onClick={() => onViewCourse(course._id!)}
+                        onClick={() => router.push("/student-dashboard/courses/" + enrollment._id)}
+
                         size="sm"
                     >
                         Continue Learning

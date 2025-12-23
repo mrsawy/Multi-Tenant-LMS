@@ -18,6 +18,7 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ i
 
     try {
         const instructors = await getUsersByOrganization({ page: 1, limit: 100 }, { roleName: Roles.INSTRUCTOR });
+        const students = await getUsersByOrganization({ page: 1, limit: 100 }, { roleName: Roles.STUDENT });
 
         const response = await getCourseWithModules(courseId);
         const course = response as ICourseWithModules;
@@ -31,7 +32,7 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ i
 
         return (
             <div className="flex flex-1 flex-col p-5">
-                <CourseForm mode="update" course={course} courseId={courseId} flatCategories={flatCategories.docs} instructors={instructors.docs}/>
+                <CourseForm mode="update" course={course} courseId={courseId} flatCategories={flatCategories.docs} instructors={instructors.docs} students={students.docs}/>
             </div>
         );
     } catch (error) {

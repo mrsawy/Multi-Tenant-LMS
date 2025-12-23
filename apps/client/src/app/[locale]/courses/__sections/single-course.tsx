@@ -18,13 +18,11 @@ import SingleCourseOverView from "../__components/single-course-overview";
 import { IUser } from "@/lib/types/user/user.interface";
 
 const SingleCourse = ({ course, user }: { course: ICourseOverview, user?: IUser }) => {
-
-
-
+    
     return (
         <div className="min-h-screen bg-background">
             {/* Navigation */}
-            <BreadCrumb />
+            {/* <BreadCrumb /> */}
 
             <div className="container mx-auto px-4 py-8">
                 <div className="grid lg:grid-cols-3 gap-8">

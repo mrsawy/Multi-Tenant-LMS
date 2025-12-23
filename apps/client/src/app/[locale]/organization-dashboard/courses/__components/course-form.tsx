@@ -25,6 +25,7 @@ import MultipleSelector, { Option } from '@/components/molecules/multi-select'
 import { useUsersByOrganization } from '@/lib/hooks/user/use-user.hook'
 import { extractErrorMessages } from "@/lib/utils/extractErrorMessages";
 import { IUser } from "@/lib/types/user/user.interface"
+import { Clock } from "lucide-react"
 
 type CourseFormMode = 'create' | 'update';
 
@@ -35,18 +36,24 @@ interface CourseFormProps {
     courseId?: string;
     flatCategories?: ICategory[];
     instructors: IUser[];
-
+    students?: IUser[];
 }
 
-function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructors = [] }: CourseFormProps) {
+function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructors = [], students = [] }: CourseFormProps) {
     const isUpdateMode = mode === 'update';
     const thumbnailUrl = isUpdateMode && course?.thumbnailKey ? getFileFullUrl(course.thumbnailKey) : undefined;
+    const trailerUrl = isUpdateMode && (course as any)?.trailerKey ? getFileFullUrl((course as any).trailerKey) : undefined;
 
     const [learningObjectives, setLearningObjectives] = useState<string[]>(course?.learningObjectives || []);
+    const [offlineSchedule, setOfflineSchedule] = useState<any[]>((course as any)?.attendanceSettings?.offlineSchedule || []);
 
     const [files, setFiles] = useState<File[] | undefined>();
     const [filePreview, setFilePreview] = useState<string | undefined>(
         isUpdateMode ? course?.thumbnailKey : undefined
+    );
+    const [trailerFiles, setTrailerFiles] = useState<File[] | undefined>();
+    const [trailerPreview, setTrailerPreview] = useState<string | undefined>(
+        isUpdateMode ? (course as any)?.trailerKey : undefined
     );
     const [selectedCategories, setSelectedCategories] = useState<Option[]>(
         course?.categories?.map(c => ({ value: c._id, label: c.name })) || []
@@ -100,7 +107,11 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
                     },
                 ]),
             ) || {},
-            categoriesIds: course.categoriesIds || []
+            categoriesIds: course.categoriesIds || [],
+            attendanceSettings: course.attendanceSettings || {
+                requireAttendance: false,
+                offlineSchedule: []
+            }
         } : {
             isPaid: false,
             coInstructorsIds: [] as any,
@@ -120,6 +131,7 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
 
     const onSubmit: SubmitHandler<CreateCourseSchema> = async (data) => {
         try {
+            console.log({ data })
             useGeneralStore.setState({ generalIsLoading: true });
             const formData = new FormData();
 
@@ -136,7 +148,7 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
             });
 
             if (isUpdateMode && courseId) {
-                await handleUpdateCourse(courseId, formData, course?.thumbnailKey);
+                await handleUpdateCourse(courseId, formData, course?.thumbnailKey, (course as any)?.trailerKey);
                 toast.success("Course Updated Successfully");
             } else {
                 await handleCreateCourse(formData);
@@ -167,6 +179,22 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
         }
     };
 
+    const handleTrailerDrop = (files: File[]) => {
+        setTrailerFiles(files);
+        if (files.length > 0) {
+            const file = files[0];
+            setValue("trailer" as any, file, { shouldValidate: true });
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (typeof e.target?.result === 'string') {
+                    setTrailerPreview(e.target?.result);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     // Convert instructors to options format
     // const instructorOptions: Option[] = instructors.map(instructor => ({
     //     value: instructor._id,
@@ -189,6 +217,10 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
     useEffect(() => {
         setValue("learningObjectives", learningObjectives)
     }, [learningObjectives])
+
+    useEffect(() => {
+        setValue("attendanceSettings.offlineSchedule" as any, offlineSchedule)
+    }, [offlineSchedule])
 
 
 
@@ -328,6 +360,42 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
                         {errors.thumbnail && (
                             <p className="text-left text-sm text-red-400 whitespace-nowrap flex items-center">
                                 {errors.thumbnail?.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Trailer Section */}
+                    <div className='flex flex-col md:flex-row gap-6 border-3 p-6 rounded-md'>
+                        <div className="flex flex-col gap-2">
+                            <Label className="text-sm lg:text-medium" htmlFor="trailer">
+                                Course Trailer Video (Optional)
+                            </Label>
+                            {isUpdateMode && trailerUrl && (
+                                <div className="mb-4">
+                                    <p className="text-sm text-muted-foreground mb-2">Current Trailer:</p>
+                                    <video
+                                        src={trailerUrl}
+                                        controls
+                                        className="rounded-md object-cover w-full max-w-md"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <DropzoneWithPreview
+                            setFilePreview={setTrailerPreview}
+                            filePreview={trailerPreview}
+                            handleDrop={handleTrailerDrop}
+                            files={trailerFiles}
+                            setFiles={setTrailerFiles}
+                            className='size-50 md:h-60 md:w-80'
+                            accept={{ "video/*": [] }}
+                            maxFiles={1}
+                        />
+
+                        {errors.trailer && (
+                            <p className="text-left text-sm text-red-400 whitespace-nowrap flex items-center">
+                                {(errors.trailer as any)?.message}
                             </p>
                         )}
                     </div>
@@ -596,6 +664,235 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
                                 </p>
                             )}
                         </div>
+                    </div>
+                </div>
+
+                {/* Attendance Settings */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Clock className="h-5 w-5" />
+                        Attendance Settings
+                    </h3>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="requireAttendance"
+                                checked={watch('attendanceSettings.requireAttendance' as any) || false}
+                                onChange={(e) => setValue('attendanceSettings.requireAttendance' as any, e.target.checked)}
+                                className="h-4 w-4 rounded text-primary focus:ring-primary border-3"
+                            />
+                            <Label htmlFor="requireAttendance">Require Attendance Tracking</Label>
+                        </div>
+
+                        {watch('attendanceSettings.requireAttendance' as any) && (
+                            <div className='border-2 p-8 bg-blend-color rounded-md flex flex-col gap-5'>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium">Offline Schedule Time Slots</label>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setOfflineSchedule(prev => [...prev, {
+                                            startTime: '',
+                                            endTime: '',
+                                            dayOfWeek: '',
+                                            instructorsIds: [],
+                                            coInstructorsIds: [],
+                                            studentsIds: []
+                                        }])}
+                                        className="flex items-center gap-1"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Add Time Slot
+                                    </Button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {offlineSchedule.map((slot, index) => (
+                                        <div key={index} className="border p-4 rounded-md space-y-3 bg-background">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium">Time Slot {index + 1}</span>
+                                                {offlineSchedule.length > 1 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setOfflineSchedule(prev => prev.filter((_, i) => i !== index))}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div className="flex flex-col gap-2">
+                                                    <Label htmlFor={`dayOfWeek-${index}`}>Day of Week *</Label>
+                                                    <Select
+                                                        value={slot.dayOfWeek}
+                                                        onValueChange={(value) => {
+                                                            const newSchedule = [...offlineSchedule];
+                                                            newSchedule[index].dayOfWeek = value;
+                                                            setOfflineSchedule(newSchedule);
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="border-3">
+                                                            <SelectValue placeholder="Select day" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+                                                                <SelectItem key={day} value={day}>
+                                                                    {day}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+
+                                                <div className="flex flex-col gap-2">
+                                                    <Label htmlFor={`startTime-${index}`}>Start Time * (e.g., 02:00 pm)</Label>
+                                                    <Input
+                                                        id={`startTime-${index}`}
+                                                        placeholder="02:00 pm"
+                                                        value={slot.startTime}
+                                                        onChange={(e) => {
+                                                            const newSchedule = [...offlineSchedule];
+                                                            newSchedule[index].startTime = e.target.value;
+                                                            setOfflineSchedule(newSchedule);
+                                                        }}
+                                                        className="border-3"
+                                                    />
+                                                </div>
+
+                                                <div className="flex flex-col gap-2">
+                                                    <Label htmlFor={`endTime-${index}`}>End Time * (e.g., 11:30 am)</Label>
+                                                    <Input
+                                                        id={`endTime-${index}`}
+                                                        placeholder="11:30 am"
+                                                        value={slot.endTime}
+                                                        onChange={(e) => {
+                                                            const newSchedule = [...offlineSchedule];
+                                                            newSchedule[index].endTime = e.target.value;
+                                                            setOfflineSchedule(newSchedule);
+                                                        }}
+                                                        className="border-3"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* User Assignments for this time slot */}
+                                            <div className="border-t pt-4 mt-4 space-y-3">
+                                                <h4 className="text-sm font-medium text-muted-foreground">Assign Users to Time Slot</h4>
+
+                                                {/* Instructors */}
+                                                <div className="flex flex-col gap-2">
+                                                    <Label htmlFor={`slot-instructors-${index}`}>Instructors (Optional)</Label>
+                                                    <MultipleSelector
+                                                        value={slot.instructorsIds?.map((id: string) => {
+                                                            const instructor = instructors.find(i => i._id === id);
+                                                            return instructor ? {
+                                                                value: instructor._id,
+                                                                label: `${instructor.firstName} ${instructor.lastName} (${instructor.email})`
+                                                            } : null;
+                                                        }).filter(Boolean) as Option[] || []}
+                                                        onChange={(selected) => {
+                                                            const newSchedule = [...offlineSchedule];
+                                                            newSchedule[index].instructorsIds = selected.map(s => s.value);
+                                                            setOfflineSchedule(newSchedule);
+                                                        }}
+                                                        defaultOptions={instructors.map(instructor => ({
+                                                            label: `${instructor.firstName} ${instructor.lastName} (${instructor.email})`,
+                                                            value: instructor._id
+                                                        }))}
+                                                        placeholder="Select instructors for this slot..."
+                                                        emptyIndicator={
+                                                            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                                                No instructors found.
+                                                            </p>
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Co-Instructors */}
+                                                <div className="flex flex-col gap-2">
+                                                    <Label htmlFor={`slot-coInstructors-${index}`}>Co-Instructors (Optional)</Label>
+                                                    <MultipleSelector
+                                                        value={slot.coInstructorsIds?.map((id: string) => {
+                                                            const coInstructor = instructors.find(i => i._id === id);
+                                                            return coInstructor ? {
+                                                                value: coInstructor._id,
+                                                                label: `${coInstructor.firstName} ${coInstructor.lastName} (${coInstructor.email})`
+                                                            } : null;
+                                                        }).filter(Boolean) as Option[] || []}
+                                                        onChange={(selected) => {
+                                                            const newSchedule = [...offlineSchedule];
+                                                            newSchedule[index].coInstructorsIds = selected.map(s => s.value);
+                                                            setOfflineSchedule(newSchedule);
+                                                        }}
+                                                        defaultOptions={instructors.map(instructor => ({
+                                                            label: `${instructor.firstName} ${instructor.lastName} (${instructor.email})`,
+                                                            value: instructor._id
+                                                        }))}
+                                                        placeholder="Select co-instructors for this slot..."
+                                                        emptyIndicator={
+                                                            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                                                No co-instructors found.
+                                                            </p>
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Students */}
+                                                {students.length > 0 && (
+                                                    <div className="flex flex-col gap-2">
+                                                        <Label htmlFor={`slot-students-${index}`}>Students (Optional)</Label>
+                                                        <MultipleSelector
+                                                            value={slot.studentsIds?.map((id: string) => {
+                                                                const student = students.find(s => s._id === id);
+                                                                return student ? {
+                                                                    value: student._id,
+                                                                    label: `${student.firstName} ${student.lastName} (${student.email})`
+                                                                } : null;
+                                                            }).filter(Boolean) as Option[] || []}
+                                                            onChange={(selected) => {
+                                                                const newSchedule = [...offlineSchedule];
+                                                                newSchedule[index].studentsIds = selected.map(s => s.value);
+                                                                setOfflineSchedule(newSchedule);
+                                                            }}
+                                                            defaultOptions={students.map(student => ({
+                                                                label: `${student.firstName} ${student.lastName} (${student.email})`,
+                                                                value: student._id
+                                                            }))}
+                                                            placeholder="Select students for this slot..."
+                                                            emptyIndicator={
+                                                                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                                                    No students found.
+                                                                </p>
+                                                            }
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Assign specific students to this time slot (optional)
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <p className="text-xs text-muted-foreground">
+                                                Time format: HH:MM am/pm (e.g., 02:00 pm, 11:30 am)
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {errors.attendanceSettings && (
+                                    <p className="text-left text-sm text-red-400">
+                                        {(errors.attendanceSettings as any)?.message}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 

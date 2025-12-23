@@ -5,7 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { ToastContainer } from 'react-toastify';
 import Spinner from "@/components/organs/spinner";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Create QueryClient with proper config to prevent unwanted prefetching
 const queryClient = new QueryClient({

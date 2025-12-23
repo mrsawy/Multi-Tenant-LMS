@@ -1,5 +1,6 @@
 import { ICourse } from "../course/course.interface";
 import { BillingCycle } from "../course/enum/BillingCycle.enum";
+import { IUser } from "../user/user.interface";
 
 export enum SubscriptionStatus {
     ACTIVE = 'ACTIVE', EXPIRED = 'EXPIRED', CANCELLED = 'cancelled', SUSPENDED = 'cancelled'
@@ -30,10 +31,22 @@ export interface SubscriptionTypeDef {
 }
 
 
+export interface IEnrollmentProgress {
+    completedModules: string[];
+    completedContents: string[];
+    quizScores: {
+        quizId: string;
+        score: number;
+        attempts: number;
+        completedAt: Date;
+    }[];
+};
+
 export interface IEnrollment {
     _id?: string;
 
     userId: string;
+    user?: IUser;
     courseId: string;
     course?: ICourse
     organizationId: string;
@@ -49,16 +62,7 @@ export interface IEnrollment {
     timeSpentMinutes: number;
     lastAccessedAt: Date;
 
-    progress: {
-        completedModules: string[];
-        completedLessons: string[];
-        quizScores: {
-            quizId: string;
-            score: number;
-            attempts: number;
-            completedAt: Date;
-        }[];
-    };
+    progress: IEnrollmentProgress;
 
     certificate: {
         issued: boolean;

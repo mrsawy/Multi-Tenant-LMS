@@ -125,8 +125,9 @@ const FiltersBar: React.FC<{
                                     title="Select Currency"
                                     placeholder="Currency ..."
                                     onValueChange={(value) => setFilters(p => ({ ...p, priceCurrency: value }))}
-                                    buttonClassName="w-16 text-sm lg:w-24 lg:text-md lg:ml-4 lg:w-32 p-3"
-                                />
+                                    buttonClassName="w-16 text-xs lg:w-24 lg:text-md lg:ml-4 lg:w-32   m-auto   flex justify-center items-center"
+
+                                    />
                             </div>
                         </div>
                     </div>

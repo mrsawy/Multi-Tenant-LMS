@@ -13,6 +13,7 @@ import { SidebarInset, SidebarProvider } from '@/components/atoms/sidebar';
 import { OrgSidebar } from '../organization-dashboard/__components/OrgSidebar';
 import { getAuthUser } from '@/lib/actions/user/user.action';
 import { StudentSidebar } from './__components/StudentSideBar';
+import { Roles } from '@/lib/types/user/roles.enum';
 
 export const metadata: Metadata = {
     title: 'Dashboard',
@@ -23,6 +24,9 @@ export default async function OrgDashboardLayout({
     children,
 }: LayoutProps<'/[locale]/student-dashboard'>) {
     const initialUser = await getAuthUser();
+    if (!initialUser || initialUser.roleName !== Roles.STUDENT) {
+        redirect("/")
+    }
 
     return (
         <div>

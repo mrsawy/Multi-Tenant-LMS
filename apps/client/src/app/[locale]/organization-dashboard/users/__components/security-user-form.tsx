@@ -31,135 +31,77 @@ function SecurityUserForm({ errors, register, setValue, watch, mode, }: {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                {mode === "create" && (
-                    <>
-                        {/* Password */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                                Password *
-                            </label>
-                            <div className="relative">
-                                <Input
-                                    {...register("password" as any)}
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter password"
-                                    className="w-full pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-4 w-4 text-gray-400" />
-                                    ) : (
-                                        <Eye className="h-4 w-4 text-gray-400" />
-                                    )}
-                                </button>
-                            </div>
-                            {errors.password && (
-                                <p className="text-sm text-red-600">{errors?.password?.message}</p>
-                            )}
-                        </div>
 
-                        {/* Confirm Password */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                                Confirm Password *
-                            </label>
-                            <div className="relative">
-                                <Input
-                                    {...register("confirmPassword")}
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="Confirm password"
-                                    className="w-full pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                >
-                                    {showConfirmPassword ? (
-                                        <EyeOff className="h-4 w-4 text-gray-400" />
-                                    ) : (
-                                        <Eye className="h-4 w-4 text-gray-400" />
-                                    )}
-                                </button>
-                            </div>
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
-                            )}
-                        </div>
-                    </>
-                )}
 
-                {mode === "edit" && (
-                    <>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <p className="text-sm text-yellow-800">
-                                Leave password fields empty if you don't want to change the password.
-                            </p>
-                        </div>
+                <>
 
-                        {/* New Password */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                                New Password
-                            </label>
-                            <div className="relative">
-                                <Input
-                                    {...register("password" as any)}
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter new password"
-                                    className="w-full pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-4 w-4 text-gray-400" />
-                                    ) : (
-                                        <Eye className="h-4 w-4 text-gray-400" />
-                                    )}
-                                </button>
-                            </div>
-                            {/* {errors.password && (
-                        <p className="text-sm text-red-600">{errors.password.message}</p>
-                    )} */}
+                    {mode == "edit" && <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p className="text-sm text-yellow-800">
+                            Leave password fields empty if you don't want to change the password.
+                        </p>
+                    </div>}
+                    {/* Password */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                            Password *
+                        </label>
+                        <div className="relative">
+                            <Input
+                                {...register("password" as any)}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter password"
+                                className="w-full pr-10"
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-4 w-4 text-gray-400" />
+                                ) : (
+                                    <Eye className="h-4 w-4 text-gray-400" />
+                                )}
+                            </button>
                         </div>
-
-                        {/* Confirm New Password */}
-                        {/* <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                        Confirm New Password
-                    </label>
-                    <div className="relative">
-                        <Input
-                            {...register("confirmPassword")}
-                            type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Confirm new password"
-                            className="w-full pr-10"
-                        />
-                        <button
-                            type="button"
-                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                            {showConfirmPassword ? (
-                                <EyeOff className="h-4 w-4 text-gray-400" />
-                            ) : (
-                                <Eye className="h-4 w-4 text-gray-400" />
-                            )}
-                        </button>
+                        {errors.password && (
+                            <p className="text-sm text-red-600">{errors?.password?.message}</p>
+                        )}
                     </div>
-                    {errors.confirmPassword && (
-                        <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
-                    )}
-                </div> */}
-                    </>
-                )}
+
+                    {/* Confirm Password */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                            Confirm Password *
+                        </label>
+                        <div className="relative">
+                            <Input
+                                {...register("confirmPassword")}
+                                type={showConfirmPassword ? "text" : "password"}
+                                placeholder="Confirm password"
+                                className="w-full pr-10"
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                                {showConfirmPassword ? (
+                                    <EyeOff className="h-4 w-4 text-gray-400" />
+                                ) : (
+                                    <Eye className="h-4 w-4 text-gray-400" />
+                                )}
+                            </button>
+                        </div>
+                        {errors.confirmPassword && (
+                            <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+                        )}
+                    </div>
+                </>
+
+
+
+
             </CardContent>
         </Card>)
 }
