@@ -50,7 +50,7 @@ export function LoginForm({
       router.push(
         redirectUrl
           ? redirectUrl
-          : response.roleName === UserMainRoles.STUDENT
+          : response.roleName.toLowerCase() === UserMainRoles.STUDENT.toLowerCase()
             ? '/student-dashboard'
             : '/organization-dashboard',
       );

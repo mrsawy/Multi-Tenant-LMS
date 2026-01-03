@@ -41,7 +41,7 @@ export default async function LocaleLayout({
 
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
         <Provider locale={locale} messages={messages}>
           {children}

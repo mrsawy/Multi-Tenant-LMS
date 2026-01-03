@@ -14,6 +14,7 @@ import { OrgSidebar } from '../organization-dashboard/__components/OrgSidebar';
 import { getAuthUser } from '@/lib/actions/user/user.action';
 import { StudentSidebar } from './__components/StudentSideBar';
 import { Roles } from '@/lib/types/user/roles.enum';
+import { useTheme } from 'next-themes';
 
 export const metadata: Metadata = {
     title: 'Dashboard',
@@ -24,10 +25,11 @@ export default async function OrgDashboardLayout({
     children,
 }: LayoutProps<'/[locale]/student-dashboard'>) {
     const initialUser = await getAuthUser();
-    if (!initialUser || initialUser.roleName !== Roles.STUDENT) {
+    if (!initialUser || initialUser.roleName.toLowerCase() !== Roles.STUDENT.toLowerCase()) {
         redirect("/")
     }
 
+    
     return (
         <div>
             <SidebarProvider
@@ -37,7 +39,8 @@ export default async function OrgDashboardLayout({
                         '--header-height': 'calc(var(--spacing) * 12)',
                     } as React.CSSProperties
                 }
-            >
+
+                >
                 <StudentSidebar user={initialUser} />
                 <SidebarInset>
                     <SiteHeader />

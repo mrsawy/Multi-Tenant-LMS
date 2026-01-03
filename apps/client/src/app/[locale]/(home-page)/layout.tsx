@@ -2,6 +2,7 @@ import { Navbar02 } from '@/components/molecules/nav-bar';
 import HomeNave from '@/components/organs/home-nav';
 import { getAuthUser } from '@/lib/actions/user/user.action';
 import type { Metadata } from 'next';
+import Provider from './provider';
 // import { redirect } from 'next/navigation';
 // import { routing } from '@/i18n/routing';
 
@@ -21,9 +22,9 @@ export default async function LocaleLayout({
   const user = await getAuthUser();
 
   return (
-    <>
+    <Provider>
       <HomeNave user={user} />
       {children}
-    </>
+    </Provider>
   );
 }

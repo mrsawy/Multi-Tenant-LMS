@@ -1,5 +1,183 @@
 {
   "HomePage": {
     "title": "Hello world!"
+  },
+  "Hero": {
+    "title": "Revolutionary LMS Platform",
+    "description": "Experience the next generation of learning management with AI-powered insights, immersive content delivery, and seamless multi-tenant architecture.",
+    "downloadNow": "Download Now",
+    "createAccount": "Create Account",
+    "starOnGithub": "Star on Github",
+    "frameworksTitle": "Play is now available for all popular frameworks",
+    "trustedByOrganizations": "Trusted by organizations worldwide",
+    "cloudBased": "Cloud Based",
+    "mobileReady": "Mobile Ready",
+    "analytics": "Analytics",
+    "secure": "Secure",
+    "multiTenant": "Multi-Tenant",
+    "fast": "Fast",
+    "numberOneMultiTenantSolution": "#1 Multi-Tenant LMS Solution",
+    "downloadStudentsApplicationNow": "Download Students App ",
+    "createNewAccountNow": "Create New Account"
+  },
+  "ScrollCards": {
+    "badge": "LMS Platform",
+    "title": "Empowering Education Worldwide",
+    "cards": [
+      {
+        "tag": "Platform",
+        "title": "Next-Gen E-learning Management",
+        "description": "A comprehensive system designed to manage learners, content, and institutional growth with ease."
+      },
+      {
+        "tag": "Content",
+        "title": "Rich & Diverse Course Materials",
+        "description": "Host immersive video lessons, interactive documents, and downloadable resources in one place."
+      },
+      {
+        "tag": "Mobility",
+        "title": "Study Anywhere, Anytime",
+        "description": "Seamlessly access your learning journey across all devices, ensuring education never stops."
+      },
+      {
+        "tag": "Collaboration",
+        "title": "Interactive Focus & Discussions",
+        "description": "Engage with instructors and peers through dedicated forums and real-time discussion boards."
+      },
+      {
+        "tag": "Validation",
+        "title": "Smart Quizzes & Assessments",
+        "description": "Evaluate knowledge with dynamic quiz types, instant results, and detailed feedback loops."
+      },
+      {
+        "tag": "Insights",
+        "title": "Advanced Analytics & Reports",
+        "description": "Monitor performance at every level with visual data reports and progress tracking metrics."
+      }
+    ]
+  },
+  "home": {
+    "hero": {
+      "title": "The All-in-One Learning Platform Built for Modern Education",
+      "subtitle": "Manage online, offline, and hybrid learning from a single powerful LMS.",
+      "description": "Deliver engaging courses, track attendance, analyze student performance, and scale across multiple organizations — all with full customization and mobile access.",
+      "primaryCta": "Start Free Trial",
+      "secondaryCta": "Request Demo"
+    },
+    "sections": [
+      {
+        "title": "Powerful Learning Experience",
+        "description": "Everything you need to deliver engaging and effective learning.",
+        "cards": [
+          {
+            "title": "Video-Based Learning",
+            "description": "Deliver high-quality video lessons optimized for all devices."
+          },
+          {
+            "title": "Interactive Quizzes",
+            "description": "Assess students with smart quizzes and instant feedback."
+          },
+          {
+            "title": "Progress Tracking",
+            "description": "Monitor lesson completion and student engagement in real time."
+          },
+          {
+            "title": "Mobile Learning",
+            "description": "Students can learn anytime using our dedicated mobile app."
+          }
+        ]
+      },
+      {
+        "title": "Built for Organizations",
+        "description": "Designed to support multiple organizations from one system.",
+        "cards": [
+          {
+            "title": "Multi-Tenant Architecture",
+            "description": "Each organization has isolated data, users, and settings."
+          },
+          {
+            "title": "Custom Branding",
+            "description": "Apply your own logo, colors, and identity."
+          },
+          {
+            "title": "Subscription Plans",
+            "description": "Control features and limits per organization."
+          },
+          {
+            "title": "Role & Permission Control",
+            "description": "Full access control for admins, instructors, and staff."
+          }
+        ]
+      },
+      {
+        "title": "Advanced Reports & Analytics",
+        "description": "Turn learning data into actionable insights.",
+        "cards": [
+          {
+            "title": "Student Reports",
+            "description": "Detailed performance reports for each student."
+          },
+          {
+            "title": "Quiz Analytics",
+            "description": "Track scores, correct answers, and improvement areas."
+          },
+          {
+            "title": "Attendance Tracking",
+            "description": "Manage attendance for offline and hybrid courses."
+          },
+          {
+            "title": "Unified Student Profile",
+            "description": "Combine online progress and offline attendance in one place."
+          }
+        ]
+      },
+      {
+        "title": "Customization & Growth",
+        "description": "Adapt the platform to your business and scale with confidence.",
+        "cards": [
+          {
+            "title": "Custom Page Builder",
+            "description": "Build landing pages and content pages without coding."
+          },
+          {
+            "title": "Feature Toggles",
+            "description": "Enable or disable features per organization."
+          },
+          {
+            "title": "Scalable Infrastructure",
+            "description": "Grow from hundreds to thousands of students smoothly."
+          },
+          {
+            "title": "Enterprise-Ready Security",
+            "description": "Secure data isolation and permission enforcement."
+          }
+        ]
+      }
+    ]
+  },
+  "courses": {
+    "title": "Courses",
+    "description": "Create, manage, and deliver structured learning experiences.",
+    "features": [
+      "Video, article, and quiz-based courses",
+      "Student enrollment and progress tracking",
+      "Offline course attendance support",
+      "Mobile-friendly learning experience"
+    ]
+  },
+  "about": {
+    "title": "About Us",
+    "description": "We are building a next-generation LMS that empowers organizations to deliver better education.",
+    "mission": "Our mission is to simplify learning management while giving organizations full control, flexibility, and scalability."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Have questions or need a demo? We’d love to hear from you.",
+    "fields": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "message": "Your Message"
+    },
+    "submit": "Send Message"
   }
 }

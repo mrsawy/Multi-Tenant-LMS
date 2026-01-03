@@ -7,6 +7,7 @@ import PricingSection from "./__sections/pricing";
 import CoursesSection from "./__sections/course-section";
 import TeachersSection from "./__sections/teacher-section";
 import { findCourses } from "@/lib/actions/courses/getCourses.action";
+import ClickSpark from '@/components/ClickSpark';
 
 // Force dynamic rendering - prevents pre-rendering during other page builds
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ export default async function Page({ params }: Props) {
   setRequestLocale(locale);
 
   const courses = await findCourses({});
-  
+
   return (
     <div className="relative w-full min-h-screen bg-white dark:bg-black">
       <HeroSection />

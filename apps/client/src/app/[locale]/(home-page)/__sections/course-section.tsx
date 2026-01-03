@@ -44,7 +44,7 @@ const CoursesSection = ({ courses }: { courses: Paginated<ICourse> }) => {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                     {courses.docs.map((course) => (
-                        <CourseCard course={course} />
+                        <CourseCard key={course._id?.toString()} course={course} />
                     ))}
                 </div>
 

@@ -107,7 +107,7 @@ const Button = React.forwardRef<
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, effect, size, className }))}
+        className={cn(buttonVariants({ variant, effect, size, className }),"rtl:flex-row-reverse")}
         ref={ref}
         {...props}
       >
@@ -116,7 +116,7 @@ const Button = React.forwardRef<
             "transition-all duration-200",
             isDisabled
               ? "w-5 translate-x-0 pr-2 opacity-100"
-              : "w-0 translate-x-[0%] pr-0 opacity-0 group-hover:w-5 group-hover:translate-x-100 group-hover:pr-2 group-hover:opacity-100"
+              : "w-0 translate-x-[0%] pr-0 opacity-0 group-hover:w-5   group-hover:pr-2 group-hover:opacity-100"
           )}>
             {renderIcon()}
           </div>

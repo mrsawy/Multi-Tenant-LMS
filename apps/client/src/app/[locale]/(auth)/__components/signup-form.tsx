@@ -75,7 +75,7 @@ export function SignupForm({
         return toast.error(response.err.message)
       }
       onSuccess?.()
-      router.push(redirectUrl ? redirectUrl : response.roleName === UserMainRoles.STUDENT ? '/student-dashboard' : '/organization-dashboard')
+      router.push(redirectUrl ? redirectUrl : response.roleName.toLowerCase() === UserMainRoles.STUDENT.toLowerCase() ? '/student-dashboard' : '/organization-dashboard')
     } catch (error) {
       console.log({ error })
       setError('root', { message: 'Something went wrong.' });

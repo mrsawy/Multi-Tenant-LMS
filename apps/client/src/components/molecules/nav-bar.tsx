@@ -1,7 +1,8 @@
 'use client';
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { BookOpenIcon, InfoIcon, LifeBuoyIcon, LogIn } from 'lucide-react';
+import { BookOpenIcon, InfoIcon, Languages, LifeBuoyIcon, LogIn } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { Button } from '@/components/atoms/button';
 import {
   NavigationMenu,
@@ -43,7 +44,7 @@ import {
 } from '@tabler/icons-react';
 import useGeneralStore from '@/lib/store/generalStore';
 import { logout } from '@/lib/actions/auth/auth.action';
-import { useRouter } from '@/i18n/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import logoSrc from '@/../public/images/logo.png';
 // Simple logo component for the navbar
@@ -160,6 +161,34 @@ const defaultNavigationLinks: Navbar02NavItem[] = [
     ],
   },
 ];
+const LanguageSwitcher = () => {
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleLocaleChange = (newLocale: 'en' | 'ar') => {
+    router.replace(pathname, { locale: newLocale });
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <Languages className="h-[1.2rem] w-[1.2rem]" />
+          <span className="sr-only">Toggle language</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => handleLocaleChange('en')}>
+          English
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleLocaleChange('ar')}>
+          Arabic
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
   (
     {
@@ -406,6 +435,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
           </div>
           {/* Right side */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <ModeToggle />
             {!user ? (
               <>
