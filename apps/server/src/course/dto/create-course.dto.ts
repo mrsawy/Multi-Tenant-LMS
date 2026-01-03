@@ -14,6 +14,7 @@ import {
   Validate,
   IsDefined,
   IsArray,
+  Matches,
 } from 'class-validator';
 import {
   ValidatorConstraint,
@@ -30,8 +31,7 @@ import mongoose from 'mongoose';
   async: false,
 })
 class AtLeastOnePricingWithPriceAndCurrency
-  implements ValidatorConstraintInterface
-{
+  implements ValidatorConstraintInterface {
   validate(pricing: PricingDto, args: ValidationArguments): boolean {
     const obj = args.object as CreateCourseDto;
     if (!obj?.isPaid) return true; // Not required when course is free
@@ -133,6 +133,54 @@ export class SettingsDto {
   downloadEnabled?: boolean;
 }
 
+export class TimeSlotDto {
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i, {
+    message: 'startTime must be in format HH:MM am/pm (e.g., 02:00 pm, 11:30 am)',
+  })
+  startTime: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i, {
+    message: 'endTime must be in format HH:MM am/pm (e.g., 02:00 pm, 11:30 am)',
+  })
+  endTime: string;
+
+  @IsString()
+  @IsNotEmpty()
+  dayOfWeek: string;
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  instructorsIds?: mongoose.Types.ObjectId[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  coInstructorsIds?: mongoose.Types.ObjectId[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  studentsIds?: mongoose.Types.ObjectId[];
+
+}
+
+export class AttendanceSettingsDto {
+  @IsBoolean()
+  @IsOptional()
+  requireAttendance?: boolean;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TimeSlotDto)
+  @IsOptional()
+  offlineSchedule?: TimeSlotDto[];
+}
+
 export class CreateCourseDto {
   @IsString()
   @IsNotEmpty()
@@ -178,9 +226,9 @@ export class CreateCourseDto {
   @IsOptional()
   thumbnailKey: string;
 
-  // @IsString()
-  // @IsOptional()
-  // trailer?: string;
+  @IsString()
+  @IsOptional()
+  trailerKey?: string;
 
   @ValidateNested()
   @Type(() => SettingsDto)
@@ -201,4 +249,9 @@ export class CreateCourseDto {
   @IsArray()
   @IsOptional()
   learningObjectives?: string[];
+
+  @ValidateNested()
+  @Type(() => AttendanceSettingsDto)
+  @IsOptional()
+  attendanceSettings?: AttendanceSettingsDto;
 }

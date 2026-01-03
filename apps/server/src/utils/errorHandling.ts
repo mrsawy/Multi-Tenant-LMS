@@ -55,3 +55,7 @@ export const handleRpcError = (error: unknown) => {
     error: 'Internal Server Error',
   });
 };
+
+
+
+

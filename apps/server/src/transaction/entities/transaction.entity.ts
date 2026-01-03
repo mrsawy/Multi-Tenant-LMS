@@ -45,10 +45,10 @@ export class Transaction extends Document<Types.ObjectId> {
   walletId?: Types.ObjectId; // Wallet that this transaction affects (for credit/debit)
 
   // ========== Core Transaction Info ==========
-  @Prop({ required: true, enum: PaymentPurpose, index: true })
+  @Prop({ required: true, type: String, enum: PaymentPurpose, index: true })
   purpose: PaymentPurpose;
 
-  @Prop({ required: true, enum: TransactionType, index: true })
+  @Prop({ required: true, type: String, enum: TransactionType, index: true })
   type: TransactionType;
 
   @Prop({ required: true, min: 0 })
@@ -58,7 +58,7 @@ export class Transaction extends Document<Types.ObjectId> {
   currency: string;
 
   @Prop({
-    required: true,
+    type: String,
     enum: TransactionStatus,
     default: TransactionStatus.PENDING,
     index: true,
@@ -88,10 +88,10 @@ export class Transaction extends Document<Types.ObjectId> {
   originalCurrency?: string; // Original currency before conversion
 
   // ========== Payment Provider Info ==========
-  @Prop({ enum: PaymentProvider })
+  @Prop({ type: String, enum: PaymentProvider })
   paymentProvider?: PaymentProvider; // PAYMOB, PAYPAL, KASHIER, etc.
 
-  @Prop({ enum: PaymentMethod })
+  @Prop({ type: String, enum: PaymentMethod })
   paymentMethod?: PaymentMethod; // WALLET, DIRECT, CREDIT_CARD, etc.
 
   @Prop({ unique: true, sparse: true, index: true })

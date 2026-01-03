@@ -8,10 +8,13 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { Response } from 'express';
 import { throwError } from 'rxjs';
+import { handleRpcError } from 'src/utils/errorHandling';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
+    console.dir({ exception }, { depth: null });
+
     const contextType = host.getType();
 
     if (contextType === 'http') {
@@ -76,40 +79,42 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private handleRpcException(exception: any, host: ArgumentsHost) {
-    let error = {
+    let error: any = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',
       error: 'RpcError',
     };
 
     if (exception instanceof RpcException) {
-      const rpcError = exception.getError();
-      if (typeof rpcError === 'object') {
-        error = { ...error, ...rpcError };
-      } else {
-        error.message = rpcError;
-      }
+      error = exception.getError();
     } else if (exception instanceof HttpException) {
-      error.statusCode = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-
-      if (typeof exceptionResponse === 'string') {
-        error.message = exceptionResponse;
-      } else if (typeof exceptionResponse === 'object') {
-        error = { ...error, ...(exceptionResponse as any) };
+      error = exception.getResponse();
+      if (typeof error === 'string') {
+        error = { statusCode: exception.getStatus(), message: error };
       }
-    } else {
-      error.message = exception.message || error.message;
+    } else if (exception?.message) {
+      error.message = exception.message;
+    }
+
+    // Preserve the original error structure if available and valid
+    // This allows passing through RpcExceptions created by handleRpcError elsewhere
+    if (exception instanceof RpcException && typeof exception.getError() === 'object') {
+      const errObj = exception.getError() as any;
+      if (errObj.statusCode || errObj.code) {
+        error = errObj;
+      }
     }
 
     // Log the error
     console.error('RPC Error:', {
       timestamp: new Date().toISOString(),
-      message: error.message,
+      message: error.message || error,
       stack: exception.stack,
+      raw: exception
     });
 
     // Return error as observable for NATS
+    // NATS expects the error to be thrown in the observable stream
     return throwError(() => error);
   }
 }

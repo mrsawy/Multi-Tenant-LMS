@@ -6,7 +6,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-;import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+; import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import mongoose, {
   ClientSession,
   Connection,
@@ -32,6 +32,7 @@ import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
 import { CourseModule } from '../course.module';
 import { CourseContent } from '../entities/course-content.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class CourseService {
@@ -80,7 +81,7 @@ export class CourseService {
       course: createdCourse,
     };
   }
-  
+
   async findAll(
     filters: mongoose.RootFilterQuery<Course>,
     options: ICourseFilters,
@@ -225,11 +226,24 @@ export class CourseService {
     return foundedCourse;
   }
 
-  async update(updateCourseDto: UpdateCourseDto) {
+  async update(
+    updateCourseDto: UpdateCourseDto,
+  ) {
     try {
-      if (updateCourseDto.isPaid && updateCourseDto.pricing) {
-        updateCourseDto.pricing = Object.fromEntries(
-          Object.entries(updateCourseDto.pricing).map(([key, value]) => [
+      const { courseId, ...updateData } = updateCourseDto;
+
+      // Check if course exists
+      const existingCourse = await this.courseModel.findById(courseId);
+      if (!existingCourse) {
+        throw new NotFoundException('Course not found');
+      }
+
+
+
+      // Handle pricing conversion if needed
+      if (updateData.isPaid && updateData.pricing) {
+        updateData.pricing = Object.fromEntries(
+          Object.entries(updateData.pricing).map(([key, value]) => [
             key,
             {
               ...value,
@@ -242,15 +256,26 @@ export class CourseService {
         );
       }
 
-      const result = await this.courseModel.updateOne(
-        { _id: updateCourseDto.courseId },
-        updateCourseDto,
-      );
-      const course = await this.courseModel.findById(updateCourseDto.courseId);
-      console.log({ course });
-      if (result.matchedCount === 0) {
-        throw new NotFoundException('Course not found');
+      // Handle attendance settings update
+      // If attendanceSettings is provided, merge it with existing settings
+      if (updateData.attendanceSettings) {
+        const currentSettings = existingCourse.attendanceSettings || {};
+        updateData.attendanceSettings = {
+          requireAttendance:
+            updateData.attendanceSettings.requireAttendance !== undefined
+              ? updateData.attendanceSettings.requireAttendance
+              : currentSettings.requireAttendance,
+          offlineSchedule:
+            updateData.attendanceSettings.offlineSchedule !== undefined
+              ? updateData.attendanceSettings.offlineSchedule
+              : currentSettings.offlineSchedule || [],
+        };
       }
+
+      const result = await this.courseModel.updateOne(
+        { _id: courseId },
+        { $set: updateData },
+      );
 
       if (result.modifiedCount === 0) {
         return {
@@ -259,9 +284,11 @@ export class CourseService {
         };
       }
 
+      const updatedCourse = await this.courseModel.findById(courseId);
       return {
         message: 'Course updated successfully',
         updated: true,
+        course: updatedCourse,
       };
     } catch (error) {
       console.error(error);

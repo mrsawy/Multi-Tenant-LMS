@@ -7,6 +7,8 @@ import { Review, ReviewSchema } from './entities/review.entity';
 import { CourseReviewSchema } from './entities/course-review.entity';
 import { InstructorReviewSchema } from './entities/instructor-review.entity';
 import { OrganizationReviewSchema } from './entities/organization-review.entity';
+import { ModuleReviewSchema } from './entities/module-review.entity';
+import { ContentReviewSchema } from './entities/content-review.entity';
 import { ReviewType } from './enum/reviewType.enum';
 import { AuthModule } from 'src/auth/auth.module';
 import { RoleModule } from 'src/role/role.module';
@@ -21,6 +23,8 @@ import { RoleModule } from 'src/role/role.module';
           { name: ReviewType.COURSE, schema: CourseReviewSchema },
           { name: ReviewType.INSTRUCTOR, schema: InstructorReviewSchema },
           { name: ReviewType.ORGANIZATION, schema: OrganizationReviewSchema },
+          { name: ReviewType.MODULE, schema: ModuleReviewSchema },
+          { name: ReviewType.CONTENT, schema: ContentReviewSchema },
         ],
       },
     ]),
@@ -31,4 +35,4 @@ import { RoleModule } from 'src/role/role.module';
   providers: [ReviewService],
   exports: [ReviewService],
 })
-export class ReviewModule {}
+export class ReviewModule { }

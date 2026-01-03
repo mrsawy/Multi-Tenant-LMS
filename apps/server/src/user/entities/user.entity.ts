@@ -67,7 +67,7 @@ class Preferences {
 }
 
 @Schema({ timestamps: true })
-export class User {
+export class User extends Document<mongoose.Types.ObjectId> {
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: false })
   organizationId: Types.ObjectId;
 
@@ -104,7 +104,7 @@ export class User {
   @Prop({ type: Preferences })
   preferences: Preferences;
 
-  @Prop({ enum: Status, default: 'active' })
+  @Prop({ type: String, enum: Status, default: 'active' })
   status: string;
 
   @Prop()

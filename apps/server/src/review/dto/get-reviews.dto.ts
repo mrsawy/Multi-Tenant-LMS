@@ -26,6 +26,16 @@ export class GetReviewsDto {
     @IsOptional()
     reviewedOrganizationId?: string;
 
+    @ValidateIf((o) => o.reviewType === ReviewType.MODULE)
+    @IsMongoId()
+    @IsOptional()
+    moduleId?: string;
+
+    @ValidateIf((o) => o.reviewType === ReviewType.CONTENT)
+    @IsMongoId()
+    @IsOptional()
+    contentId?: string;
+
     @IsNumber()
     @Min(1)
     @Max(5)

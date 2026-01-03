@@ -18,7 +18,7 @@ import { CourseContentService } from './courseContent.service';
 export class CourseModulesService {
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    @InjectModel(CourseModuleEntity.name)
+    @InjectModel('CourseModule')
     private readonly courseModuleModel: Model<CourseModuleEntity>,
     @Inject(forwardRef(() => CourseService))
     private readonly courseService: CourseService,

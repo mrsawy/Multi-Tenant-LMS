@@ -2,5 +2,7 @@ export enum ReviewType {
   COURSE = 'COURSE',
   INSTRUCTOR = 'INSTRUCTOR',
   ORGANIZATION = 'ORGANIZATION',
+  MODULE = 'MODULE',
+  CONTENT = 'CONTENT',
 }
 

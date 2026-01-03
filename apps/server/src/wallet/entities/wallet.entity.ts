@@ -17,7 +17,7 @@ export class Wallet extends Document<Types.ObjectId> {
   @Prop({ required: true, default: 0, min: 0, type: Number })
   balance: number;
 
-  @Prop({ default: 'USD' })
+  @Prop({ type: String, enum: Currency, default: 'USD' })
   currency: Currency;
 
   @Prop({ default: true })

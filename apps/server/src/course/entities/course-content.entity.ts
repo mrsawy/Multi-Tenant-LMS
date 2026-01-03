@@ -3,10 +3,18 @@ import { Document, Types } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { ContentType } from '../enum/contentType.enum';
 import { CourseModuleEntity } from './course-module.entity';
-import { QuizSchema } from './quiz.schema';
-import { ArticleSchema } from './article.schema';
-import { VideoSchema } from './video.schema';
-import { AssignmentSchema } from './assignment.schema';
+import { Quiz, QuizSchema } from './quiz.schema';
+import { Article, ArticleSchema } from './article.schema';
+import { Video, VideoSchema } from './video.schema';
+import { Assignment, AssignmentSchema } from './assignment.schema';
+
+
+export type CourseContentDocument =
+  | (CourseContent & Quiz)
+  | (CourseContent & Video)
+  | (CourseContent & Article)
+  | (CourseContent & Assignment);
+
 
 @Schema({
   timestamps: true,
@@ -20,7 +28,7 @@ export class CourseContent extends Document<Types.ObjectId> {
   @Prop({ type: Types.ObjectId, required: true, ref: 'Organization' })
   organizationId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, required: true, ref: CourseModuleEntity.name })
+  @Prop({ type: Types.ObjectId, required: true, ref: 'CourseModule' })
   moduleId: Types.ObjectId;
 
   @Prop({ type: String, required: true, ref: 'User', refPath: 'username' })

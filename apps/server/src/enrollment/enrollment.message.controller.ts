@@ -38,8 +38,10 @@ import { ProjectService } from 'src/course/services/project.service';
 import { LiveSessionService } from 'src/course/services/liveSession.service';
 import { MarkLiveSessionAttendanceDto } from './dto/live-session-attendance.dto';
 import { SubmitProjectDto } from './dto/project-submission.dto';
+import { ApplyRpcErrorHandling } from 'src/utils/docerators/error-handeling/class/ApplyRpcErrorHandling.decorator';
 
 @Controller()
+@ApplyRpcErrorHandling
 export class EnrollmentMessageController {
   constructor(
     @InjectConnection() private readonly connection: Connection,
@@ -65,6 +67,21 @@ export class EnrollmentMessageController {
     );
   }
 
+
+  @UseGuards(AuthGuard)
+  @MessagePattern('enrollment.getSingleEnrollment')
+  async getSingleEnrollment(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: { enrollmentId: string },
+  ) {
+    return await this.enrollmentService.getSingleEnrollment(
+      payload.enrollmentId,
+      context.userPayload._id.toString(),
+    );
+  }
+
+
   @UseGuards(AuthGuard)
   @MessagePattern('enrollment.getOrganizationEnrollments')
   async getOrganizationEnrollments(
@@ -79,7 +96,21 @@ export class EnrollmentMessageController {
   }
 
   @UseGuards(AuthGuard)
-  @MessagePattern('enrollment.enrollToCourseBgOrg')
+  @MessagePattern('enrollment.getCourseEnrollments')
+  async getCourseEnrollments(
+    @Ctx() context: IUserContext,
+    @Payload(new RpcValidationPipe())
+    payload: { courseId: string; options: PaginateOptionsWithSearch },
+  ) {
+    // Optional: Validate if organization matches or if user has permission
+    return await this.enrollmentService.getCourseEnrollments(
+      payload.courseId,
+      payload.options,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @MessagePattern('enrollment.enrollToCourseByOrg')
   async enrollToCourseBgOrg(
     @Payload(new RpcValidationPipe())
     payload: { userId: string; courseId: string },
@@ -131,7 +162,7 @@ export class EnrollmentMessageController {
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      handleRpcError(error);
+      throw error;
     }
   }
 
@@ -159,7 +190,7 @@ export class EnrollmentMessageController {
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      handleRpcError(error);
+      throw error;
     }
   }
 
@@ -197,7 +228,7 @@ export class EnrollmentMessageController {
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      handleRpcError(error);
+      throw error;
     }
   }
 
@@ -210,15 +241,11 @@ export class EnrollmentMessageController {
     payload: { enrollmentId: string },
     @Ctx() context: IUserContext,
   ) {
-    try {
       return await this.enrollmentService.getDetailedEnrolledCourse(
         payload.enrollmentId,
         context.userPayload._id.toString(),
-      );
-    } catch (error) {
-      handleRpcError(error);
+      )
     }
-  }
 
   @UseGuards(AuthGuard)
   @MessagePattern('enrollment.toggleContentComplete')
@@ -227,16 +254,12 @@ export class EnrollmentMessageController {
     payload: { enrollmentId: string; contentId: string; completed: boolean },
     @Ctx() context: IUserContext,
   ) {
-    try {
       return await this.enrollmentService.toggleContentComplete(
         payload.enrollmentId,
         context.userPayload._id.toString(),
         payload.contentId,
         payload.completed,
       );
-    } catch (error) {
-      handleRpcError(error);
-    }
   }
 
   @UseGuards(AuthGuard)
@@ -265,7 +288,6 @@ export class EnrollmentMessageController {
     payload: SubmitQuizDto,
     @Ctx() context: IUserContext,
   ) {
-    try {
       payload.studentId = context.userPayload._id.toString();
       const result = await this.quizService.submitQuiz({
         ...payload,
@@ -283,10 +305,7 @@ export class EnrollmentMessageController {
         message: 'Quiz submitted successfully',
         result,
         success: true,
-      };
-    } catch (error) {
-      handleRpcError(error);
-    }
+      }
   }
 
 
@@ -297,7 +316,6 @@ export class EnrollmentMessageController {
     payload: SubmitProjectDto,
     @Ctx() context: IUserContext,
   ) {
-    try {
       payload.studentId = context.userPayload._id.toString();
       const result = await this.projectService.submitProject(payload);
 
@@ -313,9 +331,6 @@ export class EnrollmentMessageController {
         result,
         success: true,
       };
-    } catch (error) {
-      handleRpcError(error);
-    }
   }
 
 
@@ -326,7 +341,6 @@ export class EnrollmentMessageController {
     payload: MarkLiveSessionAttendanceDto,
     @Ctx() context: IUserContext,
   ) {
-    try {
       payload.studentId = context.userPayload._id.toString();
       const result = await this.liveSessionService.markAttendance(payload);
 
@@ -342,8 +356,5 @@ export class EnrollmentMessageController {
         result,
         success: true,
       };
-    } catch (error) {
-      handleRpcError(error);
-    }
   }
 }

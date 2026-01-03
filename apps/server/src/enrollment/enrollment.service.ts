@@ -45,6 +45,35 @@ export class EnrollmentService {
     @InjectConnection() private readonly connection: Connection,
     private readonly currencyService: CurrencyService,
   ) { }
+
+  async updateAttendanceSummary(
+    enrollmentId: string,
+    summary: {
+      totalClasses: number;
+      attended: number;
+      absent: number;
+      late: number;
+      excused: number;
+      percentage: number;
+    },
+  ) {
+    return this.enrollmentModel.findByIdAndUpdate(
+      enrollmentId,
+      {
+        $set: {
+          attendanceSummary: summary,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async getSingleEnrollmentWithoutCheck(userId: string, courseId: string) {
+    return this.enrollmentModel.findOne({
+      courseId: new mongoose.Types.ObjectId(courseId),
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+  }
   async enrollUserToCourse(
     userId: string,
     courseId: string,
@@ -101,6 +130,24 @@ export class EnrollmentService {
           },
           {
             path: 'user',
+          },
+        ],
+      },
+    );
+  }
+
+  async getCourseEnrollments(
+    courseId: string,
+    options: PaginateOptionsWithSearch,
+  ) {
+    return await this.enrollmentModel.paginate(
+      { courseId: new mongoose.Types.ObjectId(courseId) },
+      {
+        ...options,
+        populate: [
+          {
+            path: 'user',
+            select: 'firstName lastName email avatar',
           },
         ],
       },
@@ -196,6 +243,11 @@ export class EnrollmentService {
         completedModules: [],
         completedContents: [],
         completedCourses: [],
+        submittedAssignments: [],
+        submittedProjects: [],
+        submittedQuizzes: [],
+        attendedLiveSessions: [],
+
       };
     }
     // Toggle content completion

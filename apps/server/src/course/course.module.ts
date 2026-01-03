@@ -40,7 +40,7 @@ import { CourseControllerHttp } from './controller/course.controller.http';
   imports: [
     MongooseModule.forFeature([
       { name: Course.name, schema: CourseSchema },
-      { name: CourseModuleEntity.name, schema: CourseModuleSchema },
+      { name: 'CourseModule', schema: CourseModuleSchema },
       {
         name: CourseContent.name,
         schema: CourseContentSchema,

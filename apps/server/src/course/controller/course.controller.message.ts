@@ -29,7 +29,7 @@ import { ICourseFilters } from 'src/utils/types/CourseFilters';
 export class CourseControllerMessage {
   constructor(
     private courseService: CourseService
-  ) {}
+  ) { }
 
   @MessagePattern('courses.findAllCourses')
   async findAllCourses(
@@ -106,6 +106,7 @@ export class CourseControllerMessage {
   async updateCourse(
     @Payload(new RpcValidationPipe())
     payload: UpdateCourseDto,
+    @Ctx() context: IUserContext,
   ) {
     try {
       const result = await this.courseService.update(payload);

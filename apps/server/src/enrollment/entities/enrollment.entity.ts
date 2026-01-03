@@ -30,9 +30,62 @@ export class Progress {
     _id: false,
   })
   completedCourses: Types.ObjectId[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'CourseContent',
+    default: [],
+    _id: false,
+  })
+  submittedAssignments: Types.ObjectId[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'CourseContent',
+    default: [],
+    _id: false,
+  })
+  submittedProjects: Types.ObjectId[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'CourseContent',
+    default: [],
+    _id: false,
+  })
+  submittedQuizzes: Types.ObjectId[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'CourseContent',
+    default: [],
+    _id: false,
+  })
+  attendedLiveSessions: Types.ObjectId[];
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);
+
+@Schema({ _id: false })
+export class AttendanceSummary {
+  @Prop({ type: Number, default: 0 })
+  totalClasses: number;
+
+  @Prop({ type: Number, default: 0 })
+  attended: number;
+
+  @Prop({ type: Number, default: 0 })
+  absent: number;
+
+  @Prop({ type: Number, default: 0 })
+  late: number;
+
+  @Prop({ type: Number, default: 0 })
+  excused: number;
+
+  @Prop({ type: Number, default: 0 })
+  percentage: number;
+}
 
 @Schema({ timestamps: true })
 export class Enrollment extends Document {
@@ -55,6 +108,7 @@ export class Enrollment extends Document {
   completedAt: Date;
 
   @Prop({
+    type: String,
     enum: AccessType,
     required: true,
   })
@@ -91,6 +145,10 @@ export class Enrollment extends Document {
       completedModules: [],
       completedContents: [],
       completedCourses: [],
+      submittedAssignments: [],
+      submittedProjects: [],
+      submittedQuizzes: [],
+      attendedLiveSessions: [],
     },
   })
   progress: Progress;
@@ -108,6 +166,9 @@ export class Enrollment extends Document {
     issuedAt: Date;
     certificateUrl: string;
   };
+
+  @Prop({ type: AttendanceSummary, default: {} })
+  attendanceSummary: AttendanceSummary;
 }
 
 export const EnrollmentSchema = SchemaFactory.createForClass(Enrollment);
@@ -138,14 +199,14 @@ EnrollmentSchema.virtual('organization', {
 });
 
 EnrollmentSchema.virtual('completedModules', {
-  ref: 'Module',
+  ref: 'CourseModule',
   localField: 'progress.completedModules',
   foreignField: '_id',
   justOne: false,
 });
 
 EnrollmentSchema.virtual('completedContents', {
-  ref: 'Lesson',
+  ref: 'CourseContent',
   localField: 'progress.completedContents',
   foreignField: '_id',
   justOne: false,

@@ -31,9 +31,7 @@ export class ReviewControllerHttp {
         @Body() createReviewDto: CreateReviewDto,
         @Request() req: IUserRequest,
     ) {
-        createReviewDto.userId = req.user._id.toString();
-
-        return await this.reviewService.create(createReviewDto);
+        return await this.reviewService.create({ ...createReviewDto, userId: req.user._id.toString()});
     }
 
     @Get()

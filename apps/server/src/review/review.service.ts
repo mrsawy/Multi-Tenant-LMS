@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, PaginateModel, PaginateOptions, Types } from 'mongoose';
+import { Model, MongooseBaseQueryOptions, PaginateModel, PaginateOptions, RootFilterQuery, Types } from 'mongoose';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { GetReviewsDto } from './dto/get-reviews.dto';
 import { Review } from './entities/review.entity';
 import { ReviewType } from './enum/reviewType.enum';
+import { String } from 'aws-sdk/clients/rdsdataservice';
+import { convertObjectValuesToObjectId, convertToObjectId } from 'src/utils/ObjectId.utils';
 
 @Injectable()
 export class ReviewService {
@@ -14,32 +16,28 @@ export class ReviewService {
     private reviewModel: Model<Review> & PaginateModel<Review>,
   ) { }
 
-  async create(createReviewDto: CreateReviewDto) {
+  async create(createReviewDto: CreateReviewDto & { userId: string }) {
+    for (const key in createReviewDto) {
+      const value = createReviewDto[key];
+      if (typeof value == "string" && Types.ObjectId.isValid(value)) {
+        createReviewDto[key] = convertToObjectId(value as string);
+      }
+    }
     const { reviewType, ...baseData } = createReviewDto;
-
     let modelToUse: Model<Review> & PaginateModel<Review> = this.reviewModel;
-
-    // Use discriminator model if available
     if (
       this.reviewModel.discriminators &&
       this.reviewModel.discriminators[reviewType]
     ) {
       modelToUse = this.reviewModel.discriminators[reviewType] as Model<Review> & PaginateModel<Review>;
     }
-
-    // Check if user already reviewed this entity
-    const filter: {
-      userId: string;
-      reviewType: ReviewType;
-      isActive: boolean;
-      courseId?: string;
-      instructorId?: string;
-      reviewedOrganizationId?: string;
-    } = this.buildReviewFilter(createReviewDto);
+    const filter = this.buildReviewFilter(createReviewDto);
     const existingReview = await this.reviewModel.findOne(filter);
-
     if (existingReview) {
-      throw new BadRequestException('You have already reviewed this entity');
+      return await existingReview.updateOne({
+        rating: createReviewDto.rating,
+        comment: createReviewDto.comment,
+      })
     }
 
     const review = new modelToUse(createReviewDto);
@@ -47,7 +45,7 @@ export class ReviewService {
   }
 
   async findAll(getReviewsDto: GetReviewsDto) {
-    const {
+    let {
       page = 1,
       limit = 10,
       minRating,
@@ -55,36 +53,7 @@ export class ReviewService {
       ...filters
     } = getReviewsDto;
 
-    const query: {
-      isActive: boolean;
-      reviewType?: ReviewType;
-      userId?: string;
-      courseId?: string;
-      instructorId?: string;
-      reviewedOrganizationId?: string;
-      rating?: { $gte?: number; $lte?: number };
-    } = { isActive: true };
-
-    // Apply filters
-    if (filters.reviewType) {
-      query.reviewType = filters.reviewType;
-    }
-
-    if (filters.userId) {
-      query.userId = filters.userId;
-    }
-
-    if (filters.courseId) {
-      query.courseId = filters.courseId;
-    }
-
-    if (filters.instructorId) {
-      query.instructorId = filters.instructorId;
-    }
-
-    if (filters.reviewedOrganizationId) {
-      query.reviewedOrganizationId = filters.reviewedOrganizationId;
-    }
+    let query: PaginateOptions & RootFilterQuery<Review> = convertObjectValuesToObjectId({ ...filters, page, limit, isActive: true });
 
     // Rating range filter
     if (minRating || maxRating) {
@@ -106,10 +75,6 @@ export class ReviewService {
   }
 
   async findOne(id: string) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid review ID');
-    }
-
     const review = await this.reviewModel
       .findById(id)
       .populate('user', 'username email firstName lastName avatar')
@@ -131,16 +96,35 @@ export class ReviewService {
       }
     } else if (review.reviewType === ReviewType.ORGANIZATION) {
       await review.populate('reviewedOrganization', 'name logo');
+    } else if (review.reviewType === ReviewType.MODULE) {
+      await review.populate('module', 'title');
+    } else if (review.reviewType === ReviewType.CONTENT) {
+      await review.populate('content', 'title');
     }
 
     return review;
   }
 
-  async update(id: string, updateReviewDto: UpdateReviewDto) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid review ID');
-    }
+  async findOwn(userId: string, filters: { reviewType: ReviewType; courseId?: string; moduleId?: string; contentId?: string; instructorId?: string; reviewedOrganizationId?: string }) {
+    // Convert string IDs to ObjectIds
+    const query: any = {
+      userId: convertToObjectId(userId),
+      reviewType: filters.reviewType,
+      isActive: true,
+    };
 
+    // Add entity-specific filters
+    if (filters.courseId) query.courseId = convertToObjectId(filters.courseId);
+    if (filters.moduleId) query.moduleId = convertToObjectId(filters.moduleId);
+    if (filters.contentId) query.contentId = convertToObjectId(filters.contentId);
+    if (filters.instructorId) query.instructorId = convertToObjectId(filters.instructorId);
+    if (filters.reviewedOrganizationId) query.reviewedOrganizationId = convertToObjectId(filters.reviewedOrganizationId);
+
+    const review = await this.reviewModel.findOne(query).exec();
+    return review; // Returns null if not found
+  }
+
+  async update(id: string, updateReviewDto: UpdateReviewDto) {
     const review = await this.reviewModel.findById(id);
 
     if (!review) {
@@ -190,6 +174,8 @@ export class ReviewService {
       courseId?: string;
       instructorId?: string;
       reviewedOrganizationId?: string;
+      moduleId?: string;
+      contentId?: string;
     } = { isActive: true };
 
     if (filter.reviewType) {
@@ -206,6 +192,14 @@ export class ReviewService {
 
     if (filter.reviewedOrganizationId) {
       query.reviewedOrganizationId = filter.reviewedOrganizationId;
+    }
+
+    if (filter.moduleId) {
+      query.moduleId = filter.moduleId;
+    }
+
+    if (filter.contentId) {
+      query.contentId = filter.contentId;
     }
 
     interface AggregateResult {
@@ -255,33 +249,32 @@ export class ReviewService {
     };
   }
 
-  private buildReviewFilter(dto: CreateReviewDto): {
-    userId: string;
-    reviewType: ReviewType;
-    isActive: boolean;
-    courseId?: string;
-    instructorId?: string;
-    reviewedOrganizationId?: string;
-  } {
+  private buildReviewFilter(dto: CreateReviewDto & { userId: string }) {
     const filter: {
-      userId: string;
+      userId: Types.ObjectId;
       reviewType: ReviewType;
       isActive: boolean;
-      courseId?: string;
-      instructorId?: string;
-      reviewedOrganizationId?: string;
+      courseId?: Types.ObjectId;
+      instructorId?: Types.ObjectId;
+      reviewedOrganizationId?: Types.ObjectId;
+      moduleId?: Types.ObjectId;
+      contentId?: Types.ObjectId;
     } = {
-      userId: dto.userId,
+      userId: convertToObjectId(dto.userId),
       reviewType: dto.reviewType,
       isActive: true,
     };
 
     if (dto.reviewType === ReviewType.COURSE && dto.courseId) {
-      filter.courseId = dto.courseId;
+      filter.courseId = convertToObjectId(dto.courseId);
     } else if (dto.reviewType === ReviewType.INSTRUCTOR && dto.instructorId) {
-      filter.instructorId = dto.instructorId;
+      filter.instructorId = convertToObjectId(dto.instructorId);
     } else if (dto.reviewType === ReviewType.ORGANIZATION && dto.reviewedOrganizationId) {
-      filter.reviewedOrganizationId = dto.reviewedOrganizationId;
+      filter.reviewedOrganizationId = convertToObjectId(dto.reviewedOrganizationId);
+    } else if (dto.reviewType === ReviewType.MODULE && dto.moduleId) {
+      filter.moduleId = convertToObjectId(dto.moduleId);
+    } else if (dto.reviewType === ReviewType.CONTENT && dto.contentId) {
+      filter.contentId = convertToObjectId(dto.contentId);
     }
 
     return filter;

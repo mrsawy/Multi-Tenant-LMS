@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed": "ts-node -T -r tsconfig-paths/register src/database/seeds/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.850.0",
@@ -45,9 +46,11 @@
     "dotenv": "^17.2.0",
     "fastify": "^5.4.0",
     "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.33",
     "mongoose": "^8.16.3",
     "mongoose-paginate-v2": "^1.9.1",
     "nats": "^2.29.3",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "stream": "^0.0.3",
@@ -56,6 +59,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.1.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",

@@ -2,11 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Plans } from '../enums/plans.enums';
 import { Status } from '../enums/subscription.enum';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 
 @Schema({ timestamps: true })
-export class Organization extends Document {
+export class Organization extends Document<Types.ObjectId> {
   @Prop({ required: true, unique: true })
   name: string;
 
@@ -60,6 +60,7 @@ export class Organization extends Document {
 }
 
 export const OrganizationSchema = SchemaFactory.createForClass(Organization);
+
 OrganizationSchema.plugin(mongoosePaginate);
 
 OrganizationSchema.virtual('plan', {

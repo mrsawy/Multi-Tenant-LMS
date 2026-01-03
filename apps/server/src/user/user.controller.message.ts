@@ -1,20 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Req,
-  Request,
-  InternalServerErrorException,
-  UnauthorizedException,
-  BadRequestException,
-  Inject,
-  forwardRef,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Request, InternalServerErrorException, UnauthorizedException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -36,6 +20,7 @@ import { Ctx, MessagePattern, Payload } from '@nestjs/microservices';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { WalletService } from 'src/wallet/wallet.service';
+import { convertObjectValuesToObjectId } from 'src/utils/ObjectId.utils';
 
 @Controller('user')
 export class UserControllerMessage {
@@ -43,8 +28,8 @@ export class UserControllerMessage {
     private readonly userService: UserService,
     private readonly roleService: RoleService,
     @Inject(forwardRef(() => WalletService)) private readonly walletService: WalletService,
-    @InjectConnection() private readonly connection: Connection,
-  ) { }
+    @InjectConnection() private readonly connection: Connection
+  ) {}
 
   @MessagePattern('user.getOwnData')
   @UseGuards(AuthGuard)
@@ -67,13 +52,9 @@ export class UserControllerMessage {
     payload: {
       options: PaginateOptions;
       filters?: mongoose.RootFilterQuery<User>;
-    },
+    }
   ) {
-    return await this.userService.getByOrganization(
-      context.userPayload.organizationId,
-      payload.options,
-      payload.filters,
-    );
+    return await this.userService.getByOrganization(context.userPayload.organizationId, payload.options, payload.filters);
   }
 
   @MessagePattern('users.getSingleUserByOrganization')
@@ -81,14 +62,19 @@ export class UserControllerMessage {
   async getSingleUserByOrganization(
     @Ctx() context: IUserContext,
     @Payload(new RpcValidationPipe())
-    payload: { filters: mongoose.RootFilterQuery<User> },
+    payload: { filters: mongoose.RootFilterQuery<User> }
   ) {
-    return await this.userService.filterOne({
-      ...payload.filters,
-      organizationId: new mongoose.Types.ObjectId(
-        context.userPayload.organizationId,
-      ),
+    console.dir({ payload, convertObjectValuesToObjectId: convertObjectValuesToObjectId(payload.filters) }, { depth: null });
+
+    const user = await this.userService.filterOne({
+      ...convertObjectValuesToObjectId(payload.filters),
+      autherization: undefined,
+      organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
     });
+    if (!user) throw new BadRequestException('User not found');
+    const { password, ...userData } = user.toObject();
+    console.dir({ userData }, { depth: null });
+    return userData;
   }
 
   @MessagePattern('users.organizationCreateUser')
@@ -96,7 +82,7 @@ export class UserControllerMessage {
   async organizationCreateUser(
     @Ctx() context: IUserContext,
     @Payload(new RpcValidationPipe())
-    payload: CreateUserDto,
+    payload: CreateUserDto
   ) {
     const session = await this.connection.startSession();
     try {
@@ -108,17 +94,12 @@ export class UserControllerMessage {
         {
           ...payload,
           _id: userId,
-          organizationId: new mongoose.Types.ObjectId(
-            context.userPayload.organizationId,
-          ),
+          organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
           walletId,
         },
-        session,
+        session
       );
-      await this.walletService.create(
-        { _id: walletId, userId: userId, currency: payload.preferredCurrency },
-        session,
-      );
+      await this.walletService.create({ _id: walletId, userId: userId, currency: payload.preferredCurrency }, session);
 
       await session.commitTransaction();
       return createdUser;
@@ -135,16 +116,14 @@ export class UserControllerMessage {
   async organizationUpdateUser(
     @Ctx() context: IUserContext,
     @Payload(new RpcValidationPipe())
-    payload: { userId: string; userData: Partial<CreateUserDto> },
+    payload: { userId: string; userData: Partial<CreateUserDto> }
   ) {
     return await this.userService.update(
       {
         _id: new mongoose.Types.ObjectId(payload.userId),
-        organizationId: new mongoose.Types.ObjectId(
-          context.userPayload.organizationId,
-        ),
+        organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
       },
-      payload.userData,
+      payload.userData
     );
   }
 
@@ -153,17 +132,14 @@ export class UserControllerMessage {
   async organizationDeleteUser(
     @Ctx() context: IUserContext,
     @Payload(new RpcValidationPipe())
-    payload: { userId: string },
+    payload: { userId: string }
   ) {
     const result = await this.userService.delete({
       _id: new mongoose.Types.ObjectId(payload.userId),
-      organizationId: new mongoose.Types.ObjectId(
-        context.userPayload.organizationId,
-      ),
+      organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
     });
 
-    if (result.deletedCount == 0)
-      throw new BadRequestException('User not found');
+    if (result.deletedCount == 0) throw new BadRequestException('User not found');
 
     return result;
   }

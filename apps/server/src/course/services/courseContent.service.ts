@@ -30,7 +30,7 @@ export class CourseContentService {
     @InjectModel(Course.name) private readonly courseModel: Model<Course>,
     @InjectModel(CourseContent.name)
     private readonly courseContentModel: Model<CourseContent>,
-    @InjectModel(CourseModuleEntity.name)
+    @InjectModel('CourseModule')
     private readonly courseModuleModel: Model<CourseModuleEntity>,
     @InjectConnection() private readonly connection: Connection,
     private readonly fileService: FileService,

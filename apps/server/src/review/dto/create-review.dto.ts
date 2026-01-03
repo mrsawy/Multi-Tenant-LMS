@@ -3,10 +3,6 @@ import { ReviewType } from '../enum/reviewType.enum';
 import { Types } from 'mongoose';
 
 export class CreateReviewDto {
-    @IsMongoId()
-    @IsNotEmpty()
-    userId: string;
-
     @IsEnum(ReviewType)
     @IsNotEmpty()
     reviewType: ReviewType;
@@ -113,4 +109,16 @@ export class CreateReviewDto {
     @Max(5)
     @IsOptional()
     support?: number;
+
+    // Module Review fields
+    @ValidateIf((o) => o.reviewType === ReviewType.MODULE)
+    @IsMongoId()
+    @IsNotEmpty()
+    moduleId?: string;
+
+    // Content Review fields
+    @ValidateIf((o) => o.reviewType === ReviewType.CONTENT)
+    @IsMongoId()
+    @IsNotEmpty()
+    contentId?: string;
 }

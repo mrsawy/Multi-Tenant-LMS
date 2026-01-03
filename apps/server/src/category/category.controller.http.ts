@@ -15,7 +15,7 @@ import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSe
 
 @Controller('category')
 export class CategoryHttpController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
   @Get('/filtered')
   async getFilteredCategories(@Query() payload: PaginateOptionsWithSearch) {

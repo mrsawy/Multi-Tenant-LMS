@@ -81,6 +81,64 @@ export class StatsSchema {
   // completionRate: number;
 }
 
+
+@Schema({ _id: true })
+export class TimeSlot {
+  @Prop({
+    type: String,
+    required: true,
+    validate: {
+      validator: function (time: string) {
+        // Validates format: HH:MM am/pm (e.g., 02:00 pm, 11:30 am)
+        const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i;
+        return timeRegex.test(time);
+      },
+      message: 'Time must be in format HH:MM am/pm (e.g., 02:00 pm, 11:30 am)',
+    },
+  })
+  startTime: string;
+
+  @Prop({
+    type: String,
+    required: true,
+    validate: {
+      validator: function (time: string) {
+        // Validates format: HH:MM am/pm (e.g., 02:00 pm, 11:30 am)
+        const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(am|pm)$/i;
+        return timeRegex.test(time);
+      },
+      message: 'Time must be in format HH:MM am/pm (e.g., 02:00 pm, 11:30 am)',
+    },
+  })
+  endTime: string;
+
+  @Prop({ type: String, required: true })
+  dayOfWeek: string;
+
+  @Prop({ type: [Types.ObjectId], required: false, ref: 'User' })
+  instructorsIds: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], required: false, ref: 'User' })
+  coInstructorsIds: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], required: false, ref: 'User' })
+  studentsIds: Types.ObjectId[];
+
+  // @Prop({ type: [Types.ObjectId], required: false, ref: 'Attendance' })
+  // attendanceHistoryIds: Types.ObjectId[];
+
+}
+
+@Schema({ _id: false })
+export class AttendanceSettings {
+  @Prop({ type: Boolean, default: false })
+  requireAttendance: boolean;
+
+  @Prop({ type: [TimeSlot], default: [] })
+  offlineSchedule: TimeSlot[];
+
+}
+
 @Schema({ timestamps: true, discriminatorKey: 'type' })
 export class Course extends Document<Types.ObjectId> {
   @Prop({
@@ -127,8 +185,8 @@ export class Course extends Document<Types.ObjectId> {
   @Prop({ type: String, required: true })
   thumbnailKey: string;
 
-  // @Prop({ type: String })
-  // trailer: string;
+  @Prop({ type: String })
+  trailerKey: string;
 
   // Use the proper schema for pricing
   // Note: At least one of monthly, yearly, or one-time pricing must be provided only if isPaid is true
@@ -165,12 +223,51 @@ export class Course extends Document<Types.ObjectId> {
   @Prop({ type: StatsSchema, default: {} })
   stats: StatsSchema;
 
+
+
+  @Prop({ type: AttendanceSettings, default: {} })
+  attendanceSettings: AttendanceSettings;
+
   @Prop({ type: String, required: false })
   paypalPlanId: string;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
+export const TimeSlotSchema = SchemaFactory.createForClass(TimeSlot);
 
+// TimeSlot virtuals for population
+TimeSlotSchema.virtual('instructors', {
+  ref: 'User',
+  localField: 'instructorsIds',
+  foreignField: '_id',
+  justOne: false,
+});
+
+TimeSlotSchema.virtual('coInstructors', {
+  ref: 'User',
+  localField: 'coInstructorsIds',
+  foreignField: '_id',
+  justOne: false,
+});
+
+TimeSlotSchema.virtual('students', {
+  ref: 'User',
+  localField: 'studentsIds',
+  foreignField: '_id',
+  justOne: false,
+});
+
+TimeSlotSchema.virtual('attendanceHistory', {
+  ref: 'Attendance',
+  localField: 'attendanceHistoryIds',
+  foreignField: '_id',
+  justOne: false,
+});
+
+TimeSlotSchema.set('toJSON', { virtuals: true });
+TimeSlotSchema.set('toObject', { virtuals: true });
+
+// Course virtuals for population
 CourseSchema.virtual('modules', {
   ref: 'CourseModule',
   localField: 'modulesIds',
@@ -225,3 +322,4 @@ export const PricingSchemaFactory = SchemaFactory.createForClass(PricingSchema);
 export const SettingsSchemaFactory =
   SchemaFactory.createForClass(SettingsSchema);
 export const StatsSchemaFactory = SchemaFactory.createForClass(StatsSchema);
+export const TimeSlotSchemaFactory = SchemaFactory.createForClass(TimeSlot);

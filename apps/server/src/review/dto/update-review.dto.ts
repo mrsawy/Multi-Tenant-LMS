@@ -3,7 +3,7 @@ import { CreateReviewDto } from './create-review.dto';
 import { IsMongoId, IsOptional } from 'class-validator';
 
 export class UpdateReviewDto extends PartialType(
-    OmitType(CreateReviewDto, ['userId', 'reviewType'] as const)
+    OmitType(CreateReviewDto, ['reviewType'] as const)
 ) {
     @IsMongoId()
     @IsOptional()
