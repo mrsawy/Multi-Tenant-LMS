@@ -6,6 +6,7 @@ import { Button } from '@/components/atoms/button';
 import { VideoType } from '@/lib/types/course/enum/VideoType.enum';
 import { IContent } from '@/lib/types/course/content.interface';
 import { useRouter } from '@/i18n/navigation';
+import Video from '@/components/molecules/Video';
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -15,6 +16,7 @@ const VideoContent: React.FC<{
   toggleComplete: (args: { completed: boolean; withToast: boolean; withRefresh: boolean }) => Promise<void>;
 }> = ({ toggleComplete, isComplete, content }) => {
   const [url, setUrl] = useState(content.videoUrl || '');
+<<<<<<< HEAD
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [muted, setMuted] = useState(false);
@@ -59,8 +61,27 @@ const VideoContent: React.FC<{
     console.log({ currentTime });
     if (!seeking) {
       setPlayed(currentTime / duration);
-    }
+=======
 
+  const [played, setPlayed] = useState(0);
+
+  const [watched, setWatched] = useState(false);
+  const [isUploadedVideo, setIsUploadedVideo] = useState(false);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (content.videoType === VideoType.UPLOAD) {
+      setUrl(content.fileKey ?? '');
+      setIsUploadedVideo(true);
+    } else {
+      setUrl(content.videoUrl || '');
+      setIsUploadedVideo(false);
+>>>>>>> 53b5f0d (refactor:create custom Video compoent)
+    }
+  }, [content.videoType, content.fileKey, content.videoUrl]);
+
+<<<<<<< HEAD
     if (currentTime / duration > 0.9 && !watched) {
       setWatched(true);
       await toggleComplete({ completed: true, withRefresh: false, withToast: true });
@@ -122,6 +143,13 @@ const VideoContent: React.FC<{
     }
     return `${mm}:${ss}`;
   };
+=======
+  useEffect(() => {
+    return () => {
+      router.refresh();
+    };
+  }, []);
+>>>>>>> 53b5f0d (refactor:create custom Video compoent)
 
   if (!url) {
     return (
@@ -138,6 +166,7 @@ const VideoContent: React.FC<{
 
   return (
     <div className="mx-auto max-w-4xl">
+<<<<<<< HEAD
       <div dir="ltr" id="video-player-wrapper" className="group relative mb-6 aspect-video overflow-hidden rounded-lg bg-black">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
@@ -256,6 +285,9 @@ const VideoContent: React.FC<{
         </div>
       </div>
 
+=======
+      <Video url={url} toggleComplete={toggleComplete} played={played} setPlayed={setPlayed} watched={watched} setWatched={setWatched} isUploadedVideo={isUploadedVideo} />
+>>>>>>> 53b5f0d (refactor:create custom Video compoent)
       <div className="space-y-4 text-center">
         {content.title && <h3 className="text-xl font-semibold">{content.title}</h3>}
 
