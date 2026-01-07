@@ -168,16 +168,242 @@
   "about": {
     "title": "About Us",
     "description": "We are building a next-generation LMS that empowers organizations to deliver better education.",
-    "mission": "Our mission is to simplify learning management while giving organizations full control, flexibility, and scalability."
+    "mission": "Our mission is to simplify learning management while giving organizations full control, flexibility, and scalability.",
+    "hero": {
+      "yearRange": "2007-2024",
+      "title": "We share knowledge with the world",
+      "description": "Our mission is to democratize education and make high-quality learning accessible to everyone, everywhere. We believe that knowledge should be shared freely and that education is the foundation for a better future.",
+      "learnMore": "Learn More",
+      "contactUs": "Contact Us",
+      "numberOneMultiTenantSolution": "#1 Multi-Tenant LMS Solution"
+    },
+    "companies": {
+      "title": "Industries We Empower",
+      "count": "Diverse Sectors",
+      "description": "Our flexible LMS adapts to the unique needs of various industries, delivering impactful learning experiences everywhere.",
+      "list": [
+        "Higher Education",
+        "Corporate Training",
+        "Government",
+        "K-12 Education",
+        "Healthcare",
+        "Technology",
+        "Non-Profits",
+        "Retail"
+      ]
+    },
+    "statistics": {
+      "items": [
+        {
+          "value": "67.1k",
+          "label": "Students"
+        },
+        {
+          "value": "26k",
+          "label": "Certified Instructors"
+        },
+        {
+          "value": "72",
+          "label": "Countries/Languages"
+        },
+        {
+          "value": "99.9%",
+          "label": "Success Rate"
+        },
+        {
+          "value": "57",
+          "label": "Trusted Companies"
+        }
+      ]
+    },
+    "mission": {
+      "badge": "Our One Billion Mission",
+      "title": "Our one billion mission sounds bold, We agree.",
+      "description1": "We're on a mission to reach one billion learners worldwide. This ambitious goal drives everything we do. We believe in solving problems through innovation, radical thinking, and a commitment to making education accessible to everyone, regardless of their background or location.",
+      "description2": "Our approach combines cutting-edge technology with proven pedagogical methods, creating learning experiences that are both engaging and effective. We're not just building a platform—we're building a movement.",
+      "imageAlt": "Team collaboration"
+    },
+    "gallery": {
+      "badge": "Our Gallery",
+      "title": "We've been here almost 17 years",
+      "description1": "Over the past 17 years, we've grown from a small startup to a global education platform. Our journey has been filled with challenges, innovations, and countless success stories from learners around the world.",
+      "description2": "Take a glimpse into our world—from our modern offices to our dedicated team members who work tirelessly to deliver exceptional learning experiences.",
+      "cta": "Join Our Team",
+      "images": [
+        {
+          "alt": "Modern office space"
+        },
+        {
+          "alt": "Team collaboration"
+        },
+        {
+          "alt": "Customer support"
+        },
+        {
+          "alt": "Workspace"
+        },
+        {
+          "alt": "Team meeting"
+        },
+        {
+          "alt": "Working environment"
+        }
+      ]
+    },
+    "testimonials": {
+      "title": "What Industry Leaders Say",
+      "description": "Hear from the leaders who trust our platform to transform their organizations",
+      "items": [
+        {
+          "quote": "This platform has transformed how we manage our language curriculum. The intuitive interface and powerful analytics have helped us personalize learning for every student.",
+          "author": "Dr. Aisha Al-Mansoori",
+          "role": "Director of Al-Manara Academy"
+        },
+        {
+          "quote": "The multi-tenant architecture allowed us to scale our training programs across multiple branches effortlessly. It's the robust solution we've been looking for.",
+          "author": "Yousef Hassan",
+          "role": "Founder of TechSkills Institute"
+        },
+        {
+          "quote": "Integrating online and offline learning has never been smoother. The attendance tracking and unified student profiles give us a complete view of student progress.",
+          "author": "Sarah Johnson",
+          "role": "Head of Learning at Global International School"
+        }
+      ]
+    }
   },
   "contact": {
     "title": "Contact Us",
-    "description": "Have questions or need a demo? We’d love to hear from you.",
+    "description": "Have questions or need a demo? We'd love to hear from you.",
     "fields": {
       "name": "Full Name",
       "email": "Email Address",
       "message": "Your Message"
     },
-    "submit": "Send Message"
+    "submit": "Send Message",
+    "hero": {
+      "title": "Connect with us",
+      "description": "Want to chat? We'd love to hear from you! Get in touch with our Customer Success Team to inquire about speaking events, advertising rates, or just say hello.",
+      "email": "contact@example.com",
+      "copyEmail": "Copy Email",
+      "copied": "Copied!",
+      "imageAlt": "Customer support representative"
+    },
+    "form": {
+      "title": "Get in touch",
+      "description": "Feel free contact with us, we love to make new partners & friends",
+      "infoTitle": "Contact Us",
+      "infoDescription": "Will you be in Los Angeles or any other branches any time soon? Stop by the office! We'd love to meet.",
+      "phoneLabel": "Phone Number & Email",
+      "phone1": "(480) 555-0103",
+      "phone2": "(219) 555-0114",
+      "emailLabel": "Email Address",
+      "email1": "help.eduguard@gmail.com",
+      "email2": "career.eduguard@gmail.com",
+      "addressLabel": "Address",
+      "address": "1702 Olympic Boulevard, Santa Monica, CA 90404",
+      "hoursLabel": "Official Work Time",
+      "hours": "7:00am - 6:00pm (Mon - Fri), Sat, Sun & Holiday Closed",
+      "socialLabel": "Follow Us",
+      "social": {
+        "facebook": "https://facebook.com",
+        "twitter": "https://twitter.com",
+        "instagram": "https://instagram.com",
+        "linkedin": "https://linkedin.com",
+        "youtube": "https://youtube.com"
+      },
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "subject": "Message Subject",
+        "message": "Your Message"
+      },
+      "placeholders": {
+        "firstName": "First Name...",
+        "lastName": "Last Name...",
+        "email": "Email Address",
+        "subject": "Message Subject",
+        "message": "Type your message here..."
+      },
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "success": "Message sent successfully! We'll get back to you soon.",
+      "error": "Failed to send message. Please try again.",
+      "validation": {
+        "firstName": {
+          "required": "First name is required",
+          "min": "First name must be at least 2 characters"
+        },
+        "lastName": {
+          "required": "Last name is required",
+          "min": "Last name must be at least 2 characters"
+        },
+        "email": {
+          "required": "Email address is required",
+          "invalid": "Please enter a valid email address"
+        },
+        "subject": {
+          "required": "Subject is required",
+          "min": "Subject must be at least 3 characters"
+        },
+        "message": {
+          "required": "Message is required",
+          "min": "Message must be at least 10 characters"
+        }
+      }
+    },
+    "info": {
+      "title": "Contact Information",
+      "description": "Reach out to us through any of these channels",
+      "items": {
+        "email": {
+          "title": "Email",
+          "value": "contact@example.com"
+        },
+        "phone": {
+          "title": "Phone",
+          "value": "+1 (555) 123-4567"
+        },
+        "address": {
+          "title": "Address",
+          "value": "123 Education Street, Learning City, LC 12345"
+        },
+        "hours": {
+          "title": "Business Hours",
+          "value": "Monday - Friday: 9:00 AM - 6:00 PM"
+        }
+      }
+    },
+    "offices": {
+      "title": "Our branches all over the world",
+      "description": "Phasellus sed quam eu eros faucibus cursus. Sed quis nunc at ligula porttitor iaculis.",
+      "items": [
+        {
+          "badge": "MAIN BRANCH",
+          "city": "Los Angeles, California",
+          "address": "1702 Olympic Boulevard, Santa Monica, CA 90404"
+        },
+        {
+          "badge": "",
+          "city": "Tokyo, Japan",
+          "address": "601 N Roji Str., Suite 170, Tokyo, VT 22314, Japan"
+        },
+        {
+          "badge": "",
+          "city": "Moscow, Russia",
+          "address": "Anjoliehendroad 470H, 1215 Nl, Moscow, Russia"
+        },
+        {
+          "badge": "",
+          "city": "Mumbai, India",
+          "address": "38 East 20th St, 6th Floor, Mumbai, India"
+        }
+      ]
+    },
+    "map": {
+      "title": "Our Location",
+      "embedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.0!2d-118.496!3d34.019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzA4LjQiTiAxMTjCsDI5JzQ1LjYiVw!5e0!3m2!1sen!2sus!4v1234567890"
+    }
   }
 }
