@@ -25,15 +25,8 @@ export default async function LocaleLayout({
     children,
     params
 }: LayoutProps<'/[locale]'>) {
-
-
-
-    //   const messages = await getMessages(); // will load messages for current locale
-
-const user = await getAuthUser()
     return (
         <>
-            <HomeNave user={user} />
             {children}
         </>
 

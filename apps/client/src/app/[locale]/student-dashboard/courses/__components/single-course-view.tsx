@@ -195,7 +195,7 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                     courseId={course._id}
                     title="Course Discussions"
                 />
-            </div>
+            </div> 
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { Slot, Slottable } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 
 const buttonVariants = cva(
   'inline-flex items-center cursor-pointer justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -81,7 +82,7 @@ const Button = React.forwardRef<
       effect,
       size,
       icon,
-      iconPlacement = 'right',
+      iconPlacement: iconPlacementProp = 'right',
       asChild = false,
       ...props
     },
@@ -90,6 +91,10 @@ const Button = React.forwardRef<
     const Comp = asChild ? Slot : 'button';
     const Icon = icon || ArrowRight;
     const isDisabled = props.disabled;
+    const t = useTranslations();
+    const locale = useLocale();
+    const isRTL = locale === 'ar';
+    const iconPlacement = isRTL ? 'left' : 'right';
 
     // Helper to render icon - handles both ElementType and ReactNode
     const renderIcon = () => {
@@ -107,7 +112,7 @@ const Button = React.forwardRef<
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, effect, size, className }),"rtl:flex-row-reverse")}
+        className={cn(buttonVariants({ variant, effect, size, className }), "rtl:flex-row-reverse")}
         ref={ref}
         {...props}
       >
