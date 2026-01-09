@@ -1,6 +1,6 @@
 import React, { ReactEventHandler, use, useEffect, useState } from 'react';
 // @ts-ignore - react-player types can be inconsistent
-import ReactPlayer from 'react-player';
+// import ReactPlayer from 'react-player';
 import { Play, Pause, Volume2, VolumeX, Maximize, Loader2, Gauge } from 'lucide-react';
 import { Button } from '@/components/atoms/button';
 import { VideoType } from '@/lib/types/course/enum/VideoType.enum';
@@ -56,6 +56,7 @@ const VideoContent: React.FC<{
   return (
     <div className="mx-auto max-w-4xl">
       <Video url={url} toggleComplete={toggleComplete} played={played} setPlayed={setPlayed} watched={watched} setWatched={setWatched} isUploadedVideo={isUploadedVideo} />
+      {/* <Video url={url} toggleComplete={toggleComplete} played={played} setPlayed={setPlayed} watched={watched} setWatched={setWatched} isUploadedVideo={isUploadedVideo} /> */}
       <div className="space-y-4 text-center">
         {content.title && <h3 className="text-xl font-semibold">{content.title}</h3>}
 
