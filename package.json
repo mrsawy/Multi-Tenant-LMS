@@ -7,10 +7,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --fix",
-    "lint:check": "eslint .",
-    "type-check": "tsc --noEmit -p apps/client/tsconfig.json && tsc --noEmit -p apps/server/tsconfig.json"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +15,6 @@
   "packageManager": "pnpm@10.26.2",
   "devDependencies": {
     "@nestjs/cli": "^11.0.7",
-    "@nx/eslint-plugin": "^21.2.2",
     "nx": "21.2.2",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.2"

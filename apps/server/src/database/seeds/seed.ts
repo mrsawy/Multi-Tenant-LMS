@@ -117,19 +117,11 @@ async function bootstrap() {
 
     for (const courseConfig of organization.courses) {
       const instructor: any = faker.helpers.arrayElement(instructors);
-      const course = await courseSeeder.seedCourse(
-        org._id,
-        instructor._id,
-        instructor.username,
-        [faker.helpers.arrayElement(categories)._id],
-        {
-          name: courseConfig.name,
-          isPaid: courseConfig.isPaid,
-          pricing: courseConfig.pricing as any,
-        },
-        students,
-        courseConfig.contentTypes
-      );
+      const course = await courseSeeder.seedCourse(org._id, instructor._id, instructor.username, [faker.helpers.arrayElement(categories)._id], {
+        name: courseConfig.name,
+        isPaid: courseConfig.isPaid,
+        pricing: courseConfig.pricing as any,
+      }, students, courseConfig.contentTypes);
       courses.push(course);
     }
 
@@ -191,7 +183,9 @@ async function bootstrap() {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
+
         }
+
 
         await enrollmentSeeder.seedEnrollment(
           student._id,
@@ -218,16 +212,17 @@ async function bootstrap() {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           },
-          accessType
+          accessType,
         );
         enrollmentConfigIndex++;
+
+
       }
     }
   }
 
   console.log('Seeding complete!');
   await app.close();
-  process.exit();
 }
 
 bootstrap();
