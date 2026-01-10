@@ -23,8 +23,10 @@ const Video = ({ url, toggleComplete, played, setPlayed, watched, setWatched, is
   const [loading, setLoading] = useState(true);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-  const playerRef = useRef<any>(null);
-
+  //Rabie Changes
+  const playerRef = useRef<HTMLVideoElement>(null);
+  //Rabie Changes
+  const lastUpdateTime = useRef<number>(0);
   const handlePlayPause = () => {
     setPlaying(!playing);
   };
@@ -33,14 +35,20 @@ const Video = ({ url, toggleComplete, played, setPlayed, watched, setWatched, is
     setMuted(!muted);
   };
 
+  //Rabie Changes
   const handleTimeChange = async (event: any) => {
-    const currentTime = event.target.currentTime;
-    console.log({ currentTime });
-    if (!seeking) {
-      setPlayed(currentTime / duration);
+    // const currentTime = event.target.currentTime;
+    const now = Date.now();
+
+    const playerElement = playerRef.current;
+    if (!playerElement) return;
+
+    if (!seeking && now - lastUpdateTime.current >= 1000) {
+      lastUpdateTime.current = now;
+      setPlayed(playerElement.currentTime / duration);
     }
 
-    if (currentTime / duration > 0.9 && !watched) {
+    if (playerElement.currentTime / duration > 0.9 && !watched) {
       setWatched(true);
       await toggleComplete({ completed: true, withRefresh: false, withToast: true });
     }
@@ -131,7 +139,7 @@ const Video = ({ url, toggleComplete, played, setPlayed, watched, setWatched, is
         <ReactPlayer
           ref={playerRef}
           onDoubleClick={handleFullscreen}
-          src="https://videocdn.cdnpk.net/videos/42c7dbf8-dfef-51e2-9696-d5f31703dcf0/horizontal/previews/watermarked/large.mp4"
+          src="https://youtu.be/JJO44yATass?si=4dEP3tjgBMdibU59"
           width="100%"
           height="100%"
           playing={playing}
@@ -140,6 +148,8 @@ const Video = ({ url, toggleComplete, played, setPlayed, watched, setWatched, is
           onTimeUpdate={handleTimeChange}
           playbackRate={playbackRate}
           // onProgress={handleProgress}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
           onDurationChange={handleDuration}
           onReady={handleReady}
           controls={false}

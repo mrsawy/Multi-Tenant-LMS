@@ -6,7 +6,8 @@ import { Button } from '@/components/atoms/button';
 import { VideoType } from '@/lib/types/course/enum/VideoType.enum';
 import { IContent } from '@/lib/types/course/content.interface';
 import { useRouter } from '@/i18n/navigation';
-import Video from '@/components/molecules/Video';
+import Video from '@/components/molecules/prevVideo';
+// import Video from '@/components/molecules/Video';
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
