@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 /* @import "./../../node_modules/tw-animate-css"; */
 
 @font-face {
@@ -26,12 +26,13 @@
   font-display: swap;
 }
 
-html[lang='ar'],
-html[dir='rtl'],
-[lang='ar'],
+html[lang="ar"],
+html[dir="rtl"],
+[lang="ar"],
 *:lang(ar) {
   font-family: 'ArabicFont2', sans-serif !important;
 }
+
 
 .ltr {
   direction: ltr !important;
@@ -279,6 +280,7 @@ html.dark {
 .rbc-today {
   background-color: var(--shadow-color) !important;
   color: #000;
+
 }
 
 @keyframes collapsible-down {
