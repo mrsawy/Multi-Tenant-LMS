@@ -16,19 +16,17 @@ import {
 } from '@/components/atoms/media-player';
 import { Loader2 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { HeroVideoDialog } from '@/components/molecules/video-player/magic-player';
+import toYouTubeEmbed from '@/lib/utils/video';
 type VideoProps = {
   url: string;
-  toggleComplete: (args: { completed: boolean; withToast: boolean; withRefresh: boolean }) => Promise<void>;
-  played: number;
-  setPlayed: React.Dispatch<React.SetStateAction<number>>;
-  watched: boolean;
-  setWatched: React.Dispatch<React.SetStateAction<boolean>>;
-  isUploadedVideo: boolean;
+  onPlayedPercentageUpdate?: (percentage: number) => void;
 };
 
-export default function Video({ url, toggleComplete, setPlayed, watched, setWatched, isUploadedVideo }: VideoProps) {
+export default function Video({ url, onPlayedPercentageUpdate }: VideoProps) {
   const [isVideoFullscreen, setIsVideoFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [played, setPlayed] = useState(0);
 
   const playerRef = useRef<HTMLVideoElement | null>(null);
 
@@ -58,25 +56,38 @@ export default function Video({ url, toggleComplete, setPlayed, watched, setWatc
     if (videoDuration > 0) {
       const progress = currentVideoTime / videoDuration;
       setPlayed(progress);
-
-      // Mark as complete when 90% watched
-      if (progress > 0.9 && !watched) {
-        setWatched(true);
-        await toggleComplete({ completed: true, withRefresh: false, withToast: true });
-      }
+      onPlayedPercentageUpdate?.(progress);
+      // // Mark as complete when 90% watched
+      // if (progress > 0.9 && !watched) {
+      //   setWatched(true);
+      //   await toggleComplete({ completed: true, withRefresh: false, withToast: true });
+      // }
     }
   };
 
   return (
-    <MediaPlayer dir="ltr" className={`${!isVideoFullscreen && 'group relative mb-6 aspect-video overflow-hidden rounded-2xl bg-black'} `} id="video-player-wrapper" autoHide={true}>
+    <MediaPlayer
+      dir="ltr"
+      className={`${!isVideoFullscreen && 'group relative mb-6 aspect-video overflow-hidden rounded-2xl bg-black'}`}
+      id="video-player-wrapper"
+      autoHide={true}>
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
           <Loader2 className="text-primary h-12 w-12 animate-spin" />
         </div>
       )}
       <KeyboardListener />
-      <MediaPlayerVideo className="outline-none" width="100%" height="100%" ref={playerRef} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleReady} onCanPlay={handleReady} onDoubleClick={handleFullscreen} autoPlay={true}>
-        {isUploadedVideo ? <source src={url} type="video/mp4" /> : <source src="https://videocdn.cdnpk.net/videos/42c7dbf8-dfef-51e2-9696-d5f31703dcf0/horizontal/previews/watermarked/large.mp4" type="video/mp4" />}
+      <MediaPlayerVideo
+        className="outline-none"
+        width="100%"
+        height="100%"
+        ref={playerRef}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleReady}
+        onCanPlay={handleReady}
+        onDoubleClick={handleFullscreen}
+        autoPlay={true}>
+        <source src={url} type="video/mp4" />
       </MediaPlayerVideo>
       <MediaPlayerControls className="flex-col items-start gap-2.5">
         <MediaPlayerControlsOverlay />

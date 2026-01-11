@@ -1,51 +1,50 @@
-import React, { ReactEventHandler, use, useEffect, useState } from 'react';
+import React, { ReactEventHandler, use, useEffect, useState, useCallback, useRef } from 'react';
 // @ts-ignore - react-player types can be inconsistent
-// import ReactPlayer from 'react-player';
+import ReactPlayer from 'react-player';
 import { Play, Pause, Volume2, VolumeX, Maximize, Loader2, Gauge } from 'lucide-react';
 import { Button } from '@/components/atoms/button';
 import { VideoType } from '@/lib/types/course/enum/VideoType.enum';
 import { IContent } from '@/lib/types/course/content.interface';
 import { useRouter } from '@/i18n/navigation';
-import Video from '@/components/molecules/Video';
+import Video from '@/components/molecules/video-player/Video-dice';
+import YoutubeVideoPlayer from '@/components/molecules/video-player/youtube-video-player';
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 const VideoContent: React.FC<{
-  content: IContent;
-  isComplete: boolean;
-  toggleComplete: (args: { completed: boolean; withToast: boolean; withRefresh: boolean }) => Promise<void>;
+  content: IContent, isComplete: boolean,
+  toggleComplete: (args: { completed: boolean, withToast: boolean, withRefresh: boolean }) => Promise<void>
 }> = ({ toggleComplete, isComplete, content }) => {
-  const [url, setUrl] = useState(content.videoUrl || '');
-
-  const [played, setPlayed] = useState(0);
-
-  const [watched, setWatched] = useState(false);
+  const [url, setUrl] = useState(content.videoUrl || "");
+  const [playedPercentage, setPlayedPercentage] = useState(0);
   const [isUploadedVideo, setIsUploadedVideo] = useState(false);
-
-  const router = useRouter();
+  const hasCompletedRef = useRef(isComplete);
 
   useEffect(() => {
     if (content.videoType === VideoType.UPLOAD) {
-      setUrl(content.fileKey ?? '');
+      setUrl(content.fileKey ?? "");
       setIsUploadedVideo(true);
     } else {
-      setUrl(content.videoUrl || '');
+      setUrl(content.videoUrl || "");
       setIsUploadedVideo(false);
     }
   }, [content.videoType, content.fileKey, content.videoUrl]);
 
-  useEffect(() => {
-    return () => {
-      router.refresh();
-    };
-  }, []);
+
+  const handlePercentageUpdate = useCallback(async (percentage: number) => {
+    setPlayedPercentage(percentage);
+    if (percentage > 0.9 && !hasCompletedRef.current) {
+      hasCompletedRef.current = true;
+      await toggleComplete({ completed: true, withRefresh: false, withToast: true });
+    }
+  }, [toggleComplete]);
 
   if (!url) {
     return (
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex aspect-video items-center justify-center rounded-lg bg-gray-100">
+      <div className="max-w-4xl mx-auto">
+        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-6">
           <div className="text-center text-gray-500">
-            <Play className="mx-auto mb-4 h-16 w-16 opacity-50" />
+            <Play className="w-16 h-16 mx-auto mb-4 opacity-50" />
             <p>No video URL provided</p>
           </div>
         </div>
@@ -54,19 +53,42 @@ const VideoContent: React.FC<{
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <Video url={url} toggleComplete={toggleComplete} played={played} setPlayed={setPlayed} watched={watched} setWatched={setWatched} isUploadedVideo={isUploadedVideo} />
-      {/* <Video url={url} toggleComplete={toggleComplete} played={played} setPlayed={setPlayed} watched={watched} setWatched={setWatched} isUploadedVideo={isUploadedVideo} /> */}
-      <div className="space-y-4 text-center">
-        {content.title && <h3 className="text-xl font-semibold">{content.title}</h3>}
+    <div className="max-w-4xl mx-auto dir-ltr">
+      <div
+        id="video-player-wrapper"
+        className="relative aspect-video bg-black rounded-lg overflow-hidden mb-6 group"
+
+      >
+
+
+        {isUploadedVideo ? (
+          <Video url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />
+        ) : (<YoutubeVideoPlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)}
+
+      </div>
+
+      <div className="text-center space-y-4">
+        {content.title && (
+          <h3 className="text-xl font-semibold">{content.title}</h3>
+        )}
 
         <div className="flex items-center justify-center gap-2">
-          <div className="text-sm text-gray-600">Progress: {Math.round(played * 100)}%</div>
-          {watched && <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">✓ Watched</span>}
+          <div className="text-sm text-gray-600">
+            Progress: {Math.round(playedPercentage * 100)}%
+          </div>
+          {hasCompletedRef.current && (
+            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              ✓ Watched
+            </span>
+          )}
         </div>
 
-        <Button size="lg" disabled={watched} className={watched ? 'bg-green-600 hover:bg-green-600' : ''}>
-          {watched ? '✓  Watched' : 'Complete up to 90% to mark as completed'}
+        <Button
+          size="lg"
+          disabled={hasCompletedRef.current}
+          className={hasCompletedRef.current ? 'bg-green-600 hover:bg-green-600' : ''}
+        >
+          {hasCompletedRef.current ? '✓  Watched' : 'Complete up to 90% to mark as completed'}
         </Button>
       </div>
     </div>
