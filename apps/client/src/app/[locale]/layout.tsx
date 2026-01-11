@@ -7,6 +7,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./../globals.css";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import Provider from "./provider";
+import Footer from "../../components/organs/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default async function LocaleLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
         <Provider locale={locale} messages={messages}>
           {children}
+          <Footer />
         </Provider>
       </body>
     </html>

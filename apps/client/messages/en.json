@@ -405,5 +405,13 @@
       "title": "Our Location",
       "embedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.0!2d-118.496!3d34.019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzA4LjQiTiAxMTjCsDI5JzQ1LjYiVw!5e0!3m2!1sen!2sus!4v1234567890"
     }
+  },
+  "footer": {
+    "title": "safier",
+    "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
+    "links": "Quick Links",
+    "social": "Follow Us",
+    "contact": "Contact Us",
+    "copyright": "Safier. All rights reserved."
   }
 }
