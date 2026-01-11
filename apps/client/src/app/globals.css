@@ -39,7 +39,6 @@ html[dir="rtl"],
 }
 
 @custom-variant dark (&:is(.dark *));
-
 :root {
   --background: oklch(0.9578 0.0058 264.5321);
   --foreground: oklch(0.4355 0.0430 279.3250);
@@ -316,4 +315,12 @@ html.dark {
 .animate-collapsible-up {
   animation: collapsible-up var(--ant-motion-duration-mid) var(--ant-motion-ease-in);
   animation-fill-mode: forwards;
+}
+
+.dir-ltr {
+  direction: ltr !important;
+}
+
+.dir-rtl {
+  direction: rtl !important;
 }

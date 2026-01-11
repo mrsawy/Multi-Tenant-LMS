@@ -33,7 +33,7 @@ export async function getOwnReview(filters: FindOwnReviewInput) {
             }),
         );
 
-        if ('err' in (response as any)) {
+        if (response !== null && 'err' in (response as any)) {
             throw new Error(((response as any) as { err: NatsError }).err.message)
         }
 

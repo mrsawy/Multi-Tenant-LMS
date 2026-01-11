@@ -30,7 +30,8 @@ import { IUserContext } from 'src/utils/types/IUserContext.interface';
 @Controller()
 export class FileMessageController {
   constructor(private readonly fileService: FileService) {}
-
+  
+  @UseGuards(AuthGuard)
   @MessagePattern('file.getPreSignedUrl')
   async generatePresignedUrl(
     @Payload(new RpcValidationPipe())
@@ -45,6 +46,8 @@ export class FileMessageController {
     });
   }
 
+
+  @UseGuards(AuthGuard)
   @MessagePattern('file.getFileUrl')
   async getFileUrl(
     @Payload(new RpcValidationPipe())
