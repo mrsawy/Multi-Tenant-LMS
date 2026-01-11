@@ -6,9 +6,8 @@ import { Button } from '@/components/atoms/button';
 import { VideoType } from '@/lib/types/course/enum/VideoType.enum';
 import { IContent } from '@/lib/types/course/content.interface';
 import { useRouter } from '@/i18n/navigation';
-import Video from '@/components/molecules/video-player/Video-dice';
+import VideoDice from '@/components/molecules/video-player/Video-dice';
 import YoutubeVideoPlayer from '@/components/molecules/video-player/youtube-video-player';
-
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 const VideoContent: React.FC<{
@@ -57,13 +56,13 @@ const VideoContent: React.FC<{
       <div
         id="video-player-wrapper"
         className="relative aspect-video bg-black rounded-lg overflow-hidden mb-6 group"
-
       >
-
-
-        {isUploadedVideo ? (
-          <Video url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />
-        ) : (<YoutubeVideoPlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)}
+        {isUploadedVideo
+          ?
+          (<VideoDice url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)
+          :
+          (<YoutubeVideoPlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)
+        }
 
       </div>
 
