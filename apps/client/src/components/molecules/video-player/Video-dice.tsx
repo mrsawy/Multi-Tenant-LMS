@@ -1,5 +1,4 @@
 import {
-  KeyboardListener,
   MediaPlayer,
   MediaPlayerControls,
   MediaPlayerControlsOverlay,
@@ -16,8 +15,6 @@ import {
 } from '@/components/atoms/media-player';
 import { Loader2 } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { HeroVideoDialog } from '@/components/molecules/video-player/magic-player';
-import toYouTubeEmbed from '@/lib/utils/video';
 type VideoProps = {
   url: string;
   onPlayedPercentageUpdate?: (percentage: number) => void;
@@ -76,7 +73,6 @@ export default function Video({ url, onPlayedPercentageUpdate }: VideoProps) {
           <Loader2 className="text-primary h-12 w-12 animate-spin" />
         </div>
       )}
-      <KeyboardListener />
       <MediaPlayerVideo
         className="outline-none"
         width="100%"
