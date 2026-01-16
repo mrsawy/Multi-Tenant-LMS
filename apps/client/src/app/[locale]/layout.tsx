@@ -46,7 +46,6 @@ export default async function LocaleLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
         <Provider locale={locale} messages={messages}>
           {children}
-          <Footer />
         </Provider>
       </body>
     </html>

@@ -3,6 +3,7 @@ import HomeNave from '@/components/organs/home-nav';
 import { getAuthUser } from '@/lib/actions/user/user.action';
 import type { Metadata } from 'next';
 import Provider from './provider';
+import Footer from '@/components/organs/footer';
 // import { redirect } from 'next/navigation';
 // import { routing } from '@/i18n/routing';
 
@@ -25,6 +26,8 @@ export default async function LocaleLayout({
     <Provider>
       <HomeNave user={user} />
       {children}
+      <Footer />
+
     </Provider>
   );
 }
