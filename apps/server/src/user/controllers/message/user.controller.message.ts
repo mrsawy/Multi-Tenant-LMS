@@ -1,35 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Request, InternalServerErrorException, UnauthorizedException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { Controller, UseGuards, Request, UnauthorizedException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { CreateUserDto } from '../../dto/create-user.dto';
+import { User } from '../../entities/user.entity';
 import mongoose, { Connection, Model, PaginateOptions } from 'mongoose';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { RequiredPermissions } from 'src/role/permission.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { Actions } from 'src/role/enum/Action.enum';
-import { Subjects } from 'src/role/enum/subject.enum';
-import { PermissionsGuard } from 'src/role/guards/permissions.guard';
-import { RoleService } from 'src/role/role.service';
 import { handleError, handleRpcError } from 'src/utils/errorHandling';
-import { AppAbility } from 'src/role/permissions.factory';
-import { checkConditionForRule } from 'src/utils/abilityUtils';
-import { Conditions } from 'src/role/enum/Conditions.enum';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
 import { Ctx, MessagePattern, Payload } from '@nestjs/microservices';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { WalletService } from 'src/wallet/wallet.service';
 import { convertObjectValuesToObjectId } from 'src/utils/ObjectId.utils';
+import { UserService } from '../../services/user.service';
 
 @Controller('user')
 export class UserControllerMessage {
   constructor(
     private readonly userService: UserService,
-    private readonly roleService: RoleService,
     @Inject(forwardRef(() => WalletService)) private readonly walletService: WalletService,
     @InjectConnection() private readonly connection: Connection
-  ) {}
+  ) { }
 
   @MessagePattern('user.getOwnData')
   @UseGuards(AuthGuard)
@@ -90,15 +80,17 @@ export class UserControllerMessage {
 
       const userId = new mongoose.Types.ObjectId();
       const walletId = new mongoose.Types.ObjectId();
+      const newData = convertObjectValuesToObjectId(payload) as CreateUserDto;
       const createdUser = await this.userService.create(
         {
-          ...payload,
+          ...newData,
           _id: userId,
           organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
           walletId,
         },
         session
       );
+
       await this.walletService.create({ _id: walletId, userId: userId, currency: payload.preferredCurrency }, session);
 
       await session.commitTransaction();
@@ -118,12 +110,14 @@ export class UserControllerMessage {
     @Payload(new RpcValidationPipe())
     payload: { userId: string; userData: Partial<CreateUserDto> }
   ) {
+    const newData = convertObjectValuesToObjectId(payload.userData) as CreateUserDto;
+
     return await this.userService.update(
       {
         _id: new mongoose.Types.ObjectId(payload.userId),
         organizationId: new mongoose.Types.ObjectId(context.userPayload.organizationId),
       },
-      payload.userData
+      newData
     );
   }
 

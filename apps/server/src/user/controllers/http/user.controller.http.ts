@@ -12,12 +12,10 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import mongoose, { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+import { UserService } from '../../services/user.service';
+import { CreateUserDto } from '../../dto/create-user.dto';
+import { UpdateUserDto } from '../../dto/update-user.dto';
+import mongoose from 'mongoose';
 import { RequiredPermissions } from 'src/role/permission.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Actions } from 'src/role/enum/Action.enum';

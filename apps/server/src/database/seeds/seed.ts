@@ -14,7 +14,7 @@ import { Enrollment } from '../../enrollment/entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
 import { Review } from '../../review/entities/review.entity';
 import { Discussion } from '../../discussion/entities/discussion.entity';
-import { faker } from '@faker-js/faker';
+import { fakerAR as faker } from '@faker-js/faker';
 
 import { RoleSeeder } from '../../role/seeds/role.seeder';
 import { PlanSeeder } from '../../plan/seeds/plan.seeder';
@@ -22,15 +22,12 @@ import { UserSeeder } from '../../user/seeds/user.seeder';
 import { OrganizationSeeder } from '../../organization/seeds/organization.seeder';
 import { CourseSeeder } from '../../course/seeds/course.seeder';
 import { EnrollmentSeeder } from '../../enrollment/seeds/enrollment.seeder';
+import { CategorySeeder } from '../../category/seed/category.seeder';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
-import { ORGANIZATIONS_SEED, ORGANIZATIONS_CONFIG } from '../../organization/seeds/seed.config';
-import { ENROLLMENT_CONFIG } from '../../enrollment/seeds/enrollment.config';
-import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
-import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
-import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { Currency } from 'src/payment/enums/currency.enum';
-import { AccessType } from 'src/enrollment/enum/accessType.enum';
+import { ORGANIZATIONS_SEED, ORGANIZATIONS_CONFIG } from './seed.config';
+import { Roles } from 'src/role/enum/Roles.enum';
+import { ReviewSeeder } from 'src/review/seed/seed';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -56,8 +53,10 @@ async function bootstrap() {
   const planSeeder = new PlanSeeder(planModel);
   const userSeeder = new UserSeeder(userModel, walletModel);
   const orgSeeder = new OrganizationSeeder(organizationModel);
-  const courseSeeder = new CourseSeeder(courseModel, categoryModel, moduleModel, contentModel);
-  const enrollmentSeeder = new EnrollmentSeeder(enrollmentModel, attendanceModel, reviewModel, discussionModel, courseModel, moduleModel, contentModel);
+  const categorySeeder = new CategorySeeder(categoryModel);
+  const courseSeeder = new CourseSeeder(courseModel, categoryModel, moduleModel, contentModel, userModel);
+  const enrollmentSeeder = new EnrollmentSeeder(enrollmentModel, attendanceModel, reviewModel, discussionModel, courseModel, moduleModel, contentModel, userModel);
+  const reviewSeeder = new ReviewSeeder(reviewModel, courseModel, enrollmentModel, userModel, organizationModel, moduleModel, contentModel);
 
   console.log('Seeding Roles...');
   await roleSeeder.seed();
@@ -66,7 +65,7 @@ async function bootstrap() {
   await planSeeder.seed();
 
   console.log('Seeding Global Students...');
-  await userSeeder.seedMultiple(5, { roleName: 'Student', organizationId: undefined } as any);
+  await userSeeder.seedMultiple(5, { roleName: Roles.STUDENT, organizationId: undefined } as any);
 
   console.log('Seeding Organizations and their data...');
   const plans = ['Basic Plan', 'Pro Plan', 'Enterprise Plan', 'Free Plan'];
@@ -79,7 +78,7 @@ async function bootstrap() {
     const superAdmin = await userSeeder.seedUser({
       username: `superadmin${i}`,
       email: `superadmin${i}@example.com`,
-      roleName: 'SuperAdmin',
+      roleName: Roles.SUPER_ADMIN,
     });
 
     const planName = plans[i % plans.length];
@@ -97,128 +96,123 @@ async function bootstrap() {
 
     await userSeeder.seedMultiple(organization.adminsCount, {
       organizationId: org._id,
-      roleName: 'Admin',
+      roleName: Roles.ADMIN,
     });
 
     const instructors = await userSeeder.seedMultiple(organization.teachersCount, {
       organizationId: org._id,
-      roleName: 'Instructor',
+      roleName: Roles.INSTRUCTOR,
     });
 
     const students = await userSeeder.seedMultiple(organization.studentsCount, {
       organizationId: org._id,
-      roleName: 'Student',
+      roleName: Roles.STUDENT,
     });
 
-    console.log(`  Seeding Courses for ${organization.name}...`);
-    const categories = await courseSeeder.seedCategories(org._id, 3);
+    console.log(`  Seeding Categories for ${organization.name}...`);
+    // Collect all unique category names from all courses in this organization
+    const categoryNamesSet = new Set<string>();
+    organization.courses.forEach(course => {
+      if (course.categories && course.categories.length > 0) {
+        course.categories.forEach(catName => categoryNamesSet.add(catName));
+      }
+    });
 
+    // Seed all categories for this organization
+    const categoryNames = Array.from(categoryNamesSet);
+    const categoryMap = await categorySeeder.seedCategoriesMap(org._id, categoryNames);
+
+    console.log(`  Seeding Courses for ${organization.name}...`);
     const courses: Course[] = [];
+
+    // Track which categories each instructor teaches (for assigning categories to instructors)
+    const instructorCategoryMap = new Map<string, Set<string>>();
+    instructors.forEach(inst => {
+      instructorCategoryMap.set(inst._id.toString(), new Set<string>());
+    });
 
     for (const courseConfig of organization.courses) {
       const instructor: any = faker.helpers.arrayElement(instructors);
-      const course = await courseSeeder.seedCourse(org._id, instructor._id, instructor.username, [faker.helpers.arrayElement(categories)._id], {
-        name: courseConfig.name,
-        isPaid: courseConfig.isPaid,
-        pricing: courseConfig.pricing as any,
-      }, students, courseConfig.contentTypes);
+
+      // Randomly select 0-2 co-instructors (excluding the main instructor)
+      const availableCoInstructors = instructors.filter(inst => inst._id.toString() !== instructor._id.toString());
+      const coInstructorsCount = faker.number.int({ min: 0, max: Math.min(2, availableCoInstructors.length) });
+      const coInstructors = faker.helpers.arrayElements(availableCoInstructors, coInstructorsCount);
+      const coInstructorsIds = coInstructors.map(inst => inst._id);
+
+      // Get category IDs for this course from config
+      let courseCategoryIds: any[] = [];
+      if (courseConfig.categories && courseConfig.categories.length > 0) {
+        courseCategoryIds = courseConfig.categories
+          .map(catName => categoryMap.get(catName)?._id)
+          .filter(id => id !== undefined);
+      }
+
+      // If no categories from config, use a random one (fallback)
+      if (courseCategoryIds.length === 0) {
+        const allCategories = Array.from(categoryMap.values());
+        if (allCategories.length > 0) {
+          courseCategoryIds = [faker.helpers.arrayElement(allCategories)._id];
+        }
+      }
+
+      // Track categories for instructors
+      const courseCategories = courseConfig.categories;
+      if (courseCategories && courseCategories.length > 0) {
+        const mainInstructorCategories = instructorCategoryMap.get(instructor._id.toString());
+        if (mainInstructorCategories) {
+          courseCategories.forEach(catName => mainInstructorCategories.add(catName));
+        }
+
+        coInstructors.forEach(coInst => {
+          const coInstructorCategories = instructorCategoryMap.get(coInst._id.toString());
+          if (coInstructorCategories) {
+            courseCategories.forEach(catName => coInstructorCategories.add(catName));
+          }
+        });
+      }
+
+      const course = await courseSeeder.seedCourse(
+        org._id,
+        instructor._id,
+        instructor.username,
+        courseCategoryIds,
+        {
+          name: courseConfig.name,
+          isPaid: courseConfig.isPaid,
+          pricing: courseConfig.pricing as any,
+        },
+        courseConfig.contentTypes,
+        coInstructorsIds,
+      );
       courses.push(course);
     }
 
-    console.log(`  Seeding Enrollments for ${organization.name}...`);
-    let enrollmentConfigIndex = 0;
-    for (const student of students) {
-      const enrollmentCount = faker.number.int({ min: 1, max: Math.min(courses.length, 3) });
-      const shuffledCourses = [...courses].sort(() => 0.5 - Math.random());
-      for (let k = 0; k < enrollmentCount; k++) {
-        const progressConfig = ENROLLMENT_CONFIG.enrollments[enrollmentConfigIndex % ENROLLMENT_CONFIG.enrollments.length];
-        const course = shuffledCourses[k];
-        let subscription: SubscriptionTypeDef | undefined;
-        let accessType: AccessType = AccessType.FREE;
+    // Assign categories to instructors based on the courses they teach
+    console.log(`  Assigning Categories to Instructors for ${organization.name}...`);
+    for (const instructor of instructors) {
+      const instructorCategories = instructorCategoryMap.get(instructor._id.toString());
+      if (instructorCategories && instructorCategories.size > 0) {
+        const categoryIds = Array.from(instructorCategories)
+          .map(catName => categoryMap.get(catName)?._id)
+          .filter(id => id !== undefined);
 
-        if (course.isPaid && course.pricing) {
-          const billingCycle = faker.helpers.arrayElement(Object.values(BillingCycle));
-          const pricingDetails = course.pricing[billingCycle];
-          if (pricingDetails) {
-            subscription = {
-              status: SubscriptionStatus.ACTIVE,
-              starts_at: new Date(),
-              next_billing: new Date(),
-              reminder_days: 10,
-              reminder_date: new Date(),
-              ends_at: new Date(),
-              resumed_at: new Date(),
-              billing: {
-                email: student.email,
-                last_name: student.lastName,
-                first_name: student.firstName,
-                phone_number: student.phone,
-                amount: pricingDetails.originalPrice ?? 0,
-                currency: pricingDetails.originalCurrency ?? Currency.EGP,
-                billingCycle: billingCycle,
-              },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-            accessType = AccessType.SUBSCRIPTION;
-          }
-        } else {
-          subscription = {
-            status: SubscriptionStatus.ACTIVE,
-            starts_at: new Date(),
-            next_billing: new Date(),
-            reminder_days: 10,
-            reminder_date: new Date(),
-            ends_at: new Date(),
-            resumed_at: new Date(),
-            billing: {
-              email: student.email,
-              last_name: student.lastName,
-              first_name: student.firstName,
-              phone_number: student.phone,
-              amount: 0,
-              currency: Currency.USD,
-              billingCycle: BillingCycle.ONE_TIME,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
+        if (categoryIds.length > 0) {
+          await userModel.findByIdAndUpdate(instructor._id, {
+            categoriesIds: categoryIds,
+          });
         }
-
-
-        await enrollmentSeeder.seedEnrollment(
-          student._id,
-          course._id,
-          org._id,
-          progressConfig.progressPercentage,
-          subscription || {
-            status: SubscriptionStatus.ACTIVE,
-            starts_at: new Date(),
-            next_billing: new Date(),
-            reminder_days: 10,
-            reminder_date: new Date(),
-            ends_at: new Date(),
-            resumed_at: new Date(),
-            billing: {
-              email: student.email,
-              last_name: student.lastName,
-              first_name: student.firstName,
-              phone_number: student.phone,
-              amount: 0,
-              currency: Currency.EGP,
-              billingCycle: BillingCycle.ONE_TIME,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          accessType,
-        );
-        enrollmentConfigIndex++;
-
-
       }
     }
+
+    console.log(`  Seeding Enrollments for ${organization.name}...`);
+    await enrollmentSeeder.seedEnrollmentsForStudents(students, courses, org._id);
+
+    await reviewSeeder.seedCoursesReviews(courses, students);
+
+    // Recalculate all instructor totalCourses to ensure accuracy
+    console.log(`  Recalculating instructor statistics for ${organization.name}...`);
+    await courseSeeder.recalculateAllInstructorTotalCourses(org._id);
   }
 
   console.log('Seeding complete!');

@@ -4,10 +4,10 @@ import {
     Payload,
     Ctx,
 } from '@nestjs/microservices';
-import { ReviewService } from './review.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
-import { GetReviewsDto } from './dto/get-reviews.dto';
+import { ReviewService } from '../service/review.service';
+import { CreateReviewDto } from '../dto/create-review.dto';
+import { UpdateReviewDto } from '../dto/update-review.dto';
+import { GetReviewsDto } from '../dto/get-reviews.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
@@ -49,9 +49,9 @@ export class ReviewControllerMessage {
         return await this.reviewService.findOne(payload.id);
     }
 
-    @MessagePattern('reviews.getAverageRating')
+    @MessagePattern('reviews.getAverageRatingDetails')
     async getAverageRating(@Payload() filter: GetReviewsDto) {
-        return await this.reviewService.getAverageRating(filter);
+        return await this.reviewService.getAverageRatingDetails(filter);
     }
 
     @UseGuards(AuthGuard)
@@ -115,23 +115,23 @@ export class ReviewControllerMessage {
         });
     }
 
-    @MessagePattern('reviews.getCourseAverageRating')
+    @MessagePattern('reviews.getCourseAverageRatingDetails')
     async getCourseAverageRating(@Payload() payload: { courseId: string }) {
-        return await this.reviewService.getAverageRating({
+        return await this.reviewService.getAverageRatingDetails({
             courseId: payload.courseId,
         });
     }
 
-    @MessagePattern('reviews.getInstructorAverageRating')
+    @MessagePattern('reviews.getInstructorAverageRatingDetails')
     async getInstructorAverageRating(@Payload() payload: { instructorId: string }) {
-        return await this.reviewService.getAverageRating({
+        return await this.reviewService.getAverageRatingDetails({
             instructorId: payload.instructorId,
         });
     }
 
-    @MessagePattern('reviews.getOrganizationAverageRating')
+    @MessagePattern('reviews.getOrganizationAverageRatingDetails')
     async getOrganizationAverageRating(@Payload() payload: { reviewedOrganizationId: string }) {
-        return await this.reviewService.getAverageRating({
+        return await this.reviewService.getAverageRatingDetails({
             reviewedOrganizationId: payload.reviewedOrganizationId,
         });
     }

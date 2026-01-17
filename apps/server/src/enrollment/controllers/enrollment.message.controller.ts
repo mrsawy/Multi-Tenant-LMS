@@ -9,7 +9,7 @@ import {
 import { Ctx, MessagePattern, Payload } from '@nestjs/microservices';
 import mongoose, { Connection, PaginateOptions } from 'mongoose';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { InitiateSubscriptionDto } from './dto/create-enrollment.dto';
+import { InitiateSubscriptionDto } from '../dto/create-enrollment.dto';
 import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
 import { InjectConnection } from '@nestjs/mongoose';
@@ -17,27 +17,27 @@ import { CourseService } from 'src/course/services/course.service';
 import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
-import { EnrollmentService } from './enrollment.service';
+import { EnrollmentService } from '../services/enrollment.service';
 import { WalletService } from 'src/wallet/wallet.service';
 import { Organization } from 'src/organization/entities/organization.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
 import { handleRpcError } from 'src/utils/errorHandling';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { AccessType } from './enum/accessType.enum';
-import { Enrollment } from './entities/enrollment.entity';
+import { AccessType } from '../enum/accessType.enum';
+import { Enrollment } from '../entities/enrollment.entity';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
-import { CreateEnrollmentHttpDto } from './dto/create-enrollment.http.dto';
-import { PaymentMethod } from './enum/payment-method.enum';
+import { CreateEnrollmentHttpDto } from '../dto/create-enrollment.http.dto';
+import { PaymentMethod } from '../enum/payment-method.enum';
 import { PaymentOrchestratorService } from 'src/payment/services/payment-orchestrator.service';
 import { PaymentPurpose } from 'src/payment/types/PaymentPurpose.interface';
-import { SubmitQuizDto } from './dto/quiz-submission.dto';
+import { SubmitQuizDto } from '../dto/quiz-submission.dto';
 import { QuizService } from 'src/course/services/quiz.service';
 import { ProjectService } from 'src/course/services/project.service';
 import { LiveSessionService } from 'src/course/services/liveSession.service';
-import { MarkLiveSessionAttendanceDto } from './dto/live-session-attendance.dto';
-import { SubmitProjectDto } from './dto/project-submission.dto';
+import { MarkLiveSessionAttendanceDto } from '../dto/live-session-attendance.dto';
+import { SubmitProjectDto } from '../dto/project-submission.dto';
 import { ApplyRpcErrorHandling } from 'src/utils/docerators/error-handeling/class/ApplyRpcErrorHandling.decorator';
 
 @Controller()
@@ -241,11 +241,11 @@ export class EnrollmentMessageController {
     payload: { enrollmentId: string },
     @Ctx() context: IUserContext,
   ) {
-      return await this.enrollmentService.getDetailedEnrolledCourse(
-        payload.enrollmentId,
-        context.userPayload._id.toString(),
-      )
-    }
+    return await this.enrollmentService.getDetailedEnrolledCourse(
+      payload.enrollmentId,
+      context.userPayload._id.toString(),
+    )
+  }
 
   @UseGuards(AuthGuard)
   @MessagePattern('enrollment.toggleContentComplete')
@@ -254,12 +254,12 @@ export class EnrollmentMessageController {
     payload: { enrollmentId: string; contentId: string; completed: boolean },
     @Ctx() context: IUserContext,
   ) {
-      return await this.enrollmentService.toggleContentComplete(
-        payload.enrollmentId,
-        context.userPayload._id.toString(),
-        payload.contentId,
-        payload.completed,
-      );
+    return await this.enrollmentService.toggleContentComplete(
+      payload.enrollmentId,
+      context.userPayload._id.toString(),
+      payload.contentId,
+      payload.completed,
+    );
   }
 
   @UseGuards(AuthGuard)
@@ -288,24 +288,24 @@ export class EnrollmentMessageController {
     payload: SubmitQuizDto,
     @Ctx() context: IUserContext,
   ) {
-      payload.studentId = context.userPayload._id.toString();
-      const result = await this.quizService.submitQuiz({
-        ...payload,
-        studentId: context.userPayload._id.toString(),
-      });
+    payload.studentId = context.userPayload._id.toString();
+    const result = await this.quizService.submitQuiz({
+      ...payload,
+      studentId: context.userPayload._id.toString(),
+    });
 
-      await this.enrollmentService.toggleContentComplete(
-        payload.enrollmentId,
-        payload.studentId,
-        payload.quizId,
-        true,
-      );
+    await this.enrollmentService.toggleContentComplete(
+      payload.enrollmentId,
+      payload.studentId,
+      payload.quizId,
+      true,
+    );
 
-      return {
-        message: 'Quiz submitted successfully',
-        result,
-        success: true,
-      }
+    return {
+      message: 'Quiz submitted successfully',
+      result,
+      success: true,
+    }
   }
 
 
@@ -316,21 +316,21 @@ export class EnrollmentMessageController {
     payload: SubmitProjectDto,
     @Ctx() context: IUserContext,
   ) {
-      payload.studentId = context.userPayload._id.toString();
-      const result = await this.projectService.submitProject(payload);
+    payload.studentId = context.userPayload._id.toString();
+    const result = await this.projectService.submitProject(payload);
 
-      await this.enrollmentService.toggleContentComplete(
-        payload.enrollmentId,
-        payload.studentId,
-        payload.projectId,
-        true,
-      );
+    await this.enrollmentService.toggleContentComplete(
+      payload.enrollmentId,
+      payload.studentId,
+      payload.projectId,
+      true,
+    );
 
-      return {
-        message: 'Project submitted successfully',
-        result,
-        success: true,
-      };
+    return {
+      message: 'Project submitted successfully',
+      result,
+      success: true,
+    };
   }
 
 
@@ -341,20 +341,20 @@ export class EnrollmentMessageController {
     payload: MarkLiveSessionAttendanceDto,
     @Ctx() context: IUserContext,
   ) {
-      payload.studentId = context.userPayload._id.toString();
-      const result = await this.liveSessionService.markAttendance(payload);
+    payload.studentId = context.userPayload._id.toString();
+    const result = await this.liveSessionService.markAttendance(payload);
 
-      await this.enrollmentService.toggleContentComplete(
-        payload.enrollmentId,
-        payload.studentId,
-        payload.liveSessionId,
-        true,
-      );
+    await this.enrollmentService.toggleContentComplete(
+      payload.enrollmentId,
+      payload.studentId,
+      payload.liveSessionId,
+      true,
+    );
 
-      return {
-        message: 'Attendance marked successfully',
-        result,
-        success: true,
-      };
+    return {
+      message: 'Attendance marked successfully',
+      result,
+      success: true,
+    };
   }
 }

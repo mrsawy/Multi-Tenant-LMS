@@ -12,6 +12,8 @@ import DropzoneWithPreview from '@/components/molecules/dropzone-preview'
 import { Currency } from '@/lib/data/currency.enum'
 import { handleCreateCourse } from '@/lib/actions/courses/createCourse.action'
 import { handleUpdateCourse } from '@/lib/actions/courses/updateCourse.action'
+import { uploadFileToS3 } from '@/lib/actions/file/uploadFile'
+import { getAuthUser } from '@/lib/actions/user/user.action'
 import useGeneralStore from '@/lib/store/generalStore'
 import { toast } from 'react-toastify'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -133,9 +135,27 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
         try {
             console.log({ data })
             useGeneralStore.setState({ generalIsLoading: true });
+
+            // Upload trailer if it's a File
+            let trailerKey: string | undefined;
+            if (data.trailer instanceof File) {
+                const user = await getAuthUser();
+                if (!user) throw new Error("User not authenticated");
+
+                trailerKey = await uploadFileToS3({
+                    file: data.trailer,
+                    customPath: `courses/trailers/${user.organization?.slug}`,
+                    isPublic: true, // Trailer should be stored publicly
+                });
+            }
+
             const formData = new FormData();
 
             Object.entries(data).forEach(([key, value]) => {
+                // Skip trailer File, we'll add trailerKey instead
+                if (key === 'trailer' && value instanceof File) {
+                    return;
+                }
                 if (value instanceof File) {
                     return formData.append(key, value);
                 }
@@ -147,8 +167,14 @@ function CourseForm({ mode, setOpen, course, courseId, flatCategories, instructo
                 }
             });
 
+            // Add trailerKey if trailer was uploaded
+            if (trailerKey) {
+                formData.append('trailerKey', trailerKey);
+            }
+
             if (isUpdateMode && courseId) {
-                await handleUpdateCourse(courseId, formData, course?.thumbnailKey, (course as any)?.trailerKey);
+
+                await handleUpdateCourse(courseId, formData, course?.thumbnailKey, course?.trailerKey);
                 toast.success("Course Updated Successfully");
             } else {
                 await handleCreateCourse(formData);

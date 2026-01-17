@@ -23,7 +23,7 @@ import { Subjects } from 'src/role/enum/subject.enum';
 import { CourseContentService } from '../services/courseContent.service';
 
 import { CourseModulesService } from '../services/courseModules.service';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { QuizService } from '../services/quiz.service';
 import { SubmitQuizDto } from '../../enrollment/dto/quiz-submission.dto';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
