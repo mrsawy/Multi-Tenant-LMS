@@ -14,7 +14,7 @@ import { Plan } from 'src/plan/entities/plan.entity';
 import { OrganizationService } from 'src/organization/organization.service';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { AccessType } from 'src/enrollment/enum/accessType.enum';
 import { PayPalPlan } from './types/PaypalPlan.interface';
 import {
@@ -48,7 +48,7 @@ export class PaypalPaymentService {
     private readonly courseService: CourseService,
     private readonly organizationService: OrganizationService,
     private readonly enrollmentService: EnrollmentService,
-  ) {}
+  ) { }
 
   async getPaymentUrl(
     initiateSubscriptionDto: InitiateSubscriptionDto,

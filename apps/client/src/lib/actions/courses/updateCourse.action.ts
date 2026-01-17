@@ -60,21 +60,8 @@ export const handleUpdateCourse = async (courseId: string, formData: FormData, o
             delete courseData.thumbnail;
         }
 
-        if (courseData.trailer instanceof File) {
-
-            if (oldTrailerKey) await deleteFromS3(oldTrailerKey);
-
-            const fileExtension = courseData.trailer.name.split('.').pop() || 'mp4';
-            const trailerUrl = await uploadFile(
-                await courseData.trailer.arrayBuffer(),
-                `${user?.organization?.name}/courses/${courseData.name}/${slugify(courseData.name)}_${v7()}_trailer.${fileExtension}`,
-                courseData.trailer.type,
-            );
-            courseData.trailerKey = trailerUrl;
-            uploadedTrailerKey = trailerUrl;
-            delete courseData.trailer;
-        }
-        console.log({ courseData })
+       
+        
 
         const response = await request<any>(
             natsClient,

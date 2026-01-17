@@ -10,10 +10,10 @@ import {
     Request,
     Query,
 } from '@nestjs/common';
-import { ReviewService } from './review.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
-import { GetReviewsDto } from './dto/get-reviews.dto';
+import { ReviewService } from '../service/review.service';
+import { CreateReviewDto } from '../dto/create-review.dto';
+import { UpdateReviewDto } from '../dto/update-review.dto';
+import { GetReviewsDto } from '../dto/get-reviews.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { PermissionsGuard } from 'src/role/guards/permissions.guard';
 import { RequiredPermissions } from 'src/role/permission.decorator';
@@ -31,7 +31,7 @@ export class ReviewControllerHttp {
         @Body() createReviewDto: CreateReviewDto,
         @Request() req: IUserRequest,
     ) {
-        return await this.reviewService.create({ ...createReviewDto, userId: req.user._id.toString()});
+        return await this.reviewService.create({ ...createReviewDto, userId: req.user._id.toString() });
     }
 
     @Get()
@@ -39,9 +39,9 @@ export class ReviewControllerHttp {
         return await this.reviewService.findAll(getReviewsDto);
     }
 
-    @Get('average')
+    @Get('average-details')
     async getAverageRating(@Query() filter: GetReviewsDto) {
-        return await this.reviewService.getAverageRating(filter);
+        return await this.reviewService.getAverageRatingDetails(filter);
     }
 
     @Get(':id')

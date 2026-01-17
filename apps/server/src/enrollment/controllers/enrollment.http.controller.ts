@@ -11,17 +11,17 @@ import {
   BadRequestException,
   Put,
 } from '@nestjs/common';
-import { CreateEnrollmentHttpDto } from './dto/create-enrollment.http.dto';
-import { PaymentMethod } from './enum/payment-method.enum';
+import { CreateEnrollmentHttpDto } from '../dto/create-enrollment.http.dto';
+import { PaymentMethod } from '../enum/payment-method.enum';
 
-import { EnrollmentService } from './enrollment.service';
+import { EnrollmentService } from '../services/enrollment.service';
 import { IUserRequest } from 'src/auth/interfaces/IUserRequest.interface';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
 import { PaymentOrchestratorService } from 'src/payment/services/payment-orchestrator.service';
 import { CourseService } from 'src/course/services/course.service';
 import { PaymentPurpose } from 'src/payment/types/PaymentPurpose.interface';
-import { SubmitQuizDto } from './dto/quiz-submission.dto';
+import { SubmitQuizDto } from '../dto/quiz-submission.dto';
 import { QuizService } from 'src/course/services/quiz.service';
 
 @Controller('enrollment')

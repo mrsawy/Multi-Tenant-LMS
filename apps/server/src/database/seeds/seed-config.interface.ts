@@ -5,6 +5,7 @@ import { Currency } from 'src/payment/enums/currency.enum';
 export interface CourseSeedConfig {
   name: string;
   isPaid: boolean;
+  categories?: string[]; // Category names for this course
   contentTypes?: ContentType[]; // Optional: specify which content types to use
   pricing?: {
     [BillingCycle.MONTHLY]?: {
@@ -23,6 +24,14 @@ export interface CourseSeedConfig {
       priceUSD?: number;
     };
   };
+  discussions?: {
+    title: string;
+    content: string;
+  }[];
+  reviews?: {
+    rating: number;
+    comment: string;
+  }[];
 }
 
 export interface OrganizationSeedConfig {

@@ -2,6 +2,8 @@ import { Types } from 'mongoose';
 import { Currency } from '@/lib/data/currency.enum';
 import { Status } from './status.enum';
 import { Organization } from '../organization/organization.interface';
+import { ICategory } from '../category/ICategory';
+import { Roles } from './roles.enum';
 
 export interface Address {
   street?: string;
@@ -33,7 +35,7 @@ export interface Preferences {
 
 export interface Role {
   _id: string;
-  name: string;
+  name: Roles;
   permissions: { action: string, subject: string }[];
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -50,7 +52,7 @@ export interface IUser {
 
   firstName: string;
   lastName: string;
-  roleName: string;
+  roleName: Roles;
 
   profile?: Profile;
   preferences?: Preferences;
@@ -65,7 +67,19 @@ export interface IUser {
   updatedAt?: Date;
   organization?: Organization
   role: Role;
-  
+ 
 
+}
 
+export interface IInstructor extends IUser {
+  roleName: typeof Roles.INSTRUCTOR;
+  organizationId: string;
+  totalStudents?: number;
+  totalCourses?: number;
+  averageRating?: number;
+  totalRatings?: number
+  totalCoursesReviews?: number;
+  averageCoursesRating?: number;
+  categoriesIds?: string[];
+  categories?: Pick<ICategory, '_id' | 'name'>[];
 }

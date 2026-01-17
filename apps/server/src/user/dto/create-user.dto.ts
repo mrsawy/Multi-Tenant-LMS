@@ -9,11 +9,14 @@ import {
   IsNumber,
   IsMongoId,
   Matches,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Status } from 'src/user/enum/status.enum';
 import mongoose from 'mongoose';
 import { Currency } from 'src/payment/enums/currency.enum';
+import { Roles } from 'src/role/enum/Roles.enum';
+import { IsInstructorOnly } from '../validators/instructor-only-field.validator';
 
 export class AddressDto {
   @IsOptional()
@@ -145,4 +148,15 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(Status)
   status?: Status;
+
+
+  @IsInstructorOnly({
+    message: 'categoriesIds is only acceptable for INSTRUCTOR role',
+  })
+  @ValidateIf((o) => o.roleName.toLowerCase() === Roles.INSTRUCTOR.toLowerCase())
+  @IsMongoId({ each: true })
+  @IsOptional()
+  categoriesIds?: mongoose.Types.ObjectId[];
+
+
 }

@@ -55,9 +55,13 @@ function UserDataTable() {
     const [openRowId, setOpenRowId] = useState<string | null>(null);
     const [tempStatus, setTempStatus] = useState<string>('');
     const [globalFilter, setGlobalFilter] = useState<string>('');
+    const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-    // Use custom hooks for user management
-    const { data: users = { docs: [] }, isLoading, error } = useUsersByOrganization({ page: 1, limit: 10 })
+    // Use custom hooks for user management with pagination
+    const { data: users = { docs: [], totalPages: 0 }, isLoading, error } = useUsersByOrganization({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize
+    })
     const deleteUsersMutation = useDeleteUsers();
     const deleteUserMutation = useDeleteUser();
     const updateUserStatusMutation = useUpdateUserStatus();
@@ -204,8 +208,8 @@ function UserDataTable() {
             header: "Role",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    {getRoleIcon(row.original.role.name)}
-                    <span className="capitalize">{row.original.role.name}</span>
+                    {getRoleIcon(row.original.roleName)}
+                    <span className="capitalize">{row.original.roleName}</span>
                 </div>
             )
         },
@@ -331,7 +335,7 @@ function UserDataTable() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-24">
             {/* Header */}
             <div className="flex justify-between items-center p-5">
                 <div>
@@ -369,7 +373,7 @@ function UserDataTable() {
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Students</p>
                                 <p className="text-2xl font-bold text-purple-600">
-                                    {users.docs.filter(u => u.role.name.toLowerCase().includes('student')).length}
+                                    {users.docs.filter(u => u.roleName.toLowerCase().includes('student')).length}
                                 </p>
                             </div>
                             <User className="h-8 w-8 text-purple-500" />
@@ -387,7 +391,11 @@ function UserDataTable() {
                 globalFilter={globalFilter}
                 onGlobalFilterChange={setGlobalFilter}
                 onChangeData={() => { }}
-                pageSize={50}
+                pageSize={pagination.pageSize}
+                manualPagination={true}
+                pageCount={users.totalPages}
+                pagination={pagination}
+                onPaginationChange={setPagination}
             />
 
             {/* Status Change Dialog */}
