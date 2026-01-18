@@ -1,10 +1,11 @@
 import {Phone } from 'lucide-react';
 import Logo from '../atoms/logo';
 import { useLocale, useTranslations } from 'next-intl';
-import { Lang, pageLinks  ,phoneNumbers } from '@/data/footer.config';
+import {  pageLinks  ,phoneNumbers } from '@/data/footer.config';
 import { Link } from '@/i18n/navigation';
 import SocialMedia from '@/app/[locale]/(home-page)/contact/__components/social-media';
 import { Button } from '../atoms/button';
+type Lang = 'en' | 'ar';
 
 const Footer = () => {
   const t = useTranslations('footer');
