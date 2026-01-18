@@ -19,7 +19,6 @@ export default async function LocaleLayout({
     <>
       <HomeNave user={user} />
       {children}
-      <Footer />
     </>
 
   );

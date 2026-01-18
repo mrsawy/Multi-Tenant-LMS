@@ -52,7 +52,6 @@ export default async function OrgDashboardLayout({
                 <SidebarInset>
                     <SiteHeader />
                     {children}
-                    <Footer />
 
                 </SidebarInset>
             </SidebarProvider>
