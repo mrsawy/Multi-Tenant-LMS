@@ -8,32 +8,32 @@
     href: string;
     label: Record<Lang, string>;
   };
-  const socialLinks: SocialLink[] = [
-    {
-      icon: Facebook,
-      href: 'https://facebook.com',
-      label: {
-        en: 'Facebook',
-        ar: 'فيسبوك',
-      },
-    },
-    {
-      icon: Youtube,
-      href: 'https://youtube.com',
-      label: {
-        en: 'YouTube',
-        ar: 'يوتيوب',
-      },
-    },
-    {
-      icon: Instagram,
-      href: 'https://instagram.com',
-      label: {
-        en: 'Instagram',
-        ar: 'إنستجرام',
-      },
-    },
-  ];
+  // const socialLinks: SocialLink[] = [
+  //   {
+  //     icon: Facebook,
+  //     href: 'https://facebook.com',
+  //     label: {
+  //       en: 'Facebook',
+  //       ar: 'فيسبوك',
+  //     },
+  //   },
+  //   {
+  //     icon: Youtube,
+  //     href: 'https://youtube.com',
+  //     label: {
+  //       en: 'YouTube',
+  //       ar: 'يوتيوب',
+  //     },
+  //   },
+  //   {
+  //     icon: Instagram,
+  //     href: 'https://instagram.com',
+  //     label: {
+  //       en: 'Instagram',
+  //       ar: 'إنستجرام',
+  //     },
+  //   },
+  // ];
 
   const pageLinks = [
     {
@@ -65,5 +65,5 @@
       },
     },
   ];
-
-  export{ socialLinks , pageLinks}
+  const phoneNumbers = ["201505901635","201505901635"]
+  export{  pageLinks ,phoneNumbers}
