@@ -1,74 +1,13 @@
-import { Facebook, Youtube, Instagram, Phone } from 'lucide-react';
+import {Phone } from 'lucide-react';
 import Logo from '../atoms/logo';
 import { useLocale, useTranslations } from 'next-intl';
-type Lang = 'en' | 'ar';
+import { Lang, pageLinks ,socialLinks } from '@/data/footer.config';
 
-type SocialLink = {
-  icon: React.ElementType;
-  href: string;
-  label: Record<Lang, string>;
-};
 
 const Footer = () => {
   const t = useTranslations('footer');
   const locale = useLocale() as Lang;
-  const socialLinks: SocialLink[] = [
-    {
-      icon: Facebook,
-      href: 'https://facebook.com',
-      label: {
-        en: 'Facebook',
-        ar: 'فيسبوك',
-      },
-    },
-    {
-      icon: Youtube,
-      href: 'https://youtube.com',
-      label: {
-        en: 'YouTube',
-        ar: 'يوتيوب',
-      },
-    },
-    {
-      icon: Instagram,
-      href: 'https://instagram.com',
-      label: {
-        en: 'Instagram',
-        ar: 'إنستجرام',
-      },
-    },
-  ];
 
-  const pageLinks = [
-    {
-      href: '/',
-      name: {
-        en: 'Home',
-        ar: 'الرئيسية',
-      },
-    },
-    {
-      href: '/courses',
-      name: {
-        en: 'Courses',
-        ar: 'الكورسات',
-      },
-    },
-    {
-      href: '/about',
-      name: {
-        en: 'About',
-        ar: 'من نحن',
-      },
-    },
-    {
-      href: '/pricing',
-      name: {
-        en: 'Pricing',
-        ar: 'الأسعار',
-      },
-    },
-  ];
 
   return (
     <footer dir="rtl" className="bg-card border-border mt-16 border-t">
