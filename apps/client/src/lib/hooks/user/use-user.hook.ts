@@ -24,7 +24,7 @@ export const userKeys = {
 // Custom hook for fetching users by organization
 export function useUsersByOrganization(options: PaginationOptions, filters?: any) {
   return useQuery({
-    queryKey: [...userKeys.organization(), options, filters],
+    queryKey: [...userKeys.organization(), filters],
     queryFn: async () => {
       const users = await getUsersByOrganization(options, filters);
       return users;

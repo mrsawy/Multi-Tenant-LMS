@@ -13,7 +13,6 @@ import { IconDotsVertical, IconGripVertical, IconSearch } from '@tabler/icons-re
 import { Checkbox } from '@/components/atoms/checkbox';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog"
 import { Input } from '@/components/atoms/input';
-import { Textarea } from '@/components/atoms/textarea';
 import { Plus, PlusIcon, X } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import {
@@ -29,10 +28,8 @@ import { Badge } from '@/components/atoms/badge';
 import { BillingCycle } from '@/lib/types/course/enum/BillingCycle.enum';
 import { ModulesCountCell } from './modules-count-cell';
 import { getFileFullUrl } from '@/lib/utils/getFileFullUrl';
-import { useTranslations } from 'next-intl';
 
 function CourseDataTable({ courses }: { courses: ICourse[] }) {
-    const t = useTranslations('CourseDataTable');
     const [courseList, setCourseList] = React.useState<ICourse[]>(courses || [])
     const [openRowId, setOpenRowId] = useState<string | null>(null);
     const [tempDescription, setTempDescription] = useState<string>('');
@@ -58,7 +55,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                 className="text-muted-foreground size-7 hover:bg-transparent"
             >
                 <IconGripVertical className="text-muted-foreground size-3" />
-                <span className="sr-only">{t('ariaLabels.dragToReorder')}</span>
+                <span className="sr-only">Drag to reorder</span>
             </Button>
         )
     });
@@ -109,8 +106,8 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
 
     // Memoize columns to prevent re-renders
     const columns: ColumnDef<ICourse>[] = useMemo(() => [
-
-
+      
+        
         {
             id: "select",
             header: ({ table }) => (
@@ -121,7 +118,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                             (table.getIsSomePageRowsSelected() && "indeterminate")
                         }
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                        aria-label={t('ariaLabels.selectAll')}
+                        aria-label="Select all"
                     />
                 </div>
             ),
@@ -130,7 +127,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                     <Checkbox
                         checked={row.getIsSelected()}
                         onCheckedChange={(value) => row.toggleSelected(!!value)}
-                        aria-label={t('ariaLabels.selectRow')}
+                        aria-label="Select row"
                     />
                 </div>
             ),
@@ -139,7 +136,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
         },
         {
             accessorKey: "name",
-            header: t('columns.courseName'),
+            header: "Course Name",
             cell: ({ row }) => {
                 return (
                     <div className="flex items-center gap-3">
@@ -161,35 +158,35 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
         },
         {
             accessorKey: "description",
-            header: t('columns.description'),
+            header: "Description",
             cell: ({ row }) => {
                 return (
                     <Button
                         variant="outline"
                         onClick={() => handleOpenDialog(row.original._id?.toString() || '')}
                     >
-                        {t('buttons.view')}
+                        View
                     </Button>
                 )
             }
         },
         {
             accessorKey: "isPaid",
-            header: t('columns.type'),
+            header: "Type",
             cell: ({ row }) => {
                 return (
                     <Badge variant={row.original.isPaid ? "default" : "secondary"}>
-                        {row.original.isPaid ? t('badges.paid') : t('badges.free')}
+                        {row.original.isPaid ? "Paid" : "Free"}
                     </Badge>
                 )
             }
         },
         {
             accessorKey: "pricing",
-            header: t('columns.price'),
+            header: "Price",
             cell: ({ row }) => {
                 if (!row.original.isPaid) {
-                    return <span className="text-green-600 font-medium">{t('badges.free')}</span>
+                    return <span className="text-green-600 font-medium">Free</span>
                 }
 
                 const pricing = row.original.pricing;
@@ -211,7 +208,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                                 </div>
                                 {value.priceUSD && (
                                     <div className="text-xs text-muted-foreground">
-                                        {value.priceUSD.toFixed(2)} {t('currency.usd')}
+                                        {value.priceUSD.toFixed(2)} USD
                                     </div>
                                 )}
                             </div>
@@ -224,7 +221,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
         },
         {
             accessorKey: "stats",
-            header: t('columns.enrollments'),
+            header: "Enrollments",
             cell: ({ row }) => {
                 const enrollments = row.original.stats?.totalEnrollments || 0;
                 return <span className="font-medium">{enrollments}</span>
@@ -232,19 +229,19 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
         },
         {
             accessorKey: "modulesIds",
-            header: t('columns.modules'),
+            header: "Modules",
             cell: ({ row }) => {
                 return <ModulesCountCell courseId={row.original._id?.toString() || ''} />
             }
         },
         {
             accessorKey: "publishedAt",
-            header: t('columns.status'),
+            header: "Status",
             cell: ({ row }) => {
                 const isPublished = !!row.original.publishedAt;
                 return (
                     <Badge variant={isPublished ? "default" : "outline"}>
-                        {isPublished ? t('badges.published') : t('badges.draft')}
+                        {isPublished ? "Published" : "Draft"}
                     </Badge>
                 )
             }
@@ -252,7 +249,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
         {
             id: "actions",
             accessorKey: "actions",
-            header: t('columns.actions'),
+            header: "Actions",
             cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -262,35 +259,35 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                             size="icon"
                         >
                             <IconDotsVertical />
-                            <span className="sr-only">{t('ariaLabels.openMenu')}</span>
+                            <span className="sr-only">Open menu</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
                         <Link href={`/organization-dashboard/courses/${row.original._id}`} className='cursor-pointer'>
                             <DropdownMenuItem>
-                                {t('buttons.edit')}
+                                Edit
                             </DropdownMenuItem>
                         </Link>
                         <DropdownMenuItem>
                             <Link href={`/organization-dashboard/courses/${row.original._id}/modules`}>
-                                {t('buttons.manageModules')}
+                                Manage Modules
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive">{t('buttons.delete')}</DropdownMenuItem>
+                        <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
         },
-    ], [handleOpenDialog, handleOpenPricingDialog, t]);
+    ], [handleOpenDialog, handleOpenPricingDialog]);
 
     return (
         <div className="space-y-4 ">
             <div className="flex justify-between items-center p-5">
-                <h2 className="text-xl font-medium">{t('title')}</h2>
+                <h2 className="text-xl font-medium">Courses</h2>
                 <Link href="/organization-dashboard/courses/create" >
                     <Button variant="default">
-                        <PlusIcon />{t('addCourse')}</Button>
+                        <PlusIcon />Add Course</Button>
                 </Link>
             </div>
             {/* Search Input */}
@@ -298,7 +295,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                 <div className="relative flex-1 max-w-sm ms-auto ">
                     <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder={t('searchPlaceholder')}
+                        placeholder="Search courses..."
                         value={globalFilter}
                         onChange={(e) => setGlobalFilter(e.target.value)}
                         className="pl-8"
@@ -327,32 +324,31 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
             >
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>{t('dialogs.description.title')}</DialogTitle>
+                        <DialogTitle>Course Description</DialogTitle>
                         <DialogDescription>
-                            {t('dialogs.description.description')}
+                            Edit the course description
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('dialogs.description.label')}</label>
-                        <Textarea
+                        <label className="text-sm font-medium">Description</label>
+                        <Input
                             value={tempDescription}
                             onChange={(e) => setTempDescription(e.target.value)}
-                            placeholder={t('dialogs.description.placeholder')}
+                            placeholder="Enter course description..."
                             className="w-full"
-                            rows={6}
                         />
                     </div>
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline" onClick={handleCloseDialog}>{t('buttons.cancel')}</Button>
+                            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
                         </DialogClose>
                         <Button
                             type="button"
                             onClick={() => openRowId && handleSaveDescription(openRowId)}
                         >
-                            {t('buttons.saveChanges')}
+                            Save changes
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -369,9 +365,9 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
             >
                 <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
-                        <DialogTitle>{t('dialogs.pricing.title')}</DialogTitle>
+                        <DialogTitle>Pricing Details</DialogTitle>
                         <DialogDescription>
-                            {t('dialogs.pricing.description', { courseName: selectedCourseName })}
+                            Pricing information for {selectedCourseName}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -382,7 +378,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                                     <div key={billingCycle} className="border rounded-lg p-4">
                                         <div className="flex items-center justify-between mb-3">
                                             <h3 className="text-lg font-semibold capitalize">
-                                                {t('dialogs.pricing.plan', { billingCycle })}
+                                                {billingCycle} Plan
                                             </h3>
                                             <Badge variant="outline">
                                                 {billingCycle}
@@ -392,7 +388,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">
-                                                    {t('dialogs.pricing.originalPrice')}
+                                                    Original Price
                                                 </label>
                                                 <p className="text-lg font-semibold">
                                                     {pricingDetails.originalPrice} {pricingDetails.originalCurrency}
@@ -402,10 +398,10 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                                             {pricingDetails.priceUSD && (
                                                 <div>
                                                     <label className="text-sm font-medium text-muted-foreground">
-                                                        {t('dialogs.pricing.usdPrice')}
+                                                        USD Price
                                                     </label>
                                                     <p className="text-lg font-semibold">
-                                                        ${pricingDetails.priceUSD.toFixed(2)} {t('currency.usd')}
+                                                        ${pricingDetails.priceUSD.toFixed(2)} USD
                                                     </p>
                                                 </div>
                                             )}
@@ -415,19 +411,17 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                                             <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                                                        {t('dialogs.pricing.discountAvailable')}
+                                                        Discount Available
                                                     </span>
                                                     <Badge variant="default" className="bg-green-600">
-                                                        {pricingDetails.discountPercentage}% {t('dialogs.pricing.off')}
+                                                        {pricingDetails.discountPercentage}% OFF
                                                     </Badge>
                                                 </div>
 
                                                 {pricingDetails.discountStartDate && pricingDetails.discountEndDate && (
                                                     <div className="mt-2 text-xs text-green-700 dark:text-green-300">
-                                                        {t('dialogs.pricing.validFrom', {
-                                                            startDate: new Date(pricingDetails.discountStartDate).toLocaleDateString(),
-                                                            endDate: new Date(pricingDetails.discountEndDate).toLocaleDateString()
-                                                        })}
+                                                        Valid from {new Date(pricingDetails.discountStartDate).toLocaleDateString()}
+                                                        {' '}to {new Date(pricingDetails.discountEndDate).toLocaleDateString()}
                                                     </div>
                                                 )}
                                             </div>
@@ -437,7 +431,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                             </div>
                         ) : (
                             <div className="text-center py-8">
-                                <p className="text-muted-foreground">{t('dialogs.pricing.noPricingInfo')}</p>
+                                <p className="text-muted-foreground">No pricing information available</p>
                             </div>
                         )}
                     </div>
@@ -445,7 +439,7 @@ function CourseDataTable({ courses }: { courses: ICourse[] }) {
                     <DialogFooter>
                         <DialogClose asChild>
                             <Button variant="outline" onClick={handleClosePricingDialog}>
-                                {t('buttons.close')}
+                                Close
                             </Button>
                         </DialogClose>
                     </DialogFooter>

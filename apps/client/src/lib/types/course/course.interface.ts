@@ -35,7 +35,7 @@ export interface SettingsSchema {
 
 export interface StatsSchema {
     totalEnrollments: number;
-    totalReviews: number;
+    totalRatings: number;
     averageRating: number;
     totalViews: number;
     completionRate: number;

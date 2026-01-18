@@ -26,6 +26,7 @@ import ProfileUserForm from './profile-user-form';
 import SecurityUserForm from './security-user-form';
 import PreferencesUserForm from './prefrences-user-form';
 import { extractErrorMessages } from '@/lib/utils/extractErrorMessages';
+import { createAuthorizedNatsRequest } from '@/lib/utils/createNatsRequest';
 
 interface CreateUserFormProps {
   mode?: 'create' | 'edit';
@@ -34,6 +35,7 @@ interface CreateUserFormProps {
 
 export default function CreateUserForm({ mode = 'create', initialUser = null }: CreateUserFormProps) {
   // const router = useRouter();
+
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
 
@@ -51,49 +53,48 @@ export default function CreateUserForm({ mode = 'create', initialUser = null }: 
     defaultValues:
       initialUser && mode === 'edit'
         ? {
-          _id: initialUser._id,
-          username: initialUser.username,
-          email: initialUser.email,
-          phone: initialUser.phone,
-          firstName: initialUser.firstName,
-          lastName: initialUser.lastName,
-          roleName: initialUser.roleName,
-          organizationId: initialUser.organizationId,
-          status: initialUser.status?.toUpperCase() as Status,
-          country: initialUser.profile?.address?.country as Country,
-          profile: {
-            bio: initialUser.profile?.bio || '',
-            shortBio: initialUser.profile?.shortBio || '',
-            avatar: initialUser.profile?.avatar || '',
-            dateOfBirth: initialUser.profile?.dateOfBirth ? new Date(initialUser.profile.dateOfBirth) : undefined,
-            address: {
-              street: initialUser.profile?.address?.street || '',
-              city: initialUser.profile?.address?.city || '',
-              state: initialUser.profile?.address?.state || '',
-              zipCode: initialUser.profile?.address?.zipCode || '',
-              country: initialUser.profile?.address?.country || '',
+            _id: initialUser._id,
+            username: initialUser.username,
+            email: initialUser.email,
+            phone: initialUser.phone,
+            firstName: initialUser.firstName,
+            lastName: initialUser.lastName,
+            roleName: initialUser.roleName,
+            organizationId: initialUser.organizationId,
+            status: initialUser.status?.toUpperCase() as Status,
+            country: initialUser.profile?.address?.country as Country,
+            profile: {
+              bio: initialUser.profile?.bio || '',
+              shortBio: initialUser.profile?.shortBio || '',
+              avatar: initialUser.profile?.avatar || '',
+              dateOfBirth: initialUser.profile?.dateOfBirth ? new Date(initialUser.profile.dateOfBirth) : undefined,
+              address: {
+                street: initialUser.profile?.address?.street || '',
+                city: initialUser.profile?.address?.city || '',
+                state: initialUser.profile?.address?.state || '',
+                zipCode: initialUser.profile?.address?.zipCode || '',
+                country: initialUser.profile?.address?.country || '',
+              },
+              socialLinks: {
+                linkedin: initialUser.profile?.socialLinks?.linkedin || '',
+                twitter: initialUser.profile?.socialLinks?.twitter || '',
+              },
             },
-            socialLinks: {
-              linkedin: initialUser.profile?.socialLinks?.linkedin || '',
-              twitter: initialUser.profile?.socialLinks?.twitter || '',
+            preferences: {
+              language: initialUser.preferences?.language || 'en',
+              emailNotifications: initialUser.preferences?.emailNotifications ?? true,
+              darkMode: initialUser.preferences?.darkMode ?? false,
             },
-          },
-          preferences: {
-            language: initialUser.preferences?.language || 'en',
-            emailNotifications: initialUser.preferences?.emailNotifications ?? true,
-            darkMode: initialUser.preferences?.darkMode ?? false,
-          },
-          categoriesIds: initialUser.categoriesIds || [],
-        }
+          }
         : {
-          status: Status.ACTIVE,
-          country: Country.Egypt,
-          preferences: {
-            language: 'en',
-            emailNotifications: true,
-            darkMode: false,
+            status: Status.ACTIVE,
+            country: Country.Egypt,
+            preferences: {
+              language: 'en',
+              emailNotifications: true,
+              darkMode: false,
+            },
           },
-        },
   });
 
   const onSubmit = async (values: any) => {

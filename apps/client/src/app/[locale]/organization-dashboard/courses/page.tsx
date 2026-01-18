@@ -18,7 +18,6 @@ export default async function CoursePage() {
         return (
             <div className="p-4">
                 <h1 className="text-2xl font-semibold mb-4">Courses Management</h1>
-                <p className="text-muted-foreground text-sm mb-4">No courses found</p>
                 <CourseDataTable courses={[]} />
             </div>
         )

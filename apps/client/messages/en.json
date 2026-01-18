@@ -406,116 +406,12 @@
       "embedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.0!2d-118.496!3d34.019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzA4LjQiTiAxMTjCsDI5JzQ1LjYiVw!5e0!3m2!1sen!2sus!4v1234567890"
     }
   },
-  "Instructors": {
-    "title": "Our Instructors",
-    "description": "Meet our expert instructors",
-    "searchPlaceholder": "Search instructors...",
-    "filters": "Filters",
-    "expertInstructor": "Expert Instructor",
-    "rating": "Rating",
-    "students": "Students",
-    "courses": "Courses",
-    "viewProfile": "View Profile",
-    "minimumRating": "Minimum Rating",
-    "applyFilters": "Apply Filters",
-    "resetFilters": "Reset Filters",
-    "linkedinProfile": "LinkedIn Profile",
-    "twitterProfile": "Twitter Profile",
-    "about": "About",
-    "noBiography": "No biography available for this instructor.",
-    "averageRating": "Average Rating",
-    "totalStudents": "Total Students",
-    "totalCourses": "Total Courses",
-    "totalRatings": "Total Ratings",
-    "statistics": "Statistics",
-    "errorLoadingCourses": "Error loading courses",
-    "tryAgainLater": "Please try again later.",
-    "loadingCourses": "Loading courses...",
-    "loadingMoreCourses": "Loading more courses...",
-    "noMoreCourses": "No more courses to load",
-    "noCoursesAvailable": "No courses available yet",
-    "noCoursesPublished": "This instructor hasn't published any courses.",
-    "errorLoadingInstructors": "Error loading instructors",
-    "loadingMoreInstructors": "Loading more instructors...",
-    "noMoreInstructors": "No more instructors to load",
-    "noInstructorsFound": "No instructors found",
-    "tryDifferentFilters": "Try adjusting your search or filters",
-    "category": "Category",
-    "searchCategoryPlaceholder": "Search For Category",
-    "filterByCategory": "Filter By Category",
-    "typeToSearchCategories": "Type to search categories"
-  },
-  "CourseDataTable": {
-    "title": "Courses",
-    "addCourse": "Add Course",
-    "searchPlaceholder": "Search courses...",
-    "columns": {
-      "courseName": "Course Name",
-      "description": "Description",
-      "type": "Type",
-      "price": "Price",
-      "enrollments": "Enrollments",
-      "modules": "Modules",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "badges": {
-      "paid": "Paid",
-      "free": "Free",
-      "published": "Published",
-      "draft": "Draft"
-    },
-    "buttons": {
-      "view": "View",
-      "edit": "Edit",
-      "manageModules": "Manage Modules",
-      "delete": "Delete",
-      "cancel": "Cancel",
-      "saveChanges": "Save changes",
-      "close": "Close"
-    },
-    "dialogs": {
-      "description": {
-        "title": "Course Description",
-        "description": "Edit the course description",
-        "label": "Description",
-        "placeholder": "Enter course description..."
-      },
-      "pricing": {
-        "title": "Pricing Details",
-        "description": "Pricing information for {courseName}",
-        "plan": "{billingCycle} Plan",
-        "originalPrice": "Original Price",
-        "usdPrice": "USD Price",
-        "discountAvailable": "Discount Available",
-        "off": "OFF",
-        "validFrom": "Valid from {startDate} to {endDate}",
-        "noPricingInfo": "No pricing information available"
-      }
-    },
-    "ariaLabels": {
-      "selectAll": "Select all",
-      "selectRow": "Select row",
-      "openMenu": "Open menu",
-      "dragToReorder": "Drag to reorder"
-    },
-    "currency": {
-      "usd": "USD"
-    }
-  },
-  "CourseCard": {
-    "trending": "Trending",
-    "courseCategory": "Course Category",
-    "courseLevel": "Course Level",
-    "byInstructor": "by",
-    "courseDuration": "Course Duration",
-    "lessons": "lessons",
-    "projects": "projects",
-    "certificateIncluded": "Certificate Included",
-    "enrollNow": "Enroll Now",
-    "free": "FREE",
-    "totalReviews": "reviews",
-    "rating": "rating",
-    "enrolledStudentsCount": "students"
+  "footer": {
+    "title": "safier",
+    "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
+    "links": "Quick Links",
+    "social": "Follow Us",
+    "contact": "Contact Us",
+    "copyright": "Safier. All rights reserved."
   }
 }

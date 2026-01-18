@@ -12,7 +12,6 @@ import { UserMainRoles } from '@/lib/data/userRole.enum';
 import { getCookie, removeCookie, setCookie } from '@/lib/utils/serverUtils';
 import { RegisterResponse } from '@/lib/types/auth/auth.type';
 import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
-import { parseDurationToSeconds } from '@/lib/utils';
 
 export async function handleSignup(signUpData: SignupSchema) {
     const natsClient = await connectToNats();
@@ -44,13 +43,11 @@ export async function handleSignup(signUpData: SignupSchema) {
         if (response.err.code == "409") return response
         throw new Error(response.err.message)
     }
-    const authExpiresIn = process.env.AUTH_EXPIRES_IN || '7d';
-    const ttlInSeconds = parseDurationToSeconds(authExpiresIn);
-    await redis.set(`auth-${response.access_token}`, JSON.stringify(response.user), 'EX', ttlInSeconds);
+    await redis.set(`auth-${response.access_token}`, JSON.stringify(response.user));
     await setCookie(AUTH_COOKIE_NAME, response.access_token, {
         httpOnly: process.env.NODE_ENV === 'production',
         secure: process.env.NODE_ENV === 'production',
-        maxAge: ttlInSeconds,
+        maxAge: 60 * 60 * 24 * 7, // One week
         path: '/',
     });
     return response.user
@@ -74,13 +71,11 @@ export async function handleLogin(loginData: LoginSchema) {
         if (response.err.code == "409") return response
         throw new Error(response.err.message)
     }
-    const authExpiresIn = process.env.AUTH_EXPIRES_IN
-    const ttlInSeconds = parseDurationToSeconds(authExpiresIn);
-    await redis.set(`auth-${response.access_token}`, JSON.stringify(response.user), 'EX', ttlInSeconds);
+    await redis.set(`auth-${response.access_token}`, JSON.stringify(response.user));
     await setCookie(AUTH_COOKIE_NAME, response.access_token, {
         httpOnly: process.env.NODE_ENV === 'production',
         secure: process.env.NODE_ENV === 'production',
-        maxAge: ttlInSeconds,
+        maxAge: 60 * 60 * 24 * 7, // One week
         path: '/',
     });
 

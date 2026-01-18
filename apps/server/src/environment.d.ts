@@ -12,7 +12,6 @@ declare global {
       REDIS_UR_PROD: string;
 
       JSON_PRIVATE_KEY: string;
-      AUTH_EXPIRES_IN: string;
 
       BASE_URL: string;
       SECURED_BASE_URL: string;

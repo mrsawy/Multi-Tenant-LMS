@@ -42,11 +42,6 @@ export class CourseContent extends Document<Types.ObjectId> {
 
   @Prop({ type: String, required: false })
   description: string;
-
-  @Prop({ required: true, type: Number, default: 0 })
-  totalReviews: number
-  @Prop({ required: true, type: Number, default: 0 })
-  averageRating: number
 }
 
 export const CourseContentSchema = SchemaFactory.createForClass(CourseContent);

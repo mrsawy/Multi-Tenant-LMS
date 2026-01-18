@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
       },
       effect: {
-        expandIcon: 'group gap-0 relative  transition-all duration-300 hover:ring-2 hover:ring-primary/90 hover:ring-offset-2',
+        expandIcon: 'group gap-0 relative ',
         ringHover:
           'transition-all duration-300 hover:ring-2 hover:ring-primary/90 hover:ring-offset-2',
         shine:
@@ -82,7 +82,7 @@ const Button = React.forwardRef<
       effect,
       size,
       icon,
-      iconPlacement: iconPlacementProp,
+      iconPlacement: iconPlacementProp = 'right',
       asChild = false,
       ...props
     },
@@ -94,12 +94,11 @@ const Button = React.forwardRef<
     const t = useTranslations();
     const locale = useLocale();
     const isRTL = locale === 'ar';
-    const iconPlacement = iconPlacementProp ?? (isRTL ? 'left' : 'right');
-
+    const iconPlacement = isRTL ? 'left' : 'right';
 
     // Helper to render icon - handles both ElementType and ReactNode
     const renderIcon = () => {
-      // If it's already a rendered element (JSX   like <Loader2 />), return it directly
+      // If it's already a rendered element (JSX like <Loader2 />), return it directly
       if (React.isValidElement(Icon)) {
         return Icon;
       }

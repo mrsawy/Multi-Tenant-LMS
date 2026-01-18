@@ -28,7 +28,7 @@ import { CourseModulesService } from '../services/courseModules.service';
 import { CreateCourseModuleDto } from './../dto/create-course-module.dto';
 import { ICourseFilters } from 'src/utils/types/CourseFilters';
 import { SubmitQuizDto } from '../../enrollment/dto/quiz-submission.dto';
-import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { handleError } from 'src/utils/errorHandling';
 import { FileService } from 'src/file/file.service';
 import { ContentType } from './../enum/contentType.enum';

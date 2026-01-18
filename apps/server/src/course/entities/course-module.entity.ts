@@ -31,11 +31,6 @@ export class CourseModuleEntity extends Document<Types.ObjectId> {
 
   @Prop({ type: [String], required: false })
   learningObjectives: string[];
-
-  @Prop({ required: true, type: Number, default: 0 })
-  totalReviews: number
-  @Prop({ required: true, type: Number, default: 0 })
-  averageRating: number
 }
 
 export const CourseModuleSchema = SchemaFactory.createForClass(CourseModuleEntity);

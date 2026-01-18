@@ -6,7 +6,7 @@ import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { BulkMarkAttendanceDto } from './dto/bulk-mark-attendance.dto';
 import { AttendanceReportDto } from './dto/attendance-report.dto';
 import { AttendanceStatus } from './enum/attendance-status.enum';
-import { EnrollmentService } from '../enrollment/services/enrollment.service';
+import { EnrollmentService } from '../enrollment/enrollment.service';
 import { CourseService } from '../course/services/course.service';
 import { Enrollment } from '../enrollment/entities/enrollment.entity';
 

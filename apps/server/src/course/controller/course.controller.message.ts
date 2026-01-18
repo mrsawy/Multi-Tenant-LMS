@@ -22,7 +22,7 @@ import { CreateCourseModuleDto } from '../dto/create-course-module.dto';
 import { CourseModulesService } from '../services/courseModules.service';
 import { CreateCourseContentDto } from '../dto/create-course-content.dto';
 import { CourseContentService } from '../services/courseContent.service';
-import { PaginateOptions, Types } from 'mongoose';
+import { PaginateOptions } from 'mongoose';
 import { ICourseFilters } from 'src/utils/types/CourseFilters';
 
 @Controller()
@@ -35,38 +35,10 @@ export class CourseControllerMessage {
   async findAllCourses(
     @Payload(new RpcValidationPipe())
     payload: {
-      options: ICourseFilters & { instructorId?: string; $or?: any[] };
+      options: ICourseFilters;
     },
   ) {
-    const query: Record<string, any> = {};
-
-    // Handle direct instructorId
-    if (payload.options.instructorId) {
-      query.instructorId = new Types.ObjectId(payload.options.instructorId);
-    }
-
-    // Handle $or filter (for instructorId or coInstructorsIds)
-    if (payload.options.$or && Array.isArray(payload.options.$or)) {
-      // Convert string IDs to ObjectIds in $or conditions
-      const processedOr = payload.options.$or.map((condition: any) => {
-        const processedCondition: any = {};
-        // Handle instructorId condition: { instructorId: string }
-        if (condition.instructorId !== undefined) {
-          processedCondition.instructorId = new Types.ObjectId(condition.instructorId);
-        }
-        // Handle coInstructorsIds condition: { coInstructorsIds: string }
-        // MongoDB will check if the array contains this ObjectId
-        if (condition.coInstructorsIds !== undefined) {
-          processedCondition.coInstructorsIds = new Types.ObjectId(condition.coInstructorsIds);
-        }
-        return processedCondition;
-      });
-      query.$or = processedOr;
-    }
-
-    // Remove query operators and instructorId from filters
-    const { instructorId, $or, ...filters } = payload.options;
-    const courses = await this.courseService.findAll(query, filters);
+    const courses = await this.courseService.findAll({}, payload.options);
     return courses;
   }
 

@@ -15,6 +15,7 @@ import { getAuthUser } from '@/lib/actions/user/user.action';
 import { StudentSidebar } from './__components/StudentSideBar';
 import { Roles } from '@/lib/types/user/roles.enum';
 import { useTheme } from 'next-themes';
+import Footer from '@/components/organs/footer';
 
 export const metadata: Metadata = {
     title: 'Dashboard',
@@ -45,6 +46,7 @@ export default async function OrgDashboardLayout({
                 <SidebarInset>
                     <SiteHeader />
                     {children}
+
                 </SidebarInset>
             </SidebarProvider>
         </div>

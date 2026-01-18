@@ -1,8 +1,8 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ReviewService } from './service/review.service';
-import { ReviewControllerHttp } from './controllers/review.controller.http';
-import { ReviewControllerMessage } from './controllers/review.controller.message';
+import { ReviewService } from './review.service';
+import { ReviewControllerHttp } from './review.controller.http';
+import { ReviewControllerMessage } from './review.controller.message';
 import { Review, ReviewSchema } from './entities/review.entity';
 import { CourseReviewSchema } from './entities/course-review.entity';
 import { InstructorReviewSchema } from './entities/instructor-review.entity';
@@ -12,11 +12,6 @@ import { ContentReviewSchema } from './entities/content-review.entity';
 import { ReviewType } from './enum/reviewType.enum';
 import { AuthModule } from 'src/auth/auth.module';
 import { RoleModule } from 'src/role/role.module';
-import { User, UserSchema } from 'src/user/entities/user.entity';
-import { Organization, OrganizationSchema } from 'src/organization/entities/organization.entity';
-import { Course, CourseSchema } from 'src/course/entities/course.entity';
-import { CourseModuleEntity, CourseModuleSchema } from 'src/course/entities/course-module.entity';
-import { CourseContent, CourseContentSchema } from 'src/course/entities/course-content.entity';
 
 @Module({
   imports: [
@@ -32,11 +27,6 @@ import { CourseContent, CourseContentSchema } from 'src/course/entities/course-c
           { name: ReviewType.CONTENT, schema: ContentReviewSchema },
         ],
       },
-      { name: User.name, schema: UserSchema },
-      { name: Organization.name, schema: OrganizationSchema },
-      { name: Course.name, schema: CourseSchema },
-      { name: 'CourseModule', schema: CourseModuleSchema },
-      { name: CourseContent.name, schema: CourseContentSchema },
     ]),
     forwardRef(() => AuthModule),
     RoleModule,

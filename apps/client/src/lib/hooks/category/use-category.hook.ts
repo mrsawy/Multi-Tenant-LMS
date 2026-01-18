@@ -9,7 +9,6 @@ import {
     updateCategory,
     getCategory,
     filterCategories,
-    getAllFlatCategories,
 } from "@/lib/actions/category/category.action";
 import { Paginated, PaginationOptions } from "@/lib/types/Paginated";
 import { ICategory } from "@/lib/types/category/ICategory";
@@ -23,7 +22,6 @@ export const categoryKeys = {
         [...categoryKeys.all, "organization", organizationId] as const,
     category: (categoryId: string) =>
         [...categoryKeys.all, "category", categoryId] as const,
-    flat: ["flat-categories"] as const,
 };
 
 
@@ -132,17 +130,5 @@ export function useFilteredCategories() {
             console.error("Error deleting category:", error);
             toast.error("Failed to delete category");
         },
-    });
-}
-
-
-export function useFlatCategories() {
-    return useQuery<ICategory[]>({
-        queryKey: categoryKeys.flat,
-        queryFn: async () => {
-            const flatCategories = (await getAllFlatCategories({ limit: 150, page: 1 })) as Paginated<ICategory>;
-            return flatCategories.docs;
-        }
-
     });
 }

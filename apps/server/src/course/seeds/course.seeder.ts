@@ -3,11 +3,10 @@ import { Course } from '../entities/course.entity';
 import { Category } from '../../category/entities/category.entity';
 import { CourseModuleEntity } from '../entities/course-module.entity';
 import { CourseContent } from '../entities/course-content.entity';
-import { fakerAR as faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { BillingCycle } from '../../utils/enums/billingCycle.enum';
 import { ContentType } from '../enum/contentType.enum';
 import { VideoType } from '../enum/videoType.enum';
-import { User } from '../../user/entities/user.entity';
 
 export class CourseSeeder {
   constructor(
@@ -15,7 +14,6 @@ export class CourseSeeder {
     private readonly categoryModel: Model<Category>,
     private readonly moduleModel: Model<CourseModuleEntity>,
     private readonly contentModel: Model<CourseContent>,
-    private readonly userModel: Model<User>,
   ) { }
 
   async seedCategories(organizationId: Types.ObjectId, count: number = 5) {
@@ -37,31 +35,25 @@ export class CourseSeeder {
     createdBy: string,
     categoryIds: Types.ObjectId[],
     overrides: Partial<Course> = {},
+    students: any[] = [],
     contentTypes?: ContentType[],
-    coInstructorsIds?: Types.ObjectId[],
   ) {
     const courseId = new Types.ObjectId();
     const isPaid = overrides.isPaid ?? faker.datatype.boolean();
 
-    const courseName = overrides.name || faker.commerce.productName();
-    const courseSlug = courseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    const thumbnailExtension = faker.helpers.arrayElement(['jpg', 'png', 'webp']);
-    const trailerExtension = 'mp4';
-
     const courseData = {
       _id: courseId,
       organizationId,
-      name: courseName,
+      name: faker.commerce.productName(),
       createdBy,
       categoriesIds: categoryIds,
       isPaid,
       instructorId,
-      coInstructorsIds: coInstructorsIds || [],
       description: faker.lorem.paragraphs(2),
       shortDescription: faker.lorem.sentence(),
       learningObjectives: [faker.lorem.sentence(), faker.lorem.sentence()],
-      thumbnailKey: `courses/testquantcdn/testquantcdn_thumbnail.png`,
-      trailerKey: `courses/trailers/--and--E4oqF/019bc9aa-75c3-7147-9e03-7e8477182028_emerging-technology-course-trailer-dordt-university.mp4`,
+      thumbnailKey: 'default-thumbnail.jpg',
+      trailerKey: 'default-trailer.mp4',
       pricing: isPaid ? {
         [BillingCycle.ONE_TIME]: {
           originalPrice: faker.number.int({ min: 50, max: 200 }),
@@ -152,7 +144,7 @@ export class CourseSeeder {
               contentData.videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
             } else {
               // S3 file key format
-              contentData.fileKey = `course-materials/teach/851c7e1e-2b66-4d3b-bb6c-2f0553c4f26f.mp4`;
+              contentData.fileKey = `courses/${course._id}/videos/${faker.string.alphanumeric(16)}.mp4`;
             }
             break;
           case ContentType.ARTICLE:
@@ -229,80 +221,6 @@ export class CourseSeeder {
 
     await this.courseModel.findByIdAndUpdate(course._id, { modulesIds: moduleIds });
 
-    // Update totalCourses for instructor and co-instructors
-    await this.updateInstructorTotalCourses(instructorId, coInstructorsIds || []);
-
     return course;
-  }
-
-  /**
-   * Updates totalCourses count for instructor and co-instructors
-   * totalCourses = courses where user is main instructor OR co-instructor
-   */
-  private async updateInstructorTotalCourses(
-    instructorId: Types.ObjectId,
-    coInstructorsIds: Types.ObjectId[],
-  ) {
-    // Update main instructor - count courses where they are main instructor OR co-instructor
-    const instructorCourses = await this.courseModel.countDocuments({
-      $or: [
-        { instructorId: instructorId },
-        { coInstructorsIds: instructorId } // MongoDB automatically checks if array contains this value
-      ]
-    });
-    await this.userModel.findByIdAndUpdate(
-      instructorId,
-      { $set: { totalCourses: instructorCourses } }
-    );
-
-    // Update co-instructors - count courses where they are main instructor OR co-instructor
-    for (const coInstructorId of coInstructorsIds) {
-      const coInstructorCourses = await this.courseModel.countDocuments({
-        $or: [
-          { instructorId: coInstructorId },
-          { coInstructorsIds: coInstructorId } // MongoDB automatically checks if array contains this value
-        ]
-      });
-      await this.userModel.findByIdAndUpdate(
-        coInstructorId,
-        { $set: { totalCourses: coInstructorCourses } }
-      );
-    }
-  }
-
-  /**
-   * Recalculates totalCourses for all instructors in an organization
-   * This should be called after all courses are created to ensure accuracy
-   */
-  async recalculateAllInstructorTotalCourses(organizationId: Types.ObjectId) {
-    // Get all courses in the organization
-    const courses = await this.courseModel.find({ organizationId }).select('instructorId coInstructorsIds').exec();
-
-    // Collect all unique instructor IDs (main + co-instructors)
-    const allInstructorIds = new Set<Types.ObjectId>();
-    for (const course of courses) {
-      if (course.instructorId) {
-        allInstructorIds.add(course.instructorId);
-      }
-      if (course.coInstructorsIds && course.coInstructorsIds.length > 0) {
-        course.coInstructorsIds.forEach(id => allInstructorIds.add(id));
-      }
-    }
-
-    // Recalculate totalCourses for each instructor
-    // totalCourses = courses where user is main instructor OR co-instructor
-    for (const instructorId of allInstructorIds) {
-      const instructorCourses = await this.courseModel.countDocuments({
-        $or: [
-          { instructorId: instructorId },
-          { coInstructorsIds: instructorId } // MongoDB automatically checks if array contains this value
-        ]
-      });
-
-      await this.userModel.findByIdAndUpdate(
-        instructorId,
-        { $set: { totalCourses: instructorCourses } }
-      );
-    }
   }
 }

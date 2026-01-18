@@ -26,7 +26,7 @@ import { PaginateOptions } from 'mongoose';
 import { ICourseFilters } from 'src/utils/types/CourseFilters';
 import { SubmitQuizDto } from '../../enrollment/dto/quiz-submission.dto';
 import { QuizService } from '../services/quiz.service';
-import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { ContentType } from '../enum/contentType.enum';
 import { VideoType } from '../enum/videoType.enum';
 import { FileService } from 'src/file/file.service';

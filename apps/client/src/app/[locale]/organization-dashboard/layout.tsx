@@ -16,6 +16,7 @@ import {
 
 import { OrgSidebar } from "./__components/OrgSidebar"
 import { getAuthUser } from "@/lib/actions/user/user.action"
+import Footer from "@/components/organs/footer";
 
 
 
@@ -51,6 +52,7 @@ export default async function OrgDashboardLayout({
                 <SidebarInset>
                     <SiteHeader />
                     {children}
+
                 </SidebarInset>
             </SidebarProvider>
         </div>

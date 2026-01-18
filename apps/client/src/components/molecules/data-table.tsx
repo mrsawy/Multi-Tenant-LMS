@@ -57,10 +57,6 @@ export type DataTableProps<TData> = {
   pageSize?: number
   globalFilter?: string
   onGlobalFilterChange?: (value: string) => void
-  manualPagination?: boolean
-  pageCount?: number
-  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void
-  pagination?: { pageIndex: number; pageSize: number }
 }
 
 export function DataTable<TData>({
@@ -77,10 +73,6 @@ export function DataTable<TData>({
   onDeleteSelected,
   globalFilter,
   onGlobalFilterChange,
-  manualPagination = false,
-  pageCount,
-  onPaginationChange,
-  pagination: externalPagination,
 }: DataTableProps<TData> & {
   onReorder?: (newData: TData[]) => void,
   onDeleteSelected?: (data: string[]) => void,
@@ -92,11 +84,8 @@ export function DataTable<TData>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [internalPagination, setInternalPagination] = React.useState({ pageIndex: 0, pageSize: pageSize, })
+  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: pageSize, })
   const [globalFilterState, setGlobalFilterState] = React.useState(globalFilter || '')
-  
-  // Use external pagination if provided (for manual pagination), otherwise use internal
-  const pagination = manualPagination && externalPagination ? externalPagination : internalPagination
 
   const sortableId = React.useId()
   const sensors = useSensors(useSensor(MouseSensor, {}), useSensor(TouchSensor, {}), useSensor(KeyboardSensor, {}))
@@ -178,19 +167,6 @@ export function DataTable<TData>({
     if (typeof value !== 'string') return false
     return value.toLowerCase().includes(filterValue.toLowerCase())
   }
-  const handlePaginationChange = React.useCallback((updater: any) => {
-    if (manualPagination && onPaginationChange) {
-      // For manual pagination, calculate new state and call external handler
-      const currentPagination = externalPagination || internalPagination;
-      const newPagination = typeof updater === 'function' ? updater(currentPagination) : updater;
-      onPaginationChange(newPagination);
-    } else {
-      // For client-side pagination, update internal state
-      const newPagination = typeof updater === 'function' ? updater(internalPagination) : updater;
-      setInternalPagination(newPagination);
-    }
-  }, [manualPagination, onPaginationChange, externalPagination, internalPagination]);
-
   const table = useReactTable({
     data,
     // onDataChange: setData,
@@ -209,17 +185,15 @@ export function DataTable<TData>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: handlePaginationChange,
+    onPaginationChange: setPagination,
     onGlobalFilterChange: handleGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: manualPagination ? undefined : getFilteredRowModel(),
-    getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     globalFilterFn: deepSearchFn,
-    manualPagination,
-    pageCount: manualPagination ? pageCount : undefined,
   })
 
   const handleDragEnd = React.useCallback((event: DragEndEvent) => {
@@ -388,7 +362,7 @@ export function DataTable<TData>({
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {manualPagination && pageCount !== undefined ? pageCount : table.getPageCount()}
+              {table.getPageCount()}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button

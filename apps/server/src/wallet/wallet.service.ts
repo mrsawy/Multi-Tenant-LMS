@@ -14,6 +14,7 @@ import { randomBytes } from 'crypto';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { WalletTransactionDto } from './dto/wallet-transaction.dto';
+import { UserService } from 'src/user/user.service';
 import { Currency } from 'src/payment/enums/currency.enum';
 import { CurrencyService } from 'src/currency/currency.service';
 import { TransactionService } from 'src/transaction/transaction.service';

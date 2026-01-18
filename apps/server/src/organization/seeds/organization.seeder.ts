@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { Organization } from '../entities/organization.entity';
-import { fakerAR as faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 export class OrganizationSeeder {
   constructor(private readonly organizationModel: Model<Organization>) {}

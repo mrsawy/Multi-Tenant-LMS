@@ -3,31 +3,8 @@ import mongoose, { Document, Types } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { Status } from '../enum/status.enum';
 import { Currency } from 'src/payment/enums/currency.enum';
-import { Roles } from 'src/role/enum/Roles.enum';
 
 export type UserDocument = User & Document<Types.ObjectId>;
-
-/**
- * Creates a validator configuration for instructor-only number fields
- * @param fieldName - The name of the field for error messages
- * @returns Mongoose validator configuration object
- */
-function createInstructorOnlyNumberValidator(fieldName: string) {
-  return {
-    validator: function (value: number) {
-      // If value is 0 or undefined, it's valid
-      if (value === 0 || value === undefined || value === null) {
-        return true;
-      }
-      // If value is provided and non-zero, roleName must be INSTRUCTOR
-      return (
-        this.roleName &&
-        this.roleName.toLowerCase() === Roles.INSTRUCTOR.toLowerCase()
-      );
-    },
-    message: `${fieldName} is only acceptable for INSTRUCTOR role`,
-  };
-}
 
 @Schema({ _id: false })
 class Address {
@@ -138,91 +115,10 @@ export class User extends Document<mongoose.Types.ObjectId> {
 
   @Prop({ type: String, enum: Currency, required: true })
   preferredCurrency: string;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('averageRating'),
-  })
-  averageRating?: number;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('totalReviews'),
-  })
-  totalReviews?: number;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('averageCoursesRating'),
-  })
-  averageCoursesRating?: number;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('totalCoursesReviews'),
-  })
-  totalCoursesReviews?: number;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('totalStudents'),
-  })
-  totalStudents?: number;
-
-  @Prop({
-    type: Number,
-    required: false,
-    validate: createInstructorOnlyNumberValidator('totalCourses'),
-  })
-  totalCourses?: number;
-
-  @Prop({
-    type: [mongoose.Types.ObjectId],
-    ref: 'Category',
-    default: [],
-    validate: {
-      validator: function (value: Types.ObjectId[]) {
-        // If categoriesIds is empty or undefined, it's valid
-        if (!value || value.length === 0) {
-          return true;
-        }
-        // If categoriesIds is provided, roleName must be INSTRUCTOR
-        return (
-          this.roleName &&
-          this.roleName.toLowerCase() === Roles.INSTRUCTOR.toLowerCase()
-        );
-      },
-      message: 'categoriesIds is only acceptable for INSTRUCTOR role',
-    },
-  })
-  categoriesIds: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.plugin(mongoosePaginate);
-
-// Pre-save hook to reset instructor-only fields if user is not an instructor
-UserSchema.pre('save', function (next) {
-  const isInstructor = this.roleName &&
-    this.roleName.toLowerCase() === Roles.INSTRUCTOR.toLowerCase();
-
-  // If not an instructor, set all instructor-only fields to undefined
-  if (!isInstructor) {
-    this.averageRating = undefined;
-    this.totalReviews = undefined;
-    this.averageCoursesRating = undefined;
-    this.totalCoursesReviews = undefined;
-    this.totalStudents = undefined;
-    this.totalCourses = undefined;
-  }
-
-  next();
-});
 
 UserSchema.virtual('organization', {
   ref: 'Organization',
@@ -241,12 +137,6 @@ UserSchema.virtual('role', {
   localField: 'roleName',
   foreignField: 'name',
   justOne: true,
-});
-UserSchema.virtual('categories', {
-  ref: 'Category',
-  localField: 'categoriesIds',
-  foreignField: '_id',
-  justOne: false,
 });
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });

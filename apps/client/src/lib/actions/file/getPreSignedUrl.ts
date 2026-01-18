@@ -5,9 +5,15 @@ import { getCookie } from "@/lib/utils/serverUtils";
 import { connectToNats, request } from "@/lib/nats/client";
 import { v7 } from "uuid";
 import NatsError from "@/lib/nats/error";
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { CourseContentFormData } from "@/lib/schema/content.schema";
+import { CourseContentType } from "@/lib/types/course/enum/CourseContentType.enum";
+import { VideoType } from "@/lib/types/course/enum/VideoType.enum";
 import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 
-export async function getPresignedUrl({ fileType, fileSize, fileKey, isPublic = false }: { fileType: string, fileSize: number, fileKey: string, isPublic?: boolean }) {
+export async function getPresignedUrl({ fileType, fileSize, fileKey }: { fileType: string, fileSize: number, fileKey: string }) {
     try {
         const natsClient = await connectToNats();
         const idToken = await getCookie(AUTH_COOKIE_NAME);
@@ -20,7 +26,7 @@ export async function getPresignedUrl({ fileType, fileSize, fileKey, isPublic = 
                 id: v7(),
                 data: {
                     authorization: idToken,
-                    fileType, fileSize, fileKey, isPublic
+                    fileType, fileSize, fileKey
                 }
             }),
         );

@@ -71,36 +71,5 @@ export async function getCourses() {
 
 }
 
-export async function getCoursesByInstructor(instructorId: string, options?: { page?: number; limit?: number }) {
-    try {
-        const natsClient = await connectToNats();
-        const response = await request<Paginated<ICourse>>(
-            natsClient,
-            'courses.findAllCourses',
-            JSON.stringify({
-                id: v7(),
-                data: {
-                    options: {
-                        $or: [
-                            { instructorId },
-                            { coInstructorsIds: instructorId }
-                        ],
-                        page: options?.page || 1,
-                        limit: options?.limit || 20,
-                        ...options
-                    }
-                }
-            }),
-        );
-        if ('err' in response) {
-            throw new Error((response as { err: NatsError }).err.message)
-        }
-
-        return response
-    } catch (error) {
-        throw new Error()
-    }
-}
-
 
 

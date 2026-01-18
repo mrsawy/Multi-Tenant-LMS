@@ -7,6 +7,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./../globals.css";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import Provider from "./provider";
+import Footer from "../../components/organs/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,7 @@ export default async function LocaleLayout({
     redirect("/ar/" + locale)
   }
 
-  const messages = await getMessages();
+  const messages = await getMessages(); // will load messages for current locale
 
 
   return (

@@ -5,14 +5,11 @@ import { Clock, Users, Star, Play, BookOpen, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { getFileFullUrl } from "@/lib/utils/getFileFullUrl";
 import { ICourse } from '@/lib/types/course/course.interface';
+import { Button } from '@/components/atoms/button';
 import { Link } from '@/i18n/navigation';
 import { ButtonArrowRight } from '@/components/molecules/button-arrow-right';
-import { Typography } from '@/components/atoms/typography';
-import { useTranslations } from 'next-intl';
 
 const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
-    const t = useTranslations('CourseCard');
-    console.dir({ course }, { depth: null })
     return (
         <Card key={course._id?.toString()} className="bg-section-card border-border/50 hover:border-brand-purple/30 transition-all duration-300 hover:shadow-lg group overflow-hidden py-0 gap-0 flex  justify-between">
             <CardHeader className="p-0">
@@ -24,9 +21,7 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                         {/* Trending Badge */}
                         <Badge className="absolute top-4 left-4 bg-brand-purple ">
                             <TrendingUp className="w-3 h-3 mr-1" />
-                            <Typography variant="span" size="sm" weight="medium">
-                                {t('trending')}
-                            </Typography>
+                            Trending
                         </Badge>
 
                         {/* Play Button */}
@@ -36,14 +31,10 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                             </div>
                         </div>
                         {/* Category */}
-                        {course.categories && course.categories.length > 0 && (course.categories.slice(0, 2).map((category) => <Badge key={category._id || category.name}
-                            className="absolute bottom-4 left-4   backdrop-blur-sm  border-white/30"
-                            variant="default"
-                        >
-                            <Typography variant="span" size="sm" weight="medium">
-                                {category.name}
-                            </Typography>
-                        </Badge>))}
+                        <Badge className="absolute bottom-4 left-4   backdrop-blur-sm  border-white/30">
+                            {/* {course.category} */}
+                            Course Category
+                        </Badge>
                     </div>
                 </Link>
             </CardHeader>
@@ -51,88 +42,72 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
             <CardContent className="p-2 px-6">
                 {/* Course Info */}
                 <div className="flex items-center justify-between mb-3">
-                    {/* <Badge variant="outline" >
-                        <Typography variant="span" size="sm" weight="medium">
-                            {t('courseLevel')}
-                        </Typography>
-                    </Badge> */}
-                    <div className="flex items-center gap-1">
+                    <Badge variant="outline" >
+                        Course Level
+                    </Badge>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <Typography variant="span" size="sm" color="muted">
-                            {course.stats?.averageRating}
-                        </Typography>
-                        <Typography variant="span" size="sm" color="muted">
-                            ({course.stats?.totalReviews})
-                        </Typography>
+                        <span>{course.stats?.averageRating}</span>
+                        <span>({course.stats?.totalRatings})</span>
                     </div>
                 </div>
                 <Link href={"/courses/" + course._id}>
-                    <Typography variant="h4" weight="bold" className="mb-2 line-clamp-2">
+                    <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
                         {course.name}
-                    </Typography>
+                    </h3>
                 </Link>
 
-                <Typography variant="p" size="sm" className="mb-4 line-clamp-2">
+                <p className="text-sm  mb-4 line-clamp-2">
                     {course.description}
-                </Typography>
+                </p>
 
-                <Typography variant="p" size="sm" color="purple" weight="medium" className="mb-4">
-                    {t('byInstructor')} {course.instructor?.firstName} {course.instructor?.lastName}
-                </Typography>
+                <p className="text-sm text-brand-purple font-medium mb-4">
+                    by Instructor
+                    {course.instructor?.firstName} {course.instructor?.lastName}
+                </p>
 
                 {/* Course Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-muted-foreground" />
-                        <Typography variant="span" size="sm" color="muted">
-                            {course.stats?.totalReviews} {t('totalReviews')}
-                        </Typography>
+                        <Clock className="w-4 h-4" />
+                        <span>
+                            Course Duration
+                            {/* {course.duration} */}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-muted-foreground" />
-                        <Typography variant="span" size="sm" color="muted">
-                            {course.stats?.totalEnrollments} {t('enrolledStudentsCount')}
-                        </Typography>
+                        <Users className="w-4 h-4" />
+                        <span>
+                            {course.stats?.totalEnrollments}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        <Typography variant="span" size="sm" color="muted">
-                            {course.modulesIds?.length} {t('lessons')}
-                        </Typography>
+                        <BookOpen className="w-4 h-4" />
+                        <span>{course.modulesIds?.length} lessons</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-muted-foreground" />
-                        <Typography variant="span" size="sm" color="muted">
-                            {course.stats?.averageRating.toFixed(1)} {t('rating')}
-                        </Typography>
+                        <Star className="w-4 h-4" />
+                        <span>
+                            {course.modulesIds?.length}
+                            projects</span>
                     </div>
                 </div>
 
                 {/* Certificate Badge */}
                 {course.settings?.certificateEnabled && (
                     <Badge variant="secondary" className="  text-brand-purple border-brand-purple/20 mb-4">
-                        <Typography variant="span" size="sm" weight="medium">
-                            {t('certificateIncluded')}
-                        </Typography>
+                        Certificate Included
                     </Badge>
                 )}
             </CardContent>
 
             <CardFooter className="p-6 pt-0 flex items-center justify-between">
                 <div className="text-left">
-                    {course.isPaid ? (
-                        <Typography variant="span" size="2xl" weight="bold">
-                            ${course.pricing.MONTHLY?.originalPrice}
-                        </Typography>
-                    ) : (
-                        <Typography variant="span" size="sm" weight="medium" className="p-1 px-2 rounded-2xl bg-green-600 text-white">
-                            {t('free')}
-                        </Typography>
-                    )}
+                    <span className="text-2xl font-bold text-foreground">{course.isPaid ? "$" + course.pricing.MONTHLY?.originalPrice : <p className="p-1 px-2 rounded-2xl bg-green-600 text-white text-sm">FREE</p>}</span>
                 </div>
                 <Link href={"/courses/" + course._id}>
                     <ButtonArrowRight>
-                        {t('enrollNow')}
+                        Enroll Now
                     </ButtonArrowRight>
                 </Link>
             </CardFooter>

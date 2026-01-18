@@ -3,7 +3,7 @@ import { Enrollment } from '../entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
 import { Review } from '../../review/entities/review.entity';
 import { Discussion } from '../../discussion/entities/discussion.entity';
-import { fakerAR as faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { AccessType } from '../enum/accessType.enum';
 import { AttendanceStatus } from '../../attendance/enum/attendance-status.enum';
 import { ReviewType } from '../../review/enum/reviewType.enum';
@@ -15,11 +15,6 @@ import { Quiz } from 'src/course/entities/quiz.schema';
 import { Question } from 'aws-sdk/clients/wellarchitected';
 import { QuizQuestion } from 'src/course/entities/quizSubmission.entity';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
-import { User } from '../../user/entities/user.entity';
-import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
-import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { Currency } from 'src/payment/enums/currency.enum';
-import { ENROLLMENT_CONFIG } from './enrollment.config';
 
 export class EnrollmentSeeder {
   constructor(
@@ -30,7 +25,6 @@ export class EnrollmentSeeder {
     private readonly courseModel: Model<Course>,
     private readonly moduleModel: Model<CourseModuleEntity>,
     private readonly contentModel: Model<CourseContent>,
-    private readonly userModel: Model<User>,
   ) { }
 
   async seedEnrollment(
@@ -64,7 +58,7 @@ export class EnrollmentSeeder {
     const totalContents = allContents.length;
     if (totalContents === 0) {
       // No contents, create enrollment with 0 progress
-      const enrollment = await this.enrollmentModel.create({
+      return await this.enrollmentModel.create({
         userId,
         courseId,
         organizationId,
@@ -83,17 +77,6 @@ export class EnrollmentSeeder {
         },
         subscription
       });
-
-      // Update course stats.totalEnrollments
-      await this.courseModel.updateOne(
-        { _id: courseId },
-        { $inc: { 'stats.totalEnrollments': 1 } },
-      );
-
-      // Update instructor and co-instructors totalStudents
-      await this.updateInstructorTotalStudents(course);
-
-      return enrollment;
     }
 
     // Calculate how many contents to complete based on progress percentage
@@ -290,15 +273,6 @@ export class EnrollmentSeeder {
       subscription
     });
 
-    // Update course stats.totalEnrollments
-    await this.courseModel.updateOne(
-      { _id: courseId },
-      { $inc: { 'stats.totalEnrollments': 1 } },
-    );
-
-    // Update instructor and co-instructors totalStudents
-    await this.updateInstructorTotalStudents(course);
-
     // Seed Attendance records for this enrollment
     const attendanceCount = faker.number.int({ min: 1, max: 5 });
     for (let i = 0; i < attendanceCount; i++) {
@@ -336,169 +310,5 @@ export class EnrollmentSeeder {
     }
 
     return enrollment;
-  }
-
-  /**
-   * Seed enrollments for all students in an organization
-   */
-  async seedEnrollmentsForStudents(
-    students: User[],
-    courses: Course[],
-    organizationId: Types.ObjectId,
-  ) {
-    if (courses.length === 0) {
-      console.log(`  No courses available, skipping enrollments...`);
-      return;
-    }
-
-    let enrollmentConfigIndex = 0;
-    for (const student of students) {
-      // Every student gets at least 1 enrollment, up to 3 or number of courses available
-      const maxEnrollments = Math.min(courses.length, 3);
-      const enrollmentCount = faker.number.int({ min: 1, max: maxEnrollments });
-      const shuffledCourses = [...courses].sort(() => 0.5 - Math.random());
-
-      for (let k = 0; k < enrollmentCount; k++) {
-        const progressConfig = ENROLLMENT_CONFIG.enrollments[enrollmentConfigIndex % ENROLLMENT_CONFIG.enrollments.length];
-        const course = shuffledCourses[k];
-        let subscription: SubscriptionTypeDef | undefined;
-        let accessType: AccessType = AccessType.FREE;
-
-        if (course.isPaid && course.pricing) {
-          const billingCycle = faker.helpers.arrayElement(Object.values(BillingCycle));
-          const pricingDetails = course.pricing[billingCycle];
-          if (pricingDetails) {
-            subscription = {
-              status: SubscriptionStatus.ACTIVE,
-              starts_at: new Date(),
-              next_billing: new Date(),
-              reminder_days: 10,
-              reminder_date: new Date(),
-              ends_at: new Date(),
-              resumed_at: new Date(),
-              billing: {
-                email: student.email,
-                last_name: student.lastName,
-                first_name: student.firstName,
-                phone_number: student.phone,
-                amount: pricingDetails.originalPrice ?? 0,
-                currency: pricingDetails.originalCurrency ?? Currency.EGP,
-                billingCycle: billingCycle,
-              },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-            accessType = AccessType.SUBSCRIPTION;
-          }
-        } else {
-          subscription = {
-            status: SubscriptionStatus.ACTIVE,
-            starts_at: new Date(),
-            next_billing: new Date(),
-            reminder_days: 10,
-            reminder_date: new Date(),
-            ends_at: new Date(),
-            resumed_at: new Date(),
-            billing: {
-              email: student.email,
-              last_name: student.lastName,
-              first_name: student.firstName,
-              phone_number: student.phone,
-              amount: 0,
-              currency: Currency.USD,
-              billingCycle: BillingCycle.ONE_TIME,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-        }
-
-        await this.seedEnrollment(
-          student._id,
-          course._id,
-          organizationId,
-          progressConfig.progressPercentage,
-          subscription || {
-            status: SubscriptionStatus.ACTIVE,
-            starts_at: new Date(),
-            next_billing: new Date(),
-            reminder_days: 10,
-            reminder_date: new Date(),
-            ends_at: new Date(),
-            resumed_at: new Date(),
-            billing: {
-              email: student.email,
-              last_name: student.lastName,
-              first_name: student.firstName,
-              phone_number: student.phone,
-              amount: 0,
-              currency: Currency.EGP,
-              billingCycle: BillingCycle.ONE_TIME,
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          accessType,
-        );
-        enrollmentConfigIndex++;
-      }
-    }
-  }
-
-  /**
-   * Updates instructor totalStudents count for all instructors associated with a course
-   */
-  private async updateInstructorTotalStudents(course: Course) {
-    // Collect all instructor IDs (main instructor + co-instructors)
-    const instructorIds: Types.ObjectId[] = [];
-    if (course.instructorId) {
-      instructorIds.push(course.instructorId);
-    }
-    if (course.coInstructorsIds && course.coInstructorsIds.length > 0) {
-      instructorIds.push(...course.coInstructorsIds);
-    }
-
-    if (instructorIds.length === 0) {
-      return;
-    }
-
-    // Get total enrollments for this course
-    const totalEnrollments = await this.enrollmentModel.countDocuments({
-      courseId: course._id,
-    });
-
-    // Update each instructor's totalStudents
-    for (const instructorId of instructorIds) {
-      // Get all courses taught by this instructor
-      const instructorCourses = await this.courseModel.find({
-        $or: [
-          { instructorId: instructorId },
-          { coInstructorsIds: instructorId }
-        ]
-      }).select('_id').exec();
-
-      const courseIds = instructorCourses.map(c => c._id);
-
-      if (courseIds.length === 0) {
-        continue;
-      }
-
-      // Count total unique students across all courses taught by this instructor
-      const uniqueStudents = await this.enrollmentModel.distinct('userId', {
-        courseId: { $in: courseIds },
-      });
-
-      const totalStudents = uniqueStudents.length;
-
-      // Update the instructor's totalStudents
-      await this.userModel.findByIdAndUpdate(
-        instructorId,
-        {
-          $set: {
-            totalStudents: totalStudents,
-          },
-        }
-      );
-    }
   }
 }

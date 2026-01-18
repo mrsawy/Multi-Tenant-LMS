@@ -47,13 +47,7 @@ export const settingsSchema = Yup.object().shape({
     isPublished: Yup.boolean().optional(),
     isDraft: Yup.boolean().optional(),
     enrollmentLimit: Yup.number()
-        .transform((value, originalValue) => {
-            // Convert empty string, NaN, or invalid numbers to undefined
-            if (originalValue === '' || originalValue == null || isNaN(originalValue)) {
-                return undefined;
-            }
-            return value;
-        })
+        .typeError('enrollment limit must be valid number')
         .min(1, 'Enrollment limit must be at least 1')
         .optional()
         .nullable(),
