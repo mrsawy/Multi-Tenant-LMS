@@ -9,6 +9,7 @@ export const ORGANIZATIONS_CONFIG: OrganizationSeedConfig[] = [
         studentsCount: 15,
         teachersCount: 5,
         adminsCount: 2,
+        totalCourses: 3,
         courses: [
             {
                 name: 'الرياضيات - الصف الأول الثانوي',
@@ -129,6 +130,7 @@ export const ORGANIZATIONS_CONFIG: OrganizationSeedConfig[] = [
         studentsCount: 12,
         teachersCount: 3,
         adminsCount: 1,
+        totalCourses: 2,
         courses: [
             {
                 name: 'التربية الفنية - الصف الأول الإعدادي',
@@ -190,6 +192,7 @@ export const ORGANIZATIONS_CONFIG: OrganizationSeedConfig[] = [
         studentsCount: 18,
         teachersCount: 8,
         adminsCount: 3,
+        totalCourses: 4,
         courses: [
             {
                 name: 'الكيمياء - الصف الأول الثانوي', isPaid: true,
@@ -349,6 +352,7 @@ export const ORGANIZATIONS_CONFIG: OrganizationSeedConfig[] = [
         studentsCount: 10,
         teachersCount: 2,
         adminsCount: 1,
+        totalCourses: 2,
         courses: [
             {
                 name: 'اللغة الإنجليزية - الصف الثاني الثانوي',
@@ -420,6 +424,7 @@ export const ORGANIZATIONS_CONFIG: OrganizationSeedConfig[] = [
         studentsCount: 14,
         teachersCount: 4,
         adminsCount: 2,
+        totalCourses: 3,
         courses: [
             {
                 name: 'التربية الرياضية - الصف الثالث الإعدادي',

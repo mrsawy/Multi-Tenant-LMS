@@ -11,6 +11,7 @@ import { EnrollmentMessageController } from './controllers/enrollment.message.co
 import { AuthModule } from 'src/auth/auth.module';
 import { PaymentModule } from 'src/payment/payment.module';
 import { CurrencyModule } from 'src/currency/currency.module';
+import { Organization, OrganizationSchema } from 'src/organization/entities/organization.entity';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { CurrencyModule } from 'src/currency/currency.module';
     MongooseModule.forFeature([
       { name: Enrollment.name, schema: EnrollmentSchema },
       { name: Course.name, schema: CourseSchema },
+      { name: Organization.name, schema: OrganizationSchema },
     ]),
 
 

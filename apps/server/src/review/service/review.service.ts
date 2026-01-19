@@ -449,6 +449,72 @@ export class ReviewService {
 
     // Update instructor course ratings
     await this.updateInstructorCourseRatings(courseId);
+
+    // Update organization course-related stats
+    await this.updateOrganizationCourseStats(courseId);
+  }
+
+  /**
+   * Updates organization course-related stats (averageCoursesRating, totalCoursesReviews, totalCourses)
+   * when course reviews are created, updated, or deleted
+   */
+  private async updateOrganizationCourseStats(courseId: Types.ObjectId) {
+    // Get the course to find its organizationId
+    const course = await this.courseModel.findById(courseId).select('organizationId').exec();
+
+    if (!course || !course.organizationId) {
+      return;
+    }
+
+    const organizationId = course.organizationId;
+
+    // Get all courses in the organization
+    const organizationCourses = await this.courseModel.find({
+      organizationId: organizationId,
+    }).select('_id').exec();
+
+    const courseIds = organizationCourses.map(c => c._id);
+    const totalCourses = courseIds.length;
+
+    if (courseIds.length === 0) {
+      // No courses, reset to 0
+      await this.organizationModel.findByIdAndUpdate(
+        organizationId,
+        {
+          $set: {
+            'stats.averageCoursesRating': 0,
+            'stats.totalCoursesReviews': 0,
+            'stats.totalCourses': 0,
+          },
+        }
+      );
+      return;
+    }
+
+    // Get all active course reviews for all courses in the organization
+    const allCourseReviews = await this.reviewModel.find({
+      reviewType: ReviewType.COURSE,
+      courseId: { $in: courseIds },
+      isActive: true,
+    });
+
+    // Calculate total reviews and average rating across all courses
+    const totalCoursesReviews = allCourseReviews.length;
+    const averageCoursesRating = totalCoursesReviews > 0
+      ? Math.round((allCourseReviews.reduce((sum, review) => sum + review.rating, 0) / totalCoursesReviews) * 10) / 10
+      : 0;
+
+    // Update the organization's course-related stats
+    await this.organizationModel.findByIdAndUpdate(
+      organizationId,
+      {
+        $set: {
+          'stats.averageCoursesRating': averageCoursesRating,
+          'stats.totalCoursesReviews': totalCoursesReviews,
+          'stats.totalCourses': totalCourses,
+        },
+      }
+    );
   }
 
   /**

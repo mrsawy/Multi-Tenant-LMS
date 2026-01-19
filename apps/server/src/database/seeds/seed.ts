@@ -52,7 +52,7 @@ async function bootstrap() {
   const roleSeeder = new RoleSeeder(roleModel);
   const planSeeder = new PlanSeeder(planModel);
   const userSeeder = new UserSeeder(userModel, walletModel);
-  const orgSeeder = new OrganizationSeeder(organizationModel);
+  const orgSeeder = new OrganizationSeeder(organizationModel, enrollmentModel, reviewModel, courseModel);
   const categorySeeder = new CategorySeeder(categoryModel);
   const courseSeeder = new CourseSeeder(courseModel, categoryModel, moduleModel, contentModel, userModel);
   const enrollmentSeeder = new EnrollmentSeeder(enrollmentModel, attendanceModel, reviewModel, discussionModel, courseModel, moduleModel, contentModel, userModel);
@@ -210,13 +210,20 @@ async function bootstrap() {
 
     await reviewSeeder.seedCoursesReviews(courses, students);
 
+    // Update organization stats
+    console.log(`  Updating organization statistics for ${organization.name}...`);
+    const totalCourses = organization.totalCourses ?? courses.length;
+    await orgSeeder.updateOrganizationStats(org._id, totalCourses);
+
     // Recalculate all instructor totalCourses to ensure accuracy
     console.log(`  Recalculating instructor statistics for ${organization.name}...`);
     await courseSeeder.recalculateAllInstructorTotalCourses(org._id);
+    await reviewSeeder.recalculateAllInstructorCourseRatings(org._id);
   }
 
   console.log('Seeding complete!');
   await app.close();
+  process.exit(0);
 }
 
 bootstrap();

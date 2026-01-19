@@ -314,16 +314,8 @@ export class EnrollmentSeeder {
     }
 
     // Seed Review if progress is high enough
-    if (enrollment.progressPercentage > 50) {
-      await this.reviewModel.create({
-        userId,
-        reviewType: ReviewType.COURSE,
-        rating: faker.number.int({ min: 3, max: 5 }),
-        comment: faker.lorem.sentence(),
-        isActive: true,
-        courseId, // Discriminator field
-      } as any);
-    }
+  
+    
 
     const discussionCount = faker.number.int({ min: 0, max: 3 });
     for (let i = 0; i < discussionCount; i++) {

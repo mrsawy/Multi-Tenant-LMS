@@ -21,7 +21,7 @@ const SingleCourseHeader: React.FC<{ course: ICourseWithModules }> = ({ course }
                 <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-primary text-primary" />
                     <span className="font-medium text-foreground">{course.stats?.averageRating}</span>
-                    <span>({course.stats?.totalRatings.toLocaleString()} reviews)</span>
+                    <span>({course.stats?.totalReviews} reviews)</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />

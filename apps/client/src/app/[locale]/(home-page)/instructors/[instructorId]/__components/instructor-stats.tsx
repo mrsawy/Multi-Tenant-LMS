@@ -5,13 +5,14 @@ import { IInstructor } from '@/lib/types/user/user.interface';
 import { Typography } from '@/components/atoms/typography';
 import { useTranslations } from 'next-intl';
 
+const formatNumber = (num?: number) => {
+    if (!num) return '0';
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
+};
+
 const InstructorStats: React.FC<{ instructor: IInstructor }> = ({ instructor }) => {
     const t = useTranslations('Instructors');
-    const formatNumber = (num?: number) => {
-        if (!num) return '0';
-        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-        return num.toString();
-    };
 
     const stats = [
         { 

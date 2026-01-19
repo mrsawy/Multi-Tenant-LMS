@@ -519,5 +519,23 @@
     "totalReviews": "تقييمات",
     "rating": "تقييم",
     "enrolledStudentsCount": "طالب"
+  },
+  "TeachersSection": {
+    "title": {
+      "explore": "استكشف",
+      "teachers": "المعلمين"
+    },
+    "description": "تعلم من الخبراء وقادة الفكر الذين يجلبون الخبرة الواقعية والمعرفة المتطورة إلى كل دورة.",
+    "viewAllButton": "عرض جميع المعلمين"
+  },
+  "CoursesSection": {
+    "title": {
+      "featured": "المميزة",
+      "courses": "الدورات"
+    },
+    "description": "اكتشف دوراتنا الأكثر شعبية المصممة من قبل خبراء الصناعة لتطوير مهاراتك وتسريع نموك المهني.",
+    "viewAllButton": "عرض جميع الدورات",
+    "all": "الكل",
+    "noCoursesFound": "لم يتم العثور على دورات في هذا التصنيف"
   }
 }

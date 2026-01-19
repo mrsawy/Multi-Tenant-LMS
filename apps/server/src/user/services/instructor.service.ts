@@ -15,6 +15,14 @@ import { Roles } from 'src/role/enum/Roles.enum';
 import { remove, removePassword } from 'src/utils/removeSensitiveData';
 import { Role } from 'src/role/entities/role.entity';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import {
+    NORMALIZATION_FACTORS,
+    WEIGHTS,
+    CAPS,
+    MINIMUM_THRESHOLDS,
+    SCALING_OPTIONS,
+    RECENCY_CONFIG,
+} from '../config/featuredInstructors.config';
 
 @Injectable()
 export class InstructorService {
@@ -207,5 +215,369 @@ export class InstructorService {
 
         const { password, ...instructorData } = instructor.toObject();
         return instructorData;
+    }
+
+    async getFeatured(limit: number = 10) {
+        // Extract config values as literals for MongoDB aggregation
+        const {
+            instructorReviews: normInstructorReviews,
+            instructorStudents: normInstructorStudents,
+            instructorCourses: normInstructorCourses,
+            orgReviews: normOrgReviews,
+            orgEnrollments: normOrgEnrollments,
+            orgCourses: normOrgCourses,
+            ratingScale: normRatingScale,
+        } = NORMALIZATION_FACTORS;
+
+        const {
+            instructor: {
+                totalCoursesReviews: weightInstructorTotalCoursesReviews,
+                averageCoursesRating: weightInstructorAverageCoursesRating,
+                totalStudents: weightInstructorTotalStudents,
+                totalCourses: weightInstructorTotalCourses
+            },
+            organization: {
+                totalCoursesReviews: weightOrgTotalCoursesReviews,
+                averageCoursesRating: weightOrgAverageCoursesRating,
+                totalEnrollments: weightOrgTotalEnrollments,
+                totalCourses: weightOrgTotalCourses
+            },
+            recency: weightRecency,
+        } = WEIGHTS;
+
+        const {
+            instructorTotalCoursesReviews: capInstructorReviews,
+            instructorTotalStudents: capInstructorStudents,
+            instructorTotalCourses: capInstructorCourses,
+            orgTotalCoursesReviews: capOrgReviews,
+            orgTotalEnrollments: capOrgEnrollments,
+            orgTotalCourses: capOrgCourses,
+        } = CAPS;
+
+        const {
+            totalCourses: minTotalCourses,
+            totalCoursesReviews: minTotalCoursesReviews,
+        } = MINIMUM_THRESHOLDS;
+
+        const { useLogarithmicScaling } = SCALING_OPTIONS;
+        const { enabled: recencyEnabled, millisecondsPerYear } = RECENCY_CONFIG;
+
+        const pipeline: mongoose.PipelineStage[] = [
+            // Match only instructors with minimum thresholds
+            {
+                $match: {
+                    roleName: {
+                        $regex: /^instructor$/i,
+                    },
+                    // Only include instructors with at least some activity
+                    $and: [
+                        { totalCourses: { $gte: minTotalCourses } },
+                        { totalCoursesReviews: { $gte: minTotalCoursesReviews } },
+                    ],
+                },
+            },
+            // Lookup organization to get organization stats
+            {
+                $lookup: {
+                    from: 'organizations',
+                    localField: 'organizationId',
+                    foreignField: '_id',
+                    as: 'organization',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$organization',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            // Use pre-calculated instructor stats and prepare organization stats
+            {
+                $addFields: {
+                    // Use stored instructor metrics (with defaults if null)
+                    instructorTotalCoursesReviews: { $ifNull: ['$totalCoursesReviews', 0] },
+                    instructorAverageCoursesRating: { $ifNull: ['$averageCoursesRating', 0] },
+                    instructorTotalStudents: { $ifNull: ['$totalStudents', 0] },
+                    instructorTotalCourses: { $ifNull: ['$totalCourses', 0] },
+                    // Get organization stats (with defaults if organization doesn't exist)
+                    orgStats: {
+                        $cond: {
+                            if: { $ne: ['$organization', null] },
+                            then: '$organization.stats',
+                            else: {
+                                totalCourses: 0,
+                                totalEnrollments: 0,
+                                totalCoursesReviews: 0,
+                                averageCoursesRating: 0,
+                            },
+                        },
+                    },
+                    // Calculate account age in years (for recency factor)
+                    accountAgeYears: {
+                        $divide: [
+                            {
+                                $subtract: [
+                                    new Date(),
+                                    { $ifNull: ['$createdAt', new Date()] },
+                                ],
+                            },
+                            millisecondsPerYear,
+                        ],
+                    },
+                },
+            },
+            // Calculate featured score
+            // Using a weighted formula that combines instructor and organization metrics
+            {
+                $addFields: {
+                    featuredScore: {
+                        $add: [
+                            // Instructor metrics (weighted)
+                            // Total courses reviews (with capping and optional logarithmic scaling)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            useLogarithmicScaling.reviews
+                                                ? {
+                                                    $divide: [
+                                                        {
+                                                            $ln: {
+                                                                $add: [
+                                                                    '$instructorTotalCoursesReviews',
+                                                                    1,
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            $ln: {
+                                                                $add: [normInstructorReviews, 1],
+                                                            },
+                                                        },
+                                                    ],
+                                                }
+                                                : {
+                                                    $divide: [
+                                                        '$instructorTotalCoursesReviews',
+                                                        normInstructorReviews,
+                                                    ],
+                                                },
+                                            capInstructorReviews,
+                                        ],
+                                    },
+                                    weightInstructorTotalCoursesReviews,
+                                ],
+                            },
+                            // Average courses rating - scale 0-5 to 0-1
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            '$instructorAverageCoursesRating',
+                                            normRatingScale,
+                                        ],
+                                    },
+                                    weightInstructorAverageCoursesRating,
+                                ],
+                            },
+                            // Total students (with logarithmic scaling and capping)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            useLogarithmicScaling.students
+                                                ? {
+                                                    $divide: [
+                                                        {
+                                                            $ln: {
+                                                                $add: [
+                                                                    '$instructorTotalStudents',
+                                                                    1,
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            $ln: {
+                                                                $add: [normInstructorStudents, 1],
+                                                            },
+                                                        },
+                                                    ],
+                                                }
+                                                : {
+                                                    $divide: [
+                                                        '$instructorTotalStudents',
+                                                        normInstructorStudents,
+                                                    ],
+                                                },
+                                            capInstructorStudents,
+                                        ],
+                                    },
+                                    weightInstructorTotalStudents,
+                                ],
+                            },
+                            // Total courses (with capping)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            {
+                                                $divide: [
+                                                    '$instructorTotalCourses',
+                                                    normInstructorCourses,
+                                                ],
+                                            },
+                                            capInstructorCourses,
+                                        ],
+                                    },
+                                    weightInstructorTotalCourses,
+                                ],
+                            },
+                            // Organization metrics (weighted)
+                            // Organization total courses reviews (with capping)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            {
+                                                $divide: [
+                                                    { $ifNull: ['$orgStats.totalCoursesReviews', 0] },
+                                                    normOrgReviews,
+                                                ],
+                                            },
+                                            capOrgReviews,
+                                        ],
+                                    },
+                                    weightOrgTotalCoursesReviews,
+                                ],
+                            },
+                            // Organization average courses rating - scale 0-5 to 0-1
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            { $ifNull: ['$orgStats.averageCoursesRating', 0] },
+                                            normRatingScale,
+                                        ],
+                                    },
+                                    weightOrgAverageCoursesRating,
+                                ],
+                            },
+                            // Organization total enrollments (with capping)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            {
+                                                $divide: [
+                                                    { $ifNull: ['$orgStats.totalEnrollments', 0] },
+                                                    normOrgEnrollments,
+                                                ],
+                                            },
+                                            capOrgEnrollments,
+                                        ],
+                                    },
+                                    weightOrgTotalEnrollments,
+                                ],
+                            },
+                            // Organization total courses (with capping)
+                            {
+                                $multiply: [
+                                    {
+                                        $min: [
+                                            {
+                                                $divide: [
+                                                    { $ifNull: ['$orgStats.totalCourses', 0] },
+                                                    normOrgCourses,
+                                                ],
+                                            },
+                                            capOrgCourses,
+                                        ],
+                                    },
+                                    weightOrgTotalCourses,
+                                ],
+                            },
+                            // Recency factor (newer instructors get slight boost)
+                            ...(recencyEnabled
+                                ? [
+                                    {
+                                        $multiply: [
+                                            '$accountAgeYears',
+                                            weightRecency,
+                                        ],
+                                    },
+                                ]
+                                : []),
+                        ],
+                    },
+                },
+            },
+            // Sort by featured score descending
+            {
+                $sort: { featuredScore: -1 },
+            },
+            // Limit results
+            {
+                $limit: limit,
+            },
+            // Add computed fields to root level
+            {
+                $addFields: {
+                    totalCourses: '$instructorTotalCourses',
+                    totalCoursesReviews: '$instructorTotalCoursesReviews',
+                    averageCoursesRating: '$instructorAverageCoursesRating',
+                    totalStudents: '$instructorTotalStudents',
+                },
+            },
+            // Project final fields (using inclusion projection)
+            {
+                $project: {
+                    // Include all user fields except sensitive ones
+                    _id: 1,
+                    organizationId: 1,
+                    username: 1,
+                    email: 1,
+                    phone: 1,
+                    firstName: 1,
+                    lastName: 1,
+                    roleName: 1,
+                    profile: 1,
+                    preferences: 1,
+                    status: 1,
+                    lastLogin: 1,
+                    preferredCurrency: 1,
+                    averageRating: 1,
+                    totalReviews: 1,
+                    categoriesIds: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    // Include computed instructor metrics
+                    totalCourses: 1,
+                    totalCoursesReviews: 1,
+                    averageCoursesRating: 1,
+                    totalStudents: 1,
+                    featuredScore: 1,
+                    // Include organization stats (clean nested structure)
+                    organizationStats: {
+                        totalCourses: { $ifNull: ['$orgStats.totalCourses', 0] },
+                        totalEnrollments: { $ifNull: ['$orgStats.totalEnrollments', 0] },
+                        totalCoursesReviews: { $ifNull: ['$orgStats.totalCoursesReviews', 0] },
+                        averageCoursesRating: { $ifNull: ['$orgStats.averageCoursesRating', 0] },
+                        totalReviews: { $ifNull: ['$orgStats.totalReviews', 0] },
+                        averageRating: { $ifNull: ['$orgStats.averageRating', 0] },
+                    },
+                    // Include organization basic info
+                    organization: {
+                        _id: '$organization._id',
+                        name: '$organization.name',
+                    },
+                },
+            },
+        ];
+
+
+        const featuredInstructors = await this.userModel.aggregate(pipeline);
+        return featuredInstructors;
+
+
     }
 }

@@ -517,5 +517,23 @@
     "totalReviews": "reviews",
     "rating": "rating",
     "enrolledStudentsCount": "students"
+  },
+  "TeachersSection": {
+    "title": {
+      "explore": "Explore",
+      "teachers": "Teachers"
+    },
+    "description": "Learn from industry experts and thought leaders who bring real-world experience and cutting-edge knowledge to every course.",
+    "viewAllButton": "View All Teachers"
+  },
+  "CoursesSection": {
+    "title": {
+      "featured": "Featured",
+      "courses": "Courses"
+    },
+    "description": "Discover our most popular courses designed by industry experts to advance your skills and accelerate your career growth.",
+    "viewAllButton": "View All Courses",
+    "all": "All",
+    "noCoursesFound": "No courses found in this category"
   }
 }

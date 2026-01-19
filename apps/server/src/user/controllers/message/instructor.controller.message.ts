@@ -75,4 +75,14 @@ export class InstructorControllerMessage {
         return await this.instructorService.filterOne(filters);
 
     }
+
+    @MessagePattern('instructors.getFeatured')
+    async getFeatured(
+        @Payload(new RpcValidationPipe())
+        payload: {
+            limit: number;
+        }
+    ) {
+        return await this.instructorService.getFeatured(payload.limit);
+    }
 }

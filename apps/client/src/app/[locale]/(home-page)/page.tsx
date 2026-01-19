@@ -23,21 +23,22 @@ interface Props {
   params: Promise<{
     locale: string;
   }>;
+  searchParams: Promise<{ category?: string }>;
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page({ params, searchParams }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const courses = await findCourses({});
+
 
   return (
     <div className="relative w-full min-h-screen bg-white dark:bg-black">
       <HeroSection />
       <LogoLoopOrgan />
       <ScrollCards />
+      <CoursesSection searchParams={searchParams} />
       <TeachersSection />
-      <CoursesSection courses={courses} />
       <PricingSection />
     </div>
   );

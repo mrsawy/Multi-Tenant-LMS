@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CourseService } from './services/course.service';
+import { CourseFeaturedService } from './services/course.featured.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Course, CourseSchema } from './entities/course.entity';
 import {
@@ -34,6 +35,7 @@ import { EnrollmentModule } from 'src/enrollment/enrollment.module';
 import { CourseControllerMessage } from './controller/course.controller.message';
 import { ModuleControllerMessage } from './controller/module.controller.message';
 import { CourseControllerHttp } from './controller/course.controller.http';
+import { Organization, OrganizationSchema } from 'src/organization/entities/organization.entity';
 
 
 @Module({
@@ -41,6 +43,7 @@ import { CourseControllerHttp } from './controller/course.controller.http';
     MongooseModule.forFeature([
       { name: Course.name, schema: CourseSchema },
       { name: 'CourseModule', schema: CourseModuleSchema },
+      { name: Organization.name, schema: OrganizationSchema },
       {
         name: CourseContent.name,
         schema: CourseContentSchema,
@@ -74,6 +77,7 @@ import { CourseControllerHttp } from './controller/course.controller.http';
   ],
   providers: [
     CourseService,
+    CourseFeaturedService,
     CourseContentService,
     CourseModulesService,
     QuizService,
