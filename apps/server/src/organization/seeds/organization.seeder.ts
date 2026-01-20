@@ -9,7 +9,7 @@ export class OrganizationSeeder {
     private readonly enrollmentModel?: Model<any>,
     private readonly reviewModel?: Model<any>,
     private readonly courseModel?: Model<any>,
-  ) {}
+  ) { }
 
   async seed(superAdminId: Types.ObjectId, planName: string, overrides: Partial<Organization> = {}) {
     const name = faker.company.name();

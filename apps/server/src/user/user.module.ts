@@ -5,11 +5,11 @@ import { User, UserSchema } from './entities/user.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from 'src/auth/auth.module';
 import { CaslAbilityFactory } from 'src/role/permissions.factory';
+import { InstructorControllerHttp } from './controllers/http/instructor.controller.http';
 import { RoleModule } from 'src/role/role.module';
 import { UserControllerMessage } from './controllers/message/user.controller.message';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { InstructorService } from './services/instructor.service';
-import { InstructorControllerHttp } from './controllers/http/instructor.controller.http';
 import { InstructorControllerMessage } from './controllers/message/instructor.controller.message';
 
 @Module({

@@ -18,13 +18,13 @@ const CategoryFilter = ({ categories }: CategoryFilterProps) => {
 
     const handleCategoryClick = (category: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        
+
         if (category === allText) {
             params.delete('category');
         } else {
             params.set('category', category);
         }
-        
+
         // Update URL without page reload
         const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
         router.push(newUrl, { scroll: false });

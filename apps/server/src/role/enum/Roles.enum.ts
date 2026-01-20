@@ -4,6 +4,9 @@ export enum Roles {
     INSTRUCTOR = 'INSTRUCTOR',
     STUDENT = 'STUDENT',
     PARENT = 'PARENT',
+    MANAGER = 'MANAGER',
+    SECRETARY = 'SECRETARY',
+    COUNSELOR = 'COUNSELOR',
+    LIBRARIAN = 'LIBRARIAN',
+    // OTHER = 'Other',
 }
-
-

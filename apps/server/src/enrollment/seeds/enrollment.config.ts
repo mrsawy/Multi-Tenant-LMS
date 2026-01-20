@@ -1,5 +1,5 @@
 import { EnrollmentSeedConfig } from './enrollment-config.interface';
-import { fakerAR as faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 export const ENROLLMENT_CONFIG: EnrollmentSeedConfig = {
   enrollments: [

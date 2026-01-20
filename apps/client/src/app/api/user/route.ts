@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         }
         user = response.user
     }
-    
+
     if (!user) return new NextResponse(undefined, { status: 401 })
     const response = new NextResponse(JSON.stringify(user));
     response.headers.set('Content-Type', 'application/json');

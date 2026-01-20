@@ -534,6 +534,14 @@
     "description": "Discover our most popular courses designed by industry experts to advance your skills and accelerate your career growth.",
     "viewAllButton": "View All Courses",
     "all": "All",
-    "noCoursesFound": "No courses found in this category"
+    "noCoursesFound": "No courses found in this category",
+    "footer": {
+      "title": "safier",
+      "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
+      "links": "Quick Links",
+      "social": "Follow Us",
+      "contact": "Contact Us",
+      "copyright": "Safier. All rights reserved."
+    }
   }
 }

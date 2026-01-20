@@ -346,20 +346,20 @@ export class FeatureService {
     filters?: mongoose.RootFilterQuery<Feature>,
   ) {
     const result = await this.featureModel.paginate(filters || {}, options);
-    
+
     // Remove sensitive data if needed
     result.docs = result.docs.map(removePassword);
-    
+
     return result;
   }
 
   async findOne(filters: mongoose.RootFilterQuery<Feature>) {
     const feature = await this.featureModel.findOne(filters);
-    
+
     if (!feature) {
       throw new NotFoundException('Feature not found');
     }
-    
+
     return feature;
   }
 
@@ -697,7 +697,7 @@ import { ClientSession } from 'mongoose';
 async createWithTransaction(dto: CreateFeatureDto) {
   const session = await this.featureModel.db.startSession();
   session.startTransaction();
-  
+
   try {
     const feature = await this.featureModel.create([dto], { session });
     // Other operations

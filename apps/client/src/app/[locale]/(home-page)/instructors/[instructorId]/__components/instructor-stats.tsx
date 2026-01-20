@@ -15,34 +15,34 @@ const InstructorStats: React.FC<{ instructor: IInstructor }> = ({ instructor }) 
     const t = useTranslations('Instructors');
 
     const stats = [
-        { 
-            icon: Star, 
-            label: t('averageRating'), 
-            value: instructor.averageCoursesRating ? instructor.averageCoursesRating.toFixed(1) : '0.0', 
+        {
+            icon: Star,
+            label: t('averageRating'),
+            value: instructor.averageCoursesRating ? instructor.averageCoursesRating.toFixed(1) : '0.0',
             color: 'text-yellow-500',
             bgColor: 'bg-yellow-500/10',
             borderColor: 'border-yellow-500/20'
         },
-        { 
-            icon: Users, 
-            label: t('totalStudents'), 
-            value: formatNumber(instructor.totalStudents), 
+        {
+            icon: Users,
+            label: t('totalStudents'),
+            value: formatNumber(instructor.totalStudents),
             color: 'text-blue-500',
             bgColor: 'bg-blue-500/10',
             borderColor: 'border-blue-500/20'
         },
-        { 
-            icon: BookOpen, 
-            label: t('totalCourses'), 
-            value: formatNumber(instructor.totalCourses), 
+        {
+            icon: BookOpen,
+            label: t('totalCourses'),
+            value: formatNumber(instructor.totalCourses),
             color: 'text-green-500',
             bgColor: 'bg-green-500/10',
             borderColor: 'border-green-500/20'
         },
-        { 
-            icon: Award, 
-            label: t('totalRatings'), 
-            value: formatNumber(instructor.totalCoursesReviews), 
+        {
+            icon: Award,
+            label: t('totalRatings'),
+            value: formatNumber(instructor.totalCoursesReviews),
             color: 'text-purple-500',
             bgColor: 'bg-purple-500/10',
             borderColor: 'border-purple-500/20'

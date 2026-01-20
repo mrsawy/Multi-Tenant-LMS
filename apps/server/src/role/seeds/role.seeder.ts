@@ -5,7 +5,7 @@ import { Subjects } from '../enum/subject.enum';
 import { Roles } from '../enum/Roles.enum';
 
 export class RoleSeeder {
-  constructor(private readonly roleModel: Model<Role>) { }
+  constructor(private readonly roleModel: Model<Role>) {}
 
   async seed() {
     const roles = [

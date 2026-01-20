@@ -30,7 +30,7 @@ export const WEIGHTS = {
     organization: {
         totalCoursesReviews: 0.1,
         averageCoursesRating: 0.1,
-        totalEnrollments: 0.2,  
+        totalEnrollments: 0.2,
         totalCourses: 0.2,
     },
     // Recency factor (negative weight favors newer accounts)

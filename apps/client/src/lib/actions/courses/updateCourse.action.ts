@@ -60,8 +60,8 @@ export const handleUpdateCourse = async (courseId: string, formData: FormData, o
             delete courseData.thumbnail;
         }
 
-       
-        
+
+
 
         const response = await request<any>(
             natsClient,

@@ -39,6 +39,7 @@ html[dir="rtl"],
 }
 
 @custom-variant dark (&:is(.dark *));
+
 :root {
   --background: oklch(0.9578 0.0058 264.5321);
   --foreground: oklch(0.4355 0.0430 279.3250);

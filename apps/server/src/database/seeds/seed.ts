@@ -22,7 +22,7 @@ import { UserSeeder } from '../../user/seeds/user.seeder';
 import { OrganizationSeeder } from '../../organization/seeds/organization.seeder';
 import { CourseSeeder } from '../../course/seeds/course.seeder';
 import { EnrollmentSeeder } from '../../enrollment/seeds/enrollment.seeder';
-import { CategorySeeder } from '../../category/seed/category.seeder';
+import { CategorySeeder } from '../../category/seeds/category.seeder';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { ORGANIZATIONS_SEED, ORGANIZATIONS_CONFIG } from './seed.config';
@@ -208,7 +208,8 @@ async function bootstrap() {
     console.log(`  Seeding Enrollments for ${organization.name}...`);
     await enrollmentSeeder.seedEnrollmentsForStudents(students, courses, org._id);
 
-    await reviewSeeder.seedCoursesReviews(courses, students);
+    console.log(`  Seeding Reviews for ${organization.name}...`);
+    await reviewSeeder.seedCoursesReviews(courses, students, organization);
 
     // Update organization stats
     console.log(`  Updating organization statistics for ${organization.name}...`);

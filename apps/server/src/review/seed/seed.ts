@@ -36,7 +36,9 @@ export class ReviewSeeder {
             courseId,
         });
         if (!enrollment) {
-            return;
+            // Don't create review if student is not enrolled
+            // This is expected behavior - reviews should only be created for enrolled students
+            return null;
         }
         const existingReview = await this.reviewModel.findOne({
             userId,
@@ -91,23 +93,42 @@ export class ReviewSeeder {
     async seedCoursesReviews(
         courses: Course[],
         users: User[],
+        organizationConfig?: any,
     ) {
+        console.log(`  Starting review seeding: ${courses.length} courses, ${users.length} users`);
+        
         // Get students from users array
         const students = users.filter(user => user.roleName === 'STUDENT');
 
         if (students.length === 0) {
-            console.log('No students available for seeding reviews');
+            console.log('  No students available for seeding reviews');
             return;
         }
 
-        for (const organization of ORGANIZATIONS_CONFIG) {
-            const unUsedUsers = [...students];
+        if (courses.length === 0) {
+            console.log('  No courses available for seeding reviews');
+            return;
+        }
+
+        let totalReviewsCreated = 0;
+        const unUsedUsers = [...students];
+
+        // If organizationConfig is provided, use it; otherwise iterate through all organizations
+        const organizationsToProcess = organizationConfig 
+            ? [{ courses: organizationConfig.courses }]
+            : ORGANIZATIONS_CONFIG;
+
+        // Iterate through courses and seed reviews based on config
+        for (const organization of organizationsToProcess) {
             for (const courseConfig of organization.courses) {
                 const course = courses.find(c => c.name === courseConfig.name);
                 if (course && courseConfig.reviews) {
+                    console.log(`  Seeding reviews for course: ${course.name} (${courseConfig.reviews.length} reviews)`);
                     for (const reviewConfig of courseConfig.reviews) {
                         if (unUsedUsers.length === 0) {
-                            break;
+                            console.log('  No more unused students available for reviews, reusing students...');
+                            // Reset unused users if we run out
+                            unUsedUsers.push(...students);
                         }
                         const user = faker.helpers.arrayElement(unUsedUsers);
                         const userIndex = unUsedUsers.indexOf(user);
@@ -115,14 +136,21 @@ export class ReviewSeeder {
                             unUsedUsers.splice(userIndex, 1);
                         }
                         // Correct parameter order: userId, courseId, overrides
-                        await this.seedCourseReview(user._id, course._id, {
+                        const review = await this.seedCourseReview(user._id, course._id, {
                             rating: reviewConfig.rating,
                             comment: reviewConfig.comment,
                         });
+                        if (review) {
+                            totalReviewsCreated++;
+                        }
                     }
+                } else if (courseConfig.reviews && !course) {
+                    console.log(`  Warning: Course "${courseConfig.name}" not found in courses array`);
                 }
             }
         }
+        
+        console.log(`  Review seeding complete: ${totalReviewsCreated} reviews created`);
     }
 
     /**
