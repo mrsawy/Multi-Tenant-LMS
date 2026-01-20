@@ -23,7 +23,7 @@ import {
   PaymobWebhookTransaction,
 } from './types/transaction.interface';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { AccessType } from 'src/enrollment/enum/accessType.enum';
 import { PaymobService } from './payment.paymob.service';
 

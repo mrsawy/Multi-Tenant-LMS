@@ -57,6 +57,34 @@ export class Organization extends Document<Types.ObjectId> {
       smsEnabled: boolean;
     };
   };
+
+  @Prop({
+    type: {
+      totalReviews: Number,
+      averageRating: Number,
+      averageCoursesRating: Number,
+      totalCoursesReviews: Number,
+      totalEnrollments: Number,
+      totalCourses: Number,
+    },
+    default: {
+      totalReviews: 0,
+      averageRating: 0,
+      averageCoursesRating: 0,
+      totalCoursesReviews: 0,
+      totalEnrollments: 0,
+      totalCourses: 0,
+    },
+    required: false,
+  })
+  stats: {
+    totalReviews: number;
+    averageRating: number;
+    averageCoursesRating: number;
+    totalCoursesReviews: number;
+    totalEnrollments: number;
+    totalCourses: number;
+  }
 }
 
 export const OrganizationSchema = SchemaFactory.createForClass(Organization);

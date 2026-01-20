@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { OrganizationService } from 'src/organization/organization.service';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/user/services/user.service';
 import * as jwt from 'jsonwebtoken';
 import { User } from 'src/user/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
@@ -25,7 +25,7 @@ import { Status } from 'src/user/enum/status.enum';
 @Injectable()
 export class AuthService {
   private readonly secret = process.env.JSON_PRIVATE_KEY || '';
-  private readonly expiresIn = '3d';
+  private readonly expiresIn: string = process.env.AUTH_EXPIRES_IN;
 
   constructor(
     @InjectConnection() private readonly connection: Connection,

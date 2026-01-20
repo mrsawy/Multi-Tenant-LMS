@@ -6,6 +6,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CourseService } from '../services/course.service';
+import { CourseFeaturedService } from '../services/course.featured.service';
 import {
   Ctx,
   MessagePattern,
@@ -22,23 +23,54 @@ import { CreateCourseModuleDto } from '../dto/create-course-module.dto';
 import { CourseModulesService } from '../services/courseModules.service';
 import { CreateCourseContentDto } from '../dto/create-course-content.dto';
 import { CourseContentService } from '../services/courseContent.service';
-import { PaginateOptions } from 'mongoose';
+import { PaginateOptions, Types } from 'mongoose';
 import { ICourseFilters } from 'src/utils/types/CourseFilters';
+import { ApplyRpcErrorHandling } from 'src/utils/docerators/error-handeling/class/ApplyRpcErrorHandling.decorator';
 
+@ApplyRpcErrorHandling
 @Controller()
 export class CourseControllerMessage {
   constructor(
-    private courseService: CourseService
+    private courseService: CourseService,
+    private courseFeaturedService: CourseFeaturedService,
   ) { }
 
   @MessagePattern('courses.findAllCourses')
   async findAllCourses(
     @Payload(new RpcValidationPipe())
     payload: {
-      options: ICourseFilters;
+      options: ICourseFilters & { instructorId?: string; $or?: any[] };
     },
   ) {
-    const courses = await this.courseService.findAll({}, payload.options);
+    const query: Record<string, any> = {};
+
+    // Handle direct instructorId
+    if (payload.options.instructorId) {
+      query.instructorId = new Types.ObjectId(payload.options.instructorId);
+    }
+
+    // Handle $or filter (for instructorId or coInstructorsIds)
+    if (payload.options.$or && Array.isArray(payload.options.$or)) {
+      // Convert string IDs to ObjectIds in $or conditions
+      const processedOr = payload.options.$or.map((condition: any) => {
+        const processedCondition: any = {};
+        // Handle instructorId condition: { instructorId: string }
+        if (condition.instructorId !== undefined) {
+          processedCondition.instructorId = new Types.ObjectId(condition.instructorId);
+        }
+        // Handle coInstructorsIds condition: { coInstructorsIds: string }
+        // MongoDB will check if the array contains this ObjectId
+        if (condition.coInstructorsIds !== undefined) {
+          processedCondition.coInstructorsIds = new Types.ObjectId(condition.coInstructorsIds);
+        }
+        return processedCondition;
+      });
+      query.$or = processedOr;
+    }
+
+    // Remove query operators and instructorId from filters
+    const { instructorId, $or, ...filters } = payload.options;
+    const courses = await this.courseService.findAll(query, filters);
     return courses;
   }
 
@@ -49,20 +81,13 @@ export class CourseControllerMessage {
     @Payload(new RpcValidationPipe())
     payload: { options: PaginateOptions },
   ) {
-    try {
-      const user = context.userPayload;
-      const courses = await this.courseService.findAll(
-        { organizationId: user.organizationId },
-        payload.options,
-      );
-      return courses;
-    } catch (error) {
-      throw new RpcException({
-        message: error.message || 'An unexpected error occurred',
-        code: 500,
-        error: 'Internal Server Error',
-      });
-    }
+    const user = context.userPayload;
+    const courses = await this.courseService.findAll(
+      { organizationId: user.organizationId },
+      payload.options,
+    );
+    return courses;
+
   }
 
   @MessagePattern('courses.getCourseWithModule')
@@ -74,15 +99,12 @@ export class CourseControllerMessage {
       contentSelect?: string;
     },
   ) {
-    try {
-      return await this.courseService.getCourseWithOrderedModules(
-        payload.courseId,
-        payload.includeContents,
-        payload.contentSelect,
-      );
-    } catch (error) {
-      handleRpcError(error);
-    }
+    return await this.courseService.getCourseWithOrderedModules(
+      payload.courseId,
+      payload.includeContents,
+      payload.contentSelect,
+    );
+
   }
 
   @UseGuards(AuthGuard)
@@ -94,11 +116,8 @@ export class CourseControllerMessage {
       data?: { authorization?: string };
     },
   ) {
-    try {
-      return await this.courseService.findOneById(payload.courseId);
-    } catch (error) {
-      handleRpcError(error);
-    }
+    return await this.courseService.findOneById(payload.courseId);
+
   }
 
   @UseGuards(AuthGuard)
@@ -108,16 +127,13 @@ export class CourseControllerMessage {
     payload: UpdateCourseDto,
     @Ctx() context: IUserContext,
   ) {
-    try {
-      const result = await this.courseService.update(payload);
-      return {
-        success: true,
-        data: result,
-        message: 'Course updated successfully',
-      };
-    } catch (error) {
-      handleRpcError(error);
-    }
+    const result = await this.courseService.update(payload);
+    return {
+      success: true,
+      data: result,
+      message: 'Course updated successfully',
+    };
+
   }
 
   @MessagePattern('course.createCourse')
@@ -127,15 +143,22 @@ export class CourseControllerMessage {
     payload: CreateCourseDto,
     @Ctx() context: IUserContext,
   ) {
-    try {
-      const user = context.userPayload;
-      return await this.courseService.create({
-        organizationId: user.organizationId.toString(),
-        createdBy: user._id.toString(),
-        ...payload,
-      });
-    } catch (error) {
-      handleRpcError(error);
+    const user = context.userPayload;
+    return await this.courseService.create({
+      organizationId: user.organizationId.toString(),
+      createdBy: user._id.toString(),
+      ...payload,
+    });
+
+  }
+
+  @MessagePattern('courses.getFeatured')
+  async getFeatured(
+    @Payload(new RpcValidationPipe())
+    payload: {
+      limit: number;
     }
+  ) {
+    return await this.courseFeaturedService.getFeatured(payload.limit);
   }
 }

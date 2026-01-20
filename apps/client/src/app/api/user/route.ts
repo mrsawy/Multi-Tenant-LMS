@@ -5,6 +5,7 @@ import { RegisterResponse } from '@/lib/types/auth/auth.type';
 import { IUser } from '@/lib/types/user/user.interface';
 import { v7 } from 'uuid';
 import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
+import { parseDurationToSeconds } from '@/lib/utils';
 export async function GET(request: NextRequest) {
     const authCookie = request.cookies.get(AUTH_COOKIE_NAME)?.value
     if (!authCookie) return new NextResponse(undefined, { status: 401 })
@@ -32,9 +33,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!user) return new NextResponse(undefined, { status: 401 })
-
     const response = new NextResponse(JSON.stringify(user));
     response.headers.set('Content-Type', 'application/json');
+
+    redis.set(`auth-${authCookie}`, JSON.stringify(user), 'EX', parseDurationToSeconds("1h"))
 
     return response;
 }

@@ -21,13 +21,11 @@ import useGeneralStore from "@/lib/store/generalStore";
 
 import { CourseContentType } from "@/lib/types/course/enum/CourseContentType.enum";
 import { VideoType } from "@/lib/types/course/enum/VideoType.enum";
-import { getPresignedUrl } from "@/lib/actions/file/getPreSignedUrl";
+import { uploadFileToS3 } from "@/lib/actions/file/uploadFile";
 import { getAuthUser } from "@/lib/actions/user/user.action";
-import { v7 } from "uuid";
 import { IContent } from "@/lib/types/course/content.interface";
 
 import { useRouter as useNextRouter } from 'next/navigation';
-import { deleteS3File } from "@/lib/actions/file/deleteFile";
 import ArticleContentForm from "./article-content-form";
 import VideoContentForm from "./video-content-form";
 import QuizContentForm from "./quiz-content-form";
@@ -42,9 +40,6 @@ interface CreateContentFormProps {
 
 export default function CreateContentForm({ courseId, moduleId, mode = "create", initialContent = null }: CreateContentFormProps) {
   const [contentType, setContentType] = useState<CourseContentType>(initialContent?.type ?? CourseContentType.ARTICLE);
-  const router = useRouter();
-  const nextRouter = useNextRouter();
-
   const createContentsMutation = useCreateContent();
 
   const {
@@ -107,28 +102,14 @@ export default function CreateContentForm({ courseId, moduleId, mode = "create",
         const videoFile = contentData.content.videoFile;
         const user = await getAuthUser();
 
-        const fileKey = `${user?.organization?.slug}/courses/${courseId}/course-materials/${v7()}_${videoFile.name}`;
-        const preSignedUrl = await getPresignedUrl({
-          fileType: videoFile.type,
-          fileSize: videoFile.size,
-          fileKey
+        const fileKey = await uploadFileToS3({
+          file: videoFile,
+          customPath: `${user?.organization?.slug}/courses/${courseId}/course-materials`,
+          isPublic: false,
         });
 
-        if (preSignedUrl) {
-          const response = await fetch(preSignedUrl, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': videoFile.type,
-            },
-            body: videoFile,
-          });
-          console.log({ response })
-
-          if (!response.ok) throw new Error("Couldn't upload file");
-
-          contentData.content.videoFile = undefined;
-          contentData.content.fileKey = fileKey;
-        }
+        contentData.content.videoFile = undefined;
+        contentData.content.fileKey = fileKey;
       }
 
       const fileKey = contentData.type === CourseContentType.VIDEO &&
@@ -144,7 +125,7 @@ export default function CreateContentForm({ courseId, moduleId, mode = "create",
         // toast.success("Content Updated")
         // if (result.fileKey) window.location.reload()
         // console.log({ result })
-        return 
+        return
       }
       return createContentsMutation.mutate({ moduleId, courseId, contentData, fileKey })
 

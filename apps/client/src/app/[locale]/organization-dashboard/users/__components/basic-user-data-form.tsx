@@ -7,6 +7,9 @@ import { CreateUserFormData, UserStatus } from '@/lib/schema/user.schema';
 import { Roles } from '@/lib/types/user/roles.enum';
 import { Status } from '@/lib/types/user/status.enum';
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import MultipleSelector, { Option } from '@/components/molecules/multi-select';
+import { useFlatCategories } from '@/lib/hooks/category/use-category.hook';
+import { useCallback, useState, useEffect } from 'react';
 
 const BasicUserDataForm: React.FC<{
     errors: FieldErrors<CreateUserFormData>;
@@ -17,6 +20,38 @@ const BasicUserDataForm: React.FC<{
 
     const roleName = watch("roleName");
     const isParentRole = roleName === "parent";
+    const isInstructor = roleName?.toLowerCase() === Roles.INSTRUCTOR.toLowerCase();
+    const { data: flatCategories } = useFlatCategories();
+    const [selectedCategories, setSelectedCategories] = useState<Option[]>([]);
+
+    const updateUserCategories = useCallback((categoriesOptions: Option[]) => {
+        setSelectedCategories(categoriesOptions);
+        setValue("categoriesIds", categoriesOptions.map(cat => cat.value));
+    }, [setValue]);
+
+    // Initialize selected categories from form values
+    useEffect(() => {
+        const categoriesIds = watch("categoriesIds");
+        if (categoriesIds && categoriesIds.length > 0 && flatCategories) {
+            const options = categoriesIds
+                .map(id => {
+                    const category = flatCategories.find(cat => cat._id === id);
+                    return category ? { value: category._id, label: category.name } : null;
+                })
+                .filter((opt): opt is Option => opt !== null);
+            setSelectedCategories(options);
+        } else {
+            setSelectedCategories([]);
+        }
+    }, [flatCategories, watch]);
+
+    // Clear categories when role changes from Instructor to another role
+    useEffect(() => {
+        if (!isInstructor && selectedCategories.length > 0) {
+            setSelectedCategories([]);
+            setValue("categoriesIds", []);
+        }
+    }, [isInstructor, setValue]);
 
     return (
         <Card>
@@ -197,6 +232,32 @@ const BasicUserDataForm: React.FC<{
                         )}
                     </div>
                 </div>
+
+                {/* Categories - Only for Instructors */}
+                {isInstructor && flatCategories && (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                            Categories
+                        </label>
+                        <MultipleSelector
+                            value={selectedCategories}
+                            onChange={updateUserCategories}
+                            defaultOptions={flatCategories.map(cat => ({
+                                label: cat.name,
+                                value: cat._id
+                            }))}
+                            placeholder="Select Categories..."
+                            emptyIndicator={
+                                <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                                    No Categories were found.
+                                </p>
+                            }
+                        />
+                        {errors.categoriesIds && (
+                            <p className="text-sm text-red-600">{errors.categoriesIds.message}</p>
+                        )}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

@@ -2,12 +2,8 @@ import {
   Controller,
   Post,
   Body,
-  Param,
   UseGuards,
   Req,
-  Get,
-  Query,
-  Request,
 } from '@nestjs/common';
 import { PaymentOrchestratorService } from './services/payment-orchestrator.service';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -16,13 +12,12 @@ import { PaymentProvider } from './strategies/interfaces/payment-strategy.interf
 import { CreatePaymentUrlDto } from './dto/create-payment-url.dto';
 import { PaymobWebhookTransaction } from './types/transaction.interface';
 import { PaymentPurpose } from './types/PaymentPurpose.interface';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { AccessType } from 'src/enrollment/enum/accessType.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
 import { WalletService } from 'src/wallet/wallet.service';
-import { TransactionService } from 'src/transaction/transaction.service';
 import { PaymentMethod } from 'src/transaction/entities/transaction.entity';
 
 @Controller('payment')
