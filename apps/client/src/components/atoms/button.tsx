@@ -112,7 +112,7 @@ const Button = React.forwardRef<
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, effect, size, className }), "rtl:flex-row-reverse")}
+        className={cn(buttonVariants({ variant, effect, size, className }))}
         ref={ref}
         {...props}
       >
