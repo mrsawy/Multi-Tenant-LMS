@@ -6,70 +6,71 @@ import { Country } from '../data/country.enum';
 
 export const signupSchema = Yup.object().shape({
     firstName: Yup.string()
-        .required('First name is required')
-        .min(3, 'First name must be at least 3 characters'),
+        .required('validation.firstNameRequired')
+        .min(3, 'validation.firstNameMin'),
     lastName: Yup.string()
-        .required('Last name is required')
-        .min(3, 'Last name must be at least 3 characters'),
+        .required('validation.lastNameRequired')
+        .min(3, 'validation.lastNameMin'),
 
     email: Yup.string()
-        .email('Invalid email format')
-        .required('Email is required'),
+        .email('validation.emailInvalid')
+        .required('validation.emailRequired'),
 
 
     username: Yup.string()
-        .required('Username is required')
-        .min(3, 'Username must be at least 3 characters')
-        .max(20, 'Username must be less than 20 characters')
-        .matches(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores')
-        .test('no-spaces', 'Username cannot contain spaces', value => !value?.includes(' '))
-        .test('starts-with-letter', 'Username must start with a letter', value => /^[a-zA-Z]/.test(value || '')),
+        .required('validation.usernameRequired')
+        .min(3, 'validation.usernameMin')
+        .max(20, 'validation.usernameMax')
+        .matches(/^[a-zA-Z0-9_]+$/, 'validation.usernameMatches')
+        .test('no-spaces', 'validation.usernameNoSpaces', value => !value?.includes(' '))
+        .test('starts-with-letter', 'validation.usernameStartsWithLetter', value => /^[a-zA-Z]/.test(value || '')),
 
     phoneNumber: Yup.string()
-        .required('Phone number is required')
-        .matches(/^\+?[0-9]\d{1,14}$/, 'Please enter a valid phone number'),
+        .required('validation.phoneRequired')
+        .matches(/^\+?[0-9]\d{1,14}$/, 'validation.phoneInvalid'),
 
     country: Yup.string()
-        .oneOf(Object.values(Country), 'Please select a valid country')
-        .required('Country is required'),
+        .oneOf(Object.values(Country), 'validation.countryInvalid')
+        .required('validation.countryRequired'),
 
     password: Yup.string()
-        .min(6, 'Password must be at least 6 characters')
-        .required('Password is required'),
+        .min(6, 'validation.passwordMin')
+        .required('validation.passwordRequired'),
 
     // confirmPassword: Yup.string()
     //     .oneOf([Yup.ref('password')], 'Passwords must match')
     //     .required('Please confirm your password'),
 
     roleName: Yup.string()
-        .oneOf(Object.values(UserMainRoles), 'Invalid role')
-        .required('Role is required'),
+        .oneOf(Object.values(UserMainRoles), 'validation.roleInvalid')
+        .required('validation.roleRequired'),
 
     organizationName: Yup.string()
         .when('role', {
             is: UserMainRoles.ORGANIZATION,
-            then: (schema) => schema.required('Organization name is required'),
+            then: (schema) => schema.required('validation.orgNameRequired'),
             otherwise: (schema) => schema.optional(),
         }),
     organizationSlug: Yup.string()
         .when('role', {
             is: UserMainRoles.ORGANIZATION,
             then: (schema) => schema
-                .required('Organization slug is required')
-                .min(3, 'Organization Slug must be at least 3 characters')
-                .max(20, 'Organization Slug must be less than 20 characters')
-                .matches(/^[a-zA-Z0-9_]+$/, 'Organization Slug can only contain letters, numbers, and underscores')
-                .test('no-spaces', 'Organization Slug cannot contain spaces', value => !value?.includes(' '))
-                .test('starts-with-letter', 'Organization Slug must start with a letter', value => /^[a-zA-Z]/.test(value || '')),
+                .required('validation.orgSlugRequired')
+                .min(3, 'validation.orgSlugMin')
+                .max(20, 'validation.orgSlugMax')
+                .matches(/^[a-zA-Z0-9_]+$/, 'validation.orgSlugMatches')
+                .test('no-spaces', 'validation.orgSlugNoSpaces', value => !value?.includes(' '))
+                .test('starts-with-letter', 'validation.orgSlugStartsWithLetter', value => /^[a-zA-Z]/.test(value || '')),
             otherwise: (schema) => schema.optional(),
         }),
 });
 
 export const loginSchema = Yup.object().shape({
-    identifier: Yup.string().required('username , phone or email are required'),
+    identifier: Yup.string().required('validation.identifierRequired'),
     password: Yup.string()
-        .required('Password is required'),
+        .required('validation.passwordRequired'),
 });
+
 
 export type LoginSchema = InferType<typeof loginSchema>;
 export type SignupSchema = InferType<typeof signupSchema>;
