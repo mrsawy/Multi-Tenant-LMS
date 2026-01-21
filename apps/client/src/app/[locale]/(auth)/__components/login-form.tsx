@@ -15,6 +15,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { UserMainRoles } from '@/lib/data/userRole.enum';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslations ,useLocale  } from 'next-intl';
 
 export function LoginForm({
   className,
@@ -27,6 +28,7 @@ export function LoginForm({
   onSignupClick?: () => void;
   onSuccess?: () => void;
 }) {
+  const t = useTranslations('auth.login');
   const router = useRouter();
   const {
     register,
@@ -55,7 +57,7 @@ export function LoginForm({
             : '/organization-dashboard',
       );
     } catch (error: any) {
-      const message = error?.message || 'Something went wrong.';
+      const message = error?.message || t('validation.somethingWentWrong');
       console.log({ error });
       setError('root', { message });
       setTimeout(() => {
@@ -68,6 +70,9 @@ export function LoginForm({
   };
 
   const [showPassword, setShowPassword] = useState(false);
+  const locale = useLocale();
+
+  const isRTL =locale === "ar";
 
   return (
     <div className={cn('flex flex-col gap-6', className)}>
@@ -79,24 +84,24 @@ export function LoginForm({
             {...props}
           >
             <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-2xl font-bold">Login to your account</h1>
+              <h1 className="text-2xl font-bold">{t('title')}</h1>
               <p className="text-muted-foreground text-sm text-balance">
-                Login Now
+                {t('subtitle')}
               </p>
             </div>
 
             <div className="flex flex-col gap-2">
               <Label className="text-sm lg:text-medium" htmlFor="identifier">
-                Email , username or phone number
+                {t('identifier')}
               </Label>
               <Input
-                placeholder="your identifier..."
+                placeholder={t('identifierPlaceholder')}
                 className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium"
                 {...register('identifier')}
               />
               {errors.identifier ? (
-                <p className="text-left text-sm text-red-400">
-                  {errors.identifier?.message}
+                <p  className={`${isRTL?'text-right':"text-left"} text-sm text-red-400`}>
+                  {t(errors.identifier?.message as any)}
                 </p>
               ) : null}
             </div>
@@ -104,20 +109,23 @@ export function LoginForm({
             <div className="flex flex-col gap-2">
               <div className="flex flex-col items-start">
                 <Label className="text-sm lg:text-medium" htmlFor="password">
-                  Password
+                  {t('password')}
                 </Label>
               </div>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium pr-10"
-                  placeholder="your password..."
+                  className={`placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium ${isRTL ?'pl-10':'pr-10'} `}
+                  placeholder={t('passwordPlaceholder')}
+                  // "identifierPlaceholder": "المعرف الخاص بك",
+      // "passwordPlaceholder": "...كلمة المرور الخاصة بك",
                   {...register('password')}
                 />
 
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  
+                  className={`absolute ${isRTL ?'left-3':'right-3'}   top-1/2 -translate-y-1/2`}
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
                   {showPassword ? (
@@ -128,14 +136,15 @@ export function LoginForm({
                 </button>
               </div>{' '}
               {errors.password ? (
-                <p className="text-left text-sm text-red-400">
-                  {errors.password?.message}
+                <p  className={`${isRTL?'text-right':"text-left"} text-sm text-red-400`}>
+                  {t(errors.password?.message as any)}
                 </p>
               ) : null}
             </div>
 
+
             <Button type="submit" className="w-full">
-              Login
+              {t('submit')}
             </Button>
 
             <p
@@ -144,25 +153,26 @@ export function LoginForm({
                 errors?.root && errors.root?.message && 'scale-100',
               )}
             >
-              {errors?.root?.message || ''}
+              {errors?.root?.message ? t(errors.root.message as any) : ''}
             </p>
 
+
             <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
+              {t('noAccount')}{' '}
               {onSignupClick ? (
                 <button
                   type="button"
                   onClick={onSignupClick}
                   className="underline underline-offset-4 hover:text-blue-800 transition-all cursor-pointer"
                 >
-                  Sign up
+                  {t('signUp')}
                 </button>
               ) : (
                 <Link
                   href="/signup"
                   className="underline underline-offset-4 hover:text-blue-800 transition-all cursor-pointer"
                 >
-                  Sign up
+                  {t('signUp')}
                 </Link>
               )}
             </div>
@@ -178,9 +188,10 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking login, you agree to our <a href="#">Terms of Service</a> and{' '}
-        <a href="#">Privacy Policy</a>.
+        {t('termsPrefix')} <a href="#">{t('termsLink')}</a> {t('termsSeparator')}{' '}
+        <a href="#">{t('privacyLink')}</a>.
       </div>
     </div>
   );
 }
+
