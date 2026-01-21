@@ -11,10 +11,14 @@ interface PhoneInputProps extends React.HTMLAttributes<HTMLDivElement> {
     onValueChange?: (value: string) => void
     value?: string
     name?: string
+    placeholder?:string
+    isRTL?:boolean
 }
 
 export function PhoneInput({
     label = "Phone Number",
+    placeholder="Enter phone number",
+    isRTL,
     defaultCode = { value: "+20", label: "🇪🇬 +20" },
     onValueChange,
     value = "",
@@ -94,11 +98,13 @@ export function PhoneInput({
                 />
                 <Input
                     type="tel"
-                    placeholder="Enter phone number"
+                    placeholder={placeholder}
                     value={phone}
                     onChange={handlePhoneChange}
                     name={name}
-                    className="flex-1 placeholder:text-sm lg:placeholder:text-md text-sm lg:text-base h-9"
+                    className={cn("flex-1 placeholder:text-sm lg:placeholder:text-md text-sm lg:text-base h-9", isRTL ? "placeholder:text-right" : "placeholder:text-left")}
+
+                    
                     style={{ borderStartStartRadius: 0, borderEndStartRadius: 0 }}
                 />
             </div>
