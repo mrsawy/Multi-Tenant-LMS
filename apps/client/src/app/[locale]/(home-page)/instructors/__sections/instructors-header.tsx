@@ -9,7 +9,7 @@ import FiltersBar from './filters-bar';
 import { IInstructorFilters } from '@/lib/types/instructor/IInstructorFilters';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IInstructor, IUser } from '@/lib/types/user/user.interface';
-import InstructorCard4 from '../__components/instructor-card-4';
+import InstructorCard4 from '../../../../../components/organs/instructor-card-4';
 import { useTranslations } from 'next-intl';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { useInstructors } from '@/lib/hooks/instructor/useInstructors';

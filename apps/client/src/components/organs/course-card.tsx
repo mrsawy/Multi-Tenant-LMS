@@ -13,16 +13,18 @@ import { Typography } from '@/components/atoms/typography';
 import { useTranslations } from 'next-intl';
 import { Price } from '@/components/molecules/price';
 import { Currency } from '@/lib/data/currency.enum';
+import { BorderBeam } from '../atoms/border-beam';
 
 const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
     const t = useTranslations('CourseCard');
     return (
-        <Card key={course._id?.toString()} className="bg-section-card border-border/50 hover:border-brand-purple/30 transition-all duration-300 hover:shadow-lg group overflow-hidden py-0 gap-0 flex flex-col justify-between">
+        <Card key={course._id?.toString()}
+            className="bg-section-card border-border/50 hover:border-brand-purple/30 transition-all duration-300 hover:shadow-lg group relative py-0 gap-0 flex flex-col justify-between ">
             <CardHeader className="p-0">
                 <Link href={"/courses/" + course._id}>
                     {/* Course Thumbnail */}
                     <div className={`h-56 sm:h-72 ${course.thumbnailKey} relative overflow-hidden`}>
-                        <Image src={getFileFullUrl(course.thumbnailKey ?? "")} alt="Course Thumbnail" fill className="object-cover object-center fixed top-0 size-full" />
+                        <Image src={getFileFullUrl(course.thumbnailKey ?? "")} alt="Course Thumbnail" fill className=" rounded-t-xl object-cover object-center fixed top-0 size-full" />
                         <div className="absolute inset-0" />
                         {/* Trending Badge */}
                         <Badge className="absolute top-1 left-1 sm:top-4 sm:left-4 bg-brand-purple text-sm sm:text-sm py-0.5 px-1.5 sm:px-2">
@@ -107,6 +109,8 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                 )}
             </CardContent>
 
+
+
             <CardFooter className="p-2 px-2.5 sm:p-6 pt-0 flex items-center justify-between gap-1.5 sm:gap-4">
                 <div className="text-start">
                     <Price
@@ -121,6 +125,18 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                     </ButtonArrowRight>
                 </Link>
             </CardFooter>
+            <BorderBeam
+                duration={6}
+                size={400}
+                className="from-transparent via-accent to-transparent"
+            />
+            <BorderBeam
+                duration={6}
+                delay={3}
+                size={400}
+                borderWidth={2}
+                className="from-transparent via-primary to-transparent"
+            />
         </Card>
     );
 };

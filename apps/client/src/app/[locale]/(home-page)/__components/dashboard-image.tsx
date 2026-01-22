@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { FeaturesGrid } from './features-grid';
 
 interface DashboardImageProps {
     imageSrc: string;
@@ -20,13 +21,14 @@ const DashboardImage: React.FC<DashboardImageProps> = ({
                 data-wow-delay=".25s"
             >
                 <div className="mt-16">
-                    <Image
+                    {/* <Image
                         src={imageSrc}
                         alt={imageAlt}
                         className="mx-auto max-w-full rounded-t-xl rounded-tr-xl"
                         width={imageWidth}
                         height={imageHeight}
-                    />
+                    /> */}
+                    <FeaturesGrid />
                 </div>
                 <div className="absolute -left-9 bottom-0 z-[-1]">
                     <svg

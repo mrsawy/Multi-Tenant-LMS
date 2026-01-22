@@ -23,28 +23,28 @@ const ScrollCards = () => {
     {
       image: '/images/home-section-cards/card2/5.jpg',
       styles: { backgroundImage: "url('/images/home-section-cards/card2/bg.jpg')" },
-      tag: t('cards.1.tag'), title: t('cards.1.title'), description: t('cards.1.description')
+      tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
     },
     {
       image: '/images/home-section-cards/card3/3.jpg',
       styles: { backgroundImage: "url('/images/home-section-cards/card3/bg.jpg')" },
-      tag: t('cards.2.tag'), title: t('cards.2.title'), description: t('cards.2.description')
-    },
-    {
-      image: '/images/home-section-cards/card4/6.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card4/bg.jpg')" },
-      tag: t('cards.3.tag'), title: t('cards.3.title'), description: t('cards.3.description')
-    },
-    {
-      image: '/images/home-section-cards/card5/4.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card5/bg.jpg')" },
-      tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
-    },
-    {
-      image: '/images/home-section-cards/card6/2.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card6/bg.jpg')" },
       tag: t('cards.5.tag'), title: t('cards.5.title'), description: t('cards.5.description')
     },
+    // {
+    //   image: '/images/home-section-cards/card4/6.jpg',
+    //   styles: { backgroundImage: "url('/images/home-section-cards/card4/bg.jpg')" },
+    //   tag: t('cards.3.tag'), title: t('cards.3.title'), description: t('cards.3.description')
+    // },
+      // {
+      //   image: '/images/home-section-cards/card5/4.jpg',
+      //   styles: { backgroundImage: "url('/images/home-section-cards/card5/bg.jpg')" },
+      //   tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
+      // },
+      // {
+      //   image: '/images/home-section-cards/card6/2.jpg',
+      //   styles: { backgroundImage: "url('/images/home-section-cards/card6/bg.jpg')" },
+      //   tag: t('cards.5.tag'), title: t('cards.5.title'), description: t('cards.5.description')
+      // },
   ];
 
   // More responsive timing function with shorter duration
