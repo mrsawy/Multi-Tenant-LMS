@@ -33,7 +33,6 @@ html[dir="rtl"],
   font-family: 'ArabicFont2', sans-serif !important;
 }
 
-
 .ltr {
   direction: ltr !important;
 }
@@ -324,4 +323,9 @@ html.dark {
 
 .dir-rtl {
   direction: rtl !important;
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
 }
