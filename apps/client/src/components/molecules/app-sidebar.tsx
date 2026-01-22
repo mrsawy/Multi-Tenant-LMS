@@ -16,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/atoms/sidebar"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   data: {
     navMain?: any[];
@@ -30,6 +30,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ data, ...props }: AppSidebarProps) {
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const t = useTranslations("AppSidebar");
+
   return (
     <Sidebar collapsible="offcanvas" {...props} side={isRTL ? 'right' : 'left'} >
       <SidebarHeader>
@@ -42,7 +44,7 @@ export function AppSidebar({ data, ...props }: AppSidebarProps) {
               <a href="#">
                 {/* <IconInnerShadowTop className="!size-5" /> */}
 
-                <span className="text-base font-semibold">Sahla LMS</span>
+                <span className="text-base font-semibold">{t("appName")}</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

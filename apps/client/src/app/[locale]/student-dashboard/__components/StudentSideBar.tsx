@@ -1,121 +1,112 @@
 "use client"
 
-import { Calendar } from "@/components/atoms/calendar";
 import { AppSidebar } from "@/components/molecules/app-sidebar";
-import Calendar05 from "@/components/molecules/calendar-05";
 import CalendarWithTodayButton from "@/components/molecules/calendar-with-today-button";
-import FullCalendar from "@/components/organs/full-calendar";
 import { IUser } from "@/lib/types/user/user.interface";
 import {
   IconCalendarUser,
-  IconCamera,
-  IconCategory,
-  IconChartBar,
   IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
   IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
   IconWallet,
 } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
-export const data = {
+export const useStudentSidebarData = () => {
+  const t = useTranslations("StudentSidebar");
 
-  navMain: [
-    {
-      title: "Courses",
-      url: "/student-dashboard/courses",
-      icon: IconDashboard,
-      key: "courses",
-    },
-    {
-      title: "Wallet",
-      url: "/student-dashboard/wallet",
-      icon: IconWallet,
-      key: "Wallet",
-    },
-    {
-      title: "Calendar",
-      url: "/student-dashboard/calendar",
-      icon: IconCalendarUser,
-      key: "calendar",
-    },
-    // {
-    //   title: "Users",
-    //   url: "/organization-dashboard/users",
-    //   icon: IconUsers,
-    //   key: "users",
-    // },
-    // {
-    //   title: "Lifecycle",
-    //   url: "#",
-    //   icon: IconListDetails,
-    // },
-    // {
-    //   title: "Analytics",
-    //   url: "#",
-    //   icon: IconChartBar,
-    // },
-    // {
-    //   title: "Projects",
-    //   url: "#",
-    //   icon: IconFolder,
-    // },
-    // {
-    //   title: "Team",
-    //   url: "#",
-    //   icon: IconUsers,
-    // },
-  ],
-  // documents: [
-  //   {
-  //     name: "Data Library",
-  //     url: "#",
-  //     icon: IconDatabase,
-  //   },
-  //   {
-  //     name: "Reports",
-  //     url: "#",
-  //     icon: IconReport,
-  //   },
-  //   {
-  //     name: "Word Assistant",
-  //     url: "#",
-  //     icon: IconFileWord,
-  //   },
-  // ],
+  return {
+    navMain: [
+      {
+        title: t("navMain.courses"),
+        url: "/student-dashboard/courses",
+        icon: IconDashboard,
+        key: "courses",
+      },
+      {
+        title: t("navMain.wallet"),
+        url: "/student-dashboard/wallet",
+        icon: IconWallet,
+        key: "Wallet",
+      },
+      {
+        title: t("navMain.calendar"),
+        url: "/student-dashboard/calendar",
+        icon: IconCalendarUser,
+        key: "calendar",
+      },
+      // {
+      //   title: "Users",
+      //   url: "/organization-dashboard/users",
+      //   icon: IconUsers,
+      //   key: "users",
+      // },
+      // {
+      //   title: "Lifecycle",
+      //   url: "#",
+      //   icon: IconListDetails,
+      // },
+      // {
+      //   title: "Analytics",
+      //   url: "#",
+      //   icon: IconChartBar,
+      // },
+      // {
+      //   title: "Projects",
+      //   url: "#",
+      //   icon: IconFolder,
+      // },
+      // {
+      //   title: "Team",
+      //   url: "#",
+      //   icon: IconUsers,
+      // },
+    ],
+    // documents: [
+    //   {
+    //     name: "Data Library",
+    //     url: "#",
+    //     icon: IconDatabase,
+    //   },
+    //   {
+    //     name: "Reports",
+    //     url: "#",
+    //     icon: IconReport,
+    //   },
+    //   {
+    //     name: "Word Assistant",
+    //     url: "#",
+    //     icon: IconFileWord,
+    //   },
+    // ],
 
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
+    navSecondary: [
+      {
+        title: t("navSecondary.settings"),
+        url: "#",
+        icon: IconSettings,
+      },
+      {
+        title: t("navSecondary.getHelp"),
+        url: "#",
+        icon: IconHelp,
+      },
+      {
+        title: t("navSecondary.search"),
+        url: "#",
+        icon: IconSearch,
+      },
+    ],
 
-  documentComponent: <CalendarWithTodayButton />
+    documentComponent: <CalendarWithTodayButton />
+  };
 }
 
 
 export function StudentSidebar({ user }: { user?: IUser }) {
+  const data = useStudentSidebarData();
+
   return <AppSidebar data={{
     ...data, user: {
       name: user?.firstName,

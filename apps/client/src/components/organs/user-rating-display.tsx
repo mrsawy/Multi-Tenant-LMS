@@ -6,6 +6,8 @@ import { getOwnReview } from "@/lib/actions/review/getOwnReview.action";
 import { ReviewType } from "@/lib/types/review/review.types";
 import { ReviewModal } from "./review-modal";
 import { Button } from "../atoms/button";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface UserRatingDisplayProps {
     reviewType: ReviewType;
@@ -15,6 +17,7 @@ interface UserRatingDisplayProps {
 }
 
 export function UserRatingDisplay({ reviewType, entityId, courseId, showLabel = true }: UserRatingDisplayProps) {
+    const t = useTranslations('StudentCourses.userRatingDisplay');
     const [userRating, setUserRating] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -25,11 +28,11 @@ export function UserRatingDisplay({ reviewType, entityId, courseId, showLabel = 
     const fetchUserRating = async () => {
         try {
             const filters: any = { reviewType };
-            
+
             if (reviewType === ReviewType.COURSE) filters.courseId = entityId;
             if (reviewType === ReviewType.MODULE) filters.moduleId = entityId;
             if (reviewType === ReviewType.CONTENT) filters.contentId = entityId;
-            
+
             const review: any = await getOwnReview(filters);
             setUserRating(review?.rating || 0);
         } catch (error) {
@@ -59,23 +62,22 @@ export function UserRatingDisplay({ reviewType, entityId, courseId, showLabel = 
             entityId={entityId}
             courseId={courseId}
             trigger={
-                <Button className="flex items-center gap-1 hover:opacity-80 transition-opacity" variant="outline">
+                <Button className={cn(" group flex items-center gap-1 hover:opacity-80 transition-opacity", "rtl:flex-row!")} variant="outline">
                     {showLabel && (
                         <span className="text-sm m-1">
-                            {userRating > 0 ? "Your rating" : "Rate this"}
+                            {userRating > 0 ? t('yourRating') : t('rateThis')}
                         </span>
                     )}
                     {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                             key={star}
-                            className={`size-4 ${
-                                userRating >= star
+                            className={`size-4 ${userRating >= star
                                     ? "text-yellow-400 fill-yellow-400"
-                                    : "text-gray-300"
-                            }`}
+                                : "text-gray-300 group-hover:text-black"
+                                }`}
                         />
                     ))}
-                 
+
                 </Button>
             }
         />

@@ -27,6 +27,7 @@ import {
 import { logout } from '@/lib/actions/auth/auth.action';
 import useGeneralStore from '@/lib/store/generalStore';
 import { useIsMobile } from '@/lib/hooks/use-mobile';
+import { useTranslations } from 'next-intl';
 
 export function NavUser({
   user,
@@ -38,6 +39,7 @@ export function NavUser({
   };
 }) {
   const isMobile = useIsMobile();
+  const t = useTranslations('StudentSidebar.navUser');
 
   return (
     <SidebarMenu>
@@ -85,15 +87,15 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <IconUserCircle />
-                Account
+                {t('account')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconCreditCard />
-                Billing
+                {t('billing')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconNotification />
-                Notifications
+                {t('notifications')}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -110,7 +112,7 @@ export function NavUser({
               }}
             >
               <IconLogout />
-              Log out
+              {t('logOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

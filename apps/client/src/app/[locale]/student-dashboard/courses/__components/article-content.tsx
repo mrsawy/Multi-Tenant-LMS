@@ -7,11 +7,13 @@ import useGeneralStore from '@/lib/store/generalStore';
 import { IContent } from '@/lib/types/course/content.interface';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslations } from 'next-intl';
 
 const ArticleContent: React.FC<{
     content: IContent, isComplete: boolean,
     toggleComplete: (args: { completed: boolean, withToast: boolean, withRefresh: boolean }) => Promise<void>
 }> = ({ toggleComplete, isComplete, content }) => {
+    const t = useTranslations('StudentCourses.articleContent');
 
     const [completed, setCompleted] = useState(isComplete)
 
@@ -49,7 +51,7 @@ const ArticleContent: React.FC<{
                     htmlFor="content-complete"
                     className="text-sm font-medium leading-none cursor-pointer"
                 >
-                    {completed ? "Completed — uncheck to mark uncompleted" : "Mark as completed"}
+                    {completed ? t('completedUncheck') : t('markAsCompleted')}
                 </label>
             </div>
         </div>

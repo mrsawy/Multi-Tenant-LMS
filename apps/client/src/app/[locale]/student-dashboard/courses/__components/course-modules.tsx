@@ -13,6 +13,7 @@ import { ReviewType } from "@/lib/types/review/review.types";
 import { Star } from "lucide-react";
 import { DiscussionSection } from "@/components/organs/discussion-section";
 import { DiscussionType } from "@/lib/types/discussion/discussion.types";
+import { useTranslations } from "next-intl";
 
 
 
@@ -27,6 +28,7 @@ export function CourseModules({
     completedModules,
     completedContents,
 }: CourseModulesProps) {
+    const t = useTranslations('StudentCourses.courseModules');
     const [openModules, setOpenModules] = useState<string[]>([modules[0]?._id || ""]);
 
     const toggleModule = (moduleId: string) => {
@@ -103,11 +105,11 @@ export function CourseModules({
                                             </div>
                                             <Badge variant="outline" className="flex items-center gap-1">
                                                 <BookOpenCheck className="w-3 h-3" />
-                                                {module.contents.length} items
+                                                {module.contents.length} {t('items')}
                                             </Badge>
                                             {isCompleted && (
                                                 <Badge className="bg-green-500">
-                                                    Completed
+                                                    {t('completed')}
                                                 </Badge>
                                             )}
                                         </div>
@@ -116,7 +118,7 @@ export function CourseModules({
                                     {!isCompleted && progress > 0 && (
                                         <div className="mt-3 space-y-1">
                                             <div className="flex justify-between text-sm">
-                                                <span>Progress</span>
+                                                <span>{t('progress')}</span>
                                                 <span>{Math.round(progress)}%</span>
                                             </div>
                                             <Progress value={progress} className="h-2" />
@@ -129,7 +131,7 @@ export function CourseModules({
                                 <CardContent className="pt-0">
                                     {module.learningObjectives.length > 0 && (
                                         <div className="mb-4 p-3 rounded-lg bg-muted/40">
-                                            <h4 className="font-medium text-sm mb-2">Learning Objectives:</h4>
+                                            <h4 className="font-medium text-sm mb-2">{t('learningObjectives')}</h4>
                                             <ul className="text-sm text-muted-foreground space-y-1">
                                                 {module.learningObjectives.map((objective, idx) => (
                                                     <li key={idx} className="flex items-start gap-2">
@@ -158,7 +160,7 @@ export function CourseModules({
                                             type={DiscussionType.MODULE}
                                             entityId={module._id}
                                             moduleId={module._id}
-                                            title="Module Discussions"
+                                            title={t('moduleDiscussions')}
                                         />
                                     </div>
                                 </CardContent>

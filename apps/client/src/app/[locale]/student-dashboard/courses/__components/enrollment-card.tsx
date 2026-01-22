@@ -11,6 +11,7 @@ import { Award, BookOpen, Clock } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { UserRatingDisplay } from "@/components/organs/user-rating-display";
 import { ReviewType } from "@/lib/types/review/review.types";
+import { useTranslations } from "next-intl";
 
 
 interface EnrollmentCardProps {
@@ -19,6 +20,8 @@ interface EnrollmentCardProps {
 }
 
 export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
+    const t = useTranslations('StudentCourses.enrollmentCard');
+    const tStatus = useTranslations('StudentCourses.subscriptionStatus');
     const { course, progressPercentage, timeSpentMinutes, subscription, certificate } = enrollment;
 
     if (!course) return null;
@@ -56,13 +59,13 @@ export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
                     <div className="flex gap-2">
                         {subscription && (
                             <Badge className={getStatusColor(subscription.status)}>
-                                {subscription.status}
+                                {tStatus(subscription.status)}
                             </Badge>
                         )}
                         {certificate.issued && (
                             <Badge variant="secondary">
                                 <Award className="w-3 h-3 mr-1" />
-                                Certified
+                                {t('certified')}
                             </Badge>
                         )}
                     </div>
@@ -75,7 +78,7 @@ export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span>Progress</span>
+                        <span>{t('progress')}</span>
                         <span>{progressPercentage}%</span>
                     </div>
                     <Progress value={progressPercentage} className="h-2" />
@@ -88,7 +91,7 @@ export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
                     </div>
                     <div className="flex items-center gap-2">
                         <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        <span>{course.duration || "Self-paced"}</span>
+                        <span>{course.duration || t('selfPaced')}</span>
                     </div>
                 </div>
 
@@ -96,7 +99,7 @@ export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
                     {course.stats && (
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span>⭐ {course.stats.averageRating.toFixed(1)}</span>
-                            <span>{course.stats.totalEnrollments.toLocaleString()} students</span>
+                            <span>{course.stats.totalEnrollments.toLocaleString()} {t('students')}</span>
                         </div>
                     )}
                     <UserRatingDisplay
@@ -109,14 +112,14 @@ export function EnrollmentCard({ enrollment, }: EnrollmentCardProps) {
                 <div className="flex justify-between items-center pt-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         {/* <Calendar className="w-4 h-4" /> */}
-                        <span>Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
+                        <span>{t('enrolled')} {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
                     </div>
                     <Button
                         onClick={() => router.push("/student-dashboard/courses/" + enrollment._id)}
 
                         size="sm"
                     >
-                        Continue Learning
+                        {t('continueLearning')}
                     </Button>
                 </div>
             </CardContent>

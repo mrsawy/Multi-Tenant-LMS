@@ -8,6 +8,7 @@ import { CourseContentType } from '@/lib/types/course/enum/CourseContentType.enu
 import { Clock, FileText, HelpCircle, PenTool, Play, Star } from 'lucide-react';
 import { ReviewModal } from '@/components/organs/review-modal';
 import { ReviewType } from '@/lib/types/review/review.types';
+import { useTranslations } from 'next-intl';
 
 interface ContentViewerProps {
   content: IContent;
@@ -15,6 +16,8 @@ interface ContentViewerProps {
 }
 
 export function ContentViewer({ content, isCompleted = false }: ContentViewerProps) {
+  const t = useTranslations('StudentCourses.contentViewer');
+  const tContentTypes = useTranslations('StudentCourses.contentTypes');
   const router = useRouter();
   const pathName = usePathname();
 
@@ -50,7 +53,7 @@ export function ContentViewer({ content, isCompleted = false }: ContentViewerPro
 
   const formatDuration = (minutes?: number) => {
     if (!minutes) return null;
-    return `${minutes} min`;
+    return `${minutes} ${t('min')}`;
   };
 
   return (
@@ -66,11 +69,11 @@ export function ContentViewer({ content, isCompleted = false }: ContentViewerPro
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className={getContentTypeColor(content.type).replace('bg-', 'border-')}>
-              {content.type}
+              {tContentTypes(content.type)}
             </Badge>
             {isCompleted && (
               <Badge variant="secondary" className="bg-green-100 text-green-800">
-                ✓ Completed
+                {t('completed')}
               </Badge>
             )}
           </div>
@@ -86,8 +89,8 @@ export function ContentViewer({ content, isCompleted = false }: ContentViewerPro
                 <span>{formatDuration(content.quizDurationInMinutes)}</span>
               </div>
             )}
-            {content.maxPoints && <span>{content.maxPoints} points</span>}
-            {content.dueDate && <span>Due: {new Date(content.dueDate).toLocaleDateString()}</span>}
+            {content.maxPoints && <span>{content.maxPoints} {t('points')}</span>}
+            {content.dueDate && <span>{t('due')} {new Date(content.dueDate).toLocaleDateString()}</span>}
           </div>
 
           <div className="flex items-center gap-2">
@@ -99,14 +102,14 @@ export function ContentViewer({ content, isCompleted = false }: ContentViewerPro
               onClick={() => {
                 router.push(pathName + '/' + content._id);
               }}>
-              {isCompleted ? 'Review' : 'Start'}
+              {isCompleted ? t('review') : t('start')}
             </Button>
           </div>
         </div>
 
         {content.type === CourseContentType.QUIZ && content.questions && (
           <div className="text-muted-foreground mt-3 text-sm">
-            {content.questions.length} question{content.questions.length !== 1 ? 's' : ''}
+            {content.questions.length} {content.questions.length !== 1 ? t('questionsPlural') : t('questions')}
           </div>
         )}
       </CardContent>
