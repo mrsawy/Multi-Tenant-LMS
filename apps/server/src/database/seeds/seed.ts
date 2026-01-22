@@ -8,7 +8,6 @@ import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Organization } from '../../organization/entities/organization.entity';
 import { Category } from '../../category/entities/category.entity';
 import { Course } from '../../course/entities/course.entity';
-import { CourseModuleEntity } from '../../course/entities/course-module.entity';
 import { CourseContent } from '../../course/entities/course-content.entity';
 import { Enrollment } from '../../enrollment/entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
