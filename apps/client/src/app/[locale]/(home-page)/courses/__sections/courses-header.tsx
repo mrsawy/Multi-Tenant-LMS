@@ -23,7 +23,7 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState<ICourseFilters>({ priceCurrency: Currency.EGP, page: 1, limit: 10 });
 
-
+    console.dir({ courses }, { depth: null })
     const route = useRouter()
 
 
@@ -78,7 +78,7 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
                     {/* Expanded Filters */}
                     <div className={cn(
                         "mt-6   bg-lms-dark-accent rounded-lg transition-all duration-1000 overflow-hidden flex justify-center",
-                        showFilters ? "max-h-[600px] " : "max-h-0"
+                        showFilters ? "max-h-[620px] " : "max-h-0"
                     )}
                     >
                         <FiltersBar

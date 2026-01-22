@@ -2,18 +2,19 @@ import { Model } from 'mongoose';
 import { Role } from '../entities/role.entity';
 import { Actions } from '../enum/Action.enum';
 import { Subjects } from '../enum/subject.enum';
+import { Roles } from '../enum/Roles.enum';
 
 export class RoleSeeder {
-  constructor(private readonly roleModel: Model<Role>) {}
+  constructor(private readonly roleModel: Model<Role>) { }
 
   async seed() {
     const roles = [
       {
-        name: 'SuperAdmin',
+        name: Roles.SUPER_ADMIN,
         permissions: [{ action: Actions.MANAGE, subject: Subjects.ALL }],
       },
       {
-        name: 'Admin',
+        name: Roles.ADMIN,
         permissions: [
           { action: Actions.MANAGE, subject: Subjects.COURSE },
           { action: Actions.MANAGE, subject: Subjects.CATEGORY },
@@ -21,7 +22,7 @@ export class RoleSeeder {
         ],
       },
       {
-        name: 'Instructor',
+        name: Roles.INSTRUCTOR,
         permissions: [
           { action: Actions.CREATE, subject: Subjects.COURSE },
           { action: Actions.READ, subject: Subjects.COURSE },
@@ -30,7 +31,7 @@ export class RoleSeeder {
         ],
       },
       {
-        name: 'Student',
+        name: Roles.STUDENT,
         permissions: [
           { action: Actions.READ, subject: Subjects.COURSE },
           { action: Actions.CREATE, subject: Subjects.REVIEW },

@@ -37,7 +37,7 @@ export default async function LocaleLayout({
     redirect("/ar/" + locale)
   }
 
-  const messages = await getMessages(); // will load messages for current locale
+  const messages = await getMessages();
 
 
   return (

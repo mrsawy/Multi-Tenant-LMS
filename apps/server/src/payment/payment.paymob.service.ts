@@ -23,7 +23,7 @@ import {
   PaymobWebhookTransaction,
 } from './types/transaction.interface';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
+import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { AccessType } from 'src/enrollment/enum/accessType.enum';
 import { Currency } from './enums/currency.enum';
 import { InitiateSubscriptionDto } from 'src/enrollment/dto/create-enrollment.dto';
@@ -35,7 +35,7 @@ export class PaymobService {
     private readonly courseService: CourseService,
     private readonly organizationService: OrganizationService,
     private readonly enrollmentService: EnrollmentService,
-  ) {}
+  ) { }
 
   async getPaymentUrl(initiateSubscriptionDto: InitiateSubscriptionDto) {
     try {
@@ -182,8 +182,8 @@ export class PaymobService {
     while (hasNext) {
       const response = await axios.get(
         process.env.BASE_PAYMOB +
-          '/api/acceptance/subscription-plans?page=' +
-          pageNumber,
+        '/api/acceptance/subscription-plans?page=' +
+        pageNumber,
         {
           headers: {
             Authorization: 'Bearer ' + token,
@@ -305,5 +305,5 @@ export class PaymobService {
     }
   }
 
-  async webhookTransaction(webhookBody: PaymobWebhookTransaction) {}
+  async webhookTransaction(webhookBody: PaymobWebhookTransaction) { }
 }

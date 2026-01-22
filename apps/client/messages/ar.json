@@ -408,6 +408,118 @@
       "embedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.0!2d-118.496!3d34.019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzA4LjQiTiAxMTjCsDI5JzQ1LjYiVw!5e0!3m2!1sen!2sus!4v1234567890"
     }
   },
+  "Instructors": {
+    "title": "مدربونا",
+    "description": "تعرف على مدربينا الخبراء",
+    "searchPlaceholder": "البحث عن المدربين...",
+    "filters": "التصفية",
+    "expertInstructor": "مدرب خبير",
+    "rating": "التقييم",
+    "students": "الطلاب",
+    "courses": "الدورات",
+    "viewProfile": "عرض الملف الشخصي",
+    "minimumRating": "الحد الأدنى للتقييم",
+    "applyFilters": "تطبيق التصفية",
+    "resetFilters": "إعادة تعيين التصفية",
+    "linkedinProfile": "ملف LinkedIn الشخصي",
+    "twitterProfile": "ملف Twitter الشخصي",
+    "about": "حول",
+    "noBiography": "لا توجد سيرة ذاتية متاحة لهذا المدرب.",
+    "averageRating": "متوسط التقييم",
+    "totalStudents": "إجمالي الطلاب",
+    "totalCourses": "إجمالي الدورات",
+    "totalRatings": "إجمالي التقييمات",
+    "statistics": "الإحصائيات",
+    "errorLoadingCourses": "خطأ في تحميل الدورات",
+    "tryAgainLater": "يرجى المحاولة مرة أخرى لاحقاً.",
+    "loadingCourses": "جاري تحميل الدورات...",
+    "loadingMoreCourses": "جاري تحميل المزيد من الدورات...",
+    "noMoreCourses": "لا توجد المزيد من الدورات للتحميل",
+    "noCoursesAvailable": "لا توجد دورات متاحة بعد",
+    "noCoursesPublished": "لم ينشر هذا المدرب أي دورات بعد.",
+    "errorLoadingInstructors": "خطأ في تحميل المدربين",
+    "loadingMoreInstructors": "جاري تحميل المزيد من المدربين...",
+    "noMoreInstructors": "لا توجد المزيد من المدربين للتحميل",
+    "noInstructorsFound": "لم يتم العثور على مدربين",
+    "tryDifferentFilters": "حاول تعديل البحث أو التصفية",
+    "category": "الفئة",
+    "searchCategoryPlaceholder": "البحث عن فئة",
+    "filterByCategory": "تصفية حسب الفئة",
+    "typeToSearchCategories": "اكتب للبحث عن الفئات"
+  },
+  "CourseDataTable": {
+    "title": "الدورات",
+    "addCourse": "إضافة دورة",
+    "searchPlaceholder": "البحث عن الدورات...",
+    "columns": {
+      "courseName": "اسم الدورة",
+      "description": "الوصف",
+      "type": "النوع",
+      "price": "السعر",
+      "enrollments": "التسجيلات",
+      "modules": "الوحدات",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "badges": {
+      "paid": "مدفوع",
+      "free": "مجاني",
+      "published": "منشور",
+      "draft": "مسودة"
+    },
+    "buttons": {
+      "view": "عرض",
+      "edit": "تعديل",
+      "manageModules": "إدارة الوحدات",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "saveChanges": "حفظ التغييرات",
+      "close": "إغلاق"
+    },
+    "dialogs": {
+      "description": {
+        "title": "وصف الدورة",
+        "description": "تعديل وصف الدورة",
+        "label": "الوصف",
+        "placeholder": "أدخل وصف الدورة..."
+      },
+      "pricing": {
+        "title": "تفاصيل التسعير",
+        "description": "معلومات التسعير لـ {courseName}",
+        "plan": "خطة {billingCycle}",
+        "originalPrice": "السعر الأصلي",
+        "usdPrice": "السعر بالدولار",
+        "discountAvailable": "خصم متاح",
+        "off": "خصم",
+        "validFrom": "صالح من {startDate} إلى {endDate}",
+        "noPricingInfo": "لا توجد معلومات تسعير متاحة"
+      }
+    },
+    "ariaLabels": {
+      "selectAll": "تحديد الكل",
+      "selectRow": "تحديد الصف",
+      "openMenu": "فتح القائمة",
+      "dragToReorder": "اسحب لإعادة الترتيب"
+    },
+    "currency": {
+      "usd": "دولار"
+    }
+  },
+  "CourseCard": {
+    "trending": "رائج",
+    "courseCategory": "فئة الدورة",
+    "courseLevel": "مستوى الدورة",
+    "byInstructor": "بواسطة",
+    "courseDuration": "مدة الدورة",
+    "lessons": "دروس",
+    "projects": "مشاريع",
+    "certificateIncluded": "شهادة متضمنة",
+    "enrollNow": "سجل الآن",
+    "free": "مجاني",
+    "totalReviews": "تقييمات",
+    "rating": "تقييم",
+    "enrolledStudentsCount": "طالب"
+  },
   "auth": {
     "login": {
       "title": "تسجيل الدخول",

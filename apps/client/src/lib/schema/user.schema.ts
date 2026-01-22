@@ -75,6 +75,7 @@ const baseUserSchema = yup.object({
   country: yup.string()
     .oneOf(Object.values(Country), 'Please select a valid country')
     .required('Country is required'),
+  categoriesIds: yup.array().of(yup.string()).optional(),
 });
 
 // Create user schema (includes password)
@@ -96,14 +97,22 @@ export const editUserSchema = baseUserSchema.shape({
   _id: yup.string().required('User ID is required'),
   password: yup
     .string()
-    .optional()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+    .nullable()
+    .notRequired()
+    .test('password-min', 'Password must be at least 8 characters', (value) => {
+      if (!value || value.length === 0) return true; // Allow empty/undefined
+      return value.length >= 8;
+    })
+    .test('password-pattern', 'Password must contain at least one uppercase letter, one lowercase letter, and one number', (value) => {
+      if (!value || value.length === 0) return true; // Allow empty/undefined
+      return /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value);
+    }),
   confirmPassword: yup
     .string()
-    .optional()
+    .nullable()
+    .notRequired()
     .when('password', {
-      is: (password: string) => password && password.length > 0,
+      is: (password: string) => password != null && password.length > 0,
       then: (schema) => schema.required('Please confirm your password').oneOf([yup.ref('password')], 'Passwords must match'),
     }),
 });

@@ -3,32 +3,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
-import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { SubscriptionTypeDef } from 'src/utils/types/Subscription.interface';
 import { CourseService } from 'src/course/services/course.service';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Enrollment } from './entities/enrollment.entity';
+import { Enrollment } from '../entities/enrollment.entity';
 import mongoose, { Connection, mongo, PaginateModel } from 'mongoose';
-import { UserService } from 'src/user/user.service';
-import { AccessType } from './enum/accessType.enum';
-import { Wallet } from 'src/wallet/entities/wallet.entity';
+import { UserService } from 'src/user/services/user.service';
+import { InstructorService } from 'src/user/services/instructor.service';
+import { AccessType } from '../enum/accessType.enum';
 import { WalletService } from 'src/wallet/wallet.service';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
-import { Course } from 'src/course/entities/course.entity';
 import { CourseModuleEntity } from 'src/course/entities/course-module.entity';
 import { Currency } from 'src/payment/enums/currency.enum';
 import { PaginateOptionsWithSearch } from 'src/utils/types/PaginateOptionsWithSearch';
-import { Types } from 'mongoose';
-import { SubscriptionType } from 'src/utils/enums/subscriptionType.enum';
 import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
 import { Organization } from 'src/organization/entities/organization.entity';
-import { PaymentOrchestratorService } from 'src/payment/services/payment-orchestrator.service';
-import { PaymentProvider, PaymentPurpose } from 'src/payment/strategies/interfaces/payment-strategy.interface';
-import { PaymentMethod as PaymentMethodEnum } from 'src/payment/types/paymentMethod.interface';
+import { PaymentPurpose } from 'src/payment/types/PaymentPurpose.interface';
 import { CurrencyService } from 'src/currency/currency.service';
-import { PaymentMethod } from './enum/payment-method.enum';
+import { PaymentMethod } from '../enum/payment-method.enum';
 import { CourseContent } from 'src/course/entities/course-content.entity';
+import { Course } from 'src/course/entities/course.entity';
 
 
 
@@ -44,6 +38,7 @@ export class EnrollmentService {
     private readonly courseModel: PaginateModel<Course>,
     @InjectConnection() private readonly connection: Connection,
     private readonly currencyService: CurrencyService,
+    private readonly instructorService: InstructorService,
   ) { }
 
   async updateAttendanceSummary(
@@ -74,6 +69,7 @@ export class EnrollmentService {
       userId: new mongoose.Types.ObjectId(userId),
     });
   }
+
   async enrollUserToCourse(
     userId: string,
     courseId: string,
@@ -93,9 +89,23 @@ export class EnrollmentService {
       { _id: new mongoose.Types.ObjectId(courseId) },
       { $inc: { 'stats.totalEnrollments': 1 } },
     );
-
+    if (course.instructorId) {
+      this.instructorService.update(
+        { _id: new mongoose.Types.ObjectId(course.instructorId) },
+        { $inc: { totalStudents: 1 } },
+      );
+    }
+    if (course.coInstructorsIds) {
+      for (const coInstructorId of course.coInstructorsIds) {
+        this.instructorService.update(
+          { _id: new mongoose.Types.ObjectId(coInstructorId) },
+          { $inc: { totalStudents: 1 } },
+        );
+      }
+    }
     return createdEnrollment;
   }
+
 
   async getUserEnrollments(userId: string, options: PaginateOptionsWithSearch) {
     return await this.enrollmentModel.paginate(

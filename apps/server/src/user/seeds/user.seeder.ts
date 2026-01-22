@@ -1,10 +1,11 @@
 import { Model, Types } from 'mongoose';
 import { User } from '../entities/user.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
-import { faker } from '@faker-js/faker';
+import { fakerAR as faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt';
 import { Currency } from '../../payment/enums/currency.enum';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { Roles } from 'src/role/enum/Roles.enum';
 
 export class UserSeeder {
   constructor(
@@ -29,7 +30,7 @@ export class UserSeeder {
       password,
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
-      roleName: 'Student',
+      roleName: Roles.STUDENT,
       status: 'ACTIVE',
       preferredCurrency: Currency.EGP,
       walletId,

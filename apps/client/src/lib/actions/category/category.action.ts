@@ -31,8 +31,8 @@ export const getAllCategories = async (
     return createAuthorizedNatsRequest("category.getAll", payload);
 };
 
-export const getCategory = async (categoryId: string) => {
-    return createAuthorizedNatsRequest<{ categoryId: string }, ICategory>("category.getCategory", { categoryId })
+export const getCategory = async (categoryId: string): Promise<ICategory> => {
+    return createAuthorizedNatsRequest<ICategory, { categoryId: string }>("category.getCategory", { categoryId })
 }
 
 export const deleteCategory = async (

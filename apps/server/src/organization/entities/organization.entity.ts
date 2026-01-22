@@ -57,6 +57,13 @@ export class Organization extends Document<Types.ObjectId> {
       smsEnabled: boolean;
     };
   };
+
+
+  @Prop({ required: true, type: Number, default: 0 })
+  totalReviews: number
+
+  @Prop({ required: true, type: Number, default: 0 })
+  averageRating: number
 }
 
 export const OrganizationSchema = SchemaFactory.createForClass(Organization);
