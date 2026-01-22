@@ -11,6 +11,7 @@ import { ButtonArrowRight } from '@/components/molecules/button-arrow-right';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/button';
 import { Typography } from '@/components/atoms/typography';
+import { BorderBeam } from '../atoms/border-beam';
 
 const InstructorCard4: React.FC<{ instructor: IInstructor }> = ({ instructor }) => {
     const t = useTranslations('Instructors');
@@ -134,6 +135,18 @@ const InstructorCard4: React.FC<{ instructor: IInstructor }> = ({ instructor }) 
                         </Button>
                     </div>
                 </CardContent>
+                <BorderBeam
+                    duration={6}
+                    size={400}
+                    className="from-transparent via-accent to-transparent"
+                />
+                <BorderBeam
+                    duration={6}
+                    delay={3}
+                    size={400}
+                    borderWidth={2}
+                    className="from-transparent via-primary to-transparent"
+                />
             </Card>
         </Link>
     );

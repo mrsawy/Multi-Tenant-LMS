@@ -7,6 +7,7 @@ import { Typography } from "@/components/atoms/typography";
 import { Cloud, Smartphone, BarChart3, Shield, Users, Zap } from "lucide-react";
 import { SparklesText } from "@/components/atoms/sparkles-text";
 import { TextAnimate } from "@/components/atoms/text-animate";
+import { BentoGrid } from "@/components/atoms/bento-grid";
 
 const HeroWithDashboard = () => {
     const t = useTranslations("Hero");

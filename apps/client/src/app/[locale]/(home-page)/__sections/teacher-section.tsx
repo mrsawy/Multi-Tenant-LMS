@@ -1,7 +1,7 @@
 import { Button } from "@/components/atoms/button";
 import { Star, Users, BookOpen, Award } from "lucide-react";
 import { getFeaturedInstructors } from "@/lib/actions/instructors/getFeaturedInstructors.action";
-import InstructorCard4 from "../instructors/__components/instructor-card-4";
+import InstructorCard4 from "../../../../components/organs/instructor-card-4";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 

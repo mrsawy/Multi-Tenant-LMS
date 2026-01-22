@@ -1,6 +1,6 @@
 import { Button } from "@/components/atoms/button";
 import { BookOpen } from "lucide-react";
-import CourseCard from "../courses/__components/course-card";
+import CourseCard from "../../../../components/organs/course-card";
 import { getFeaturedCourses } from "@/lib/actions/courses/getFeaturedCourses.action";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";

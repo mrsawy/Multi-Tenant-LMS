@@ -4,6 +4,9 @@
   },
   "Hero": {
     "title": "Revolutionary LMS Platform",
+    "revolutionary": "Revolutionary",
+    "lMS": "LMS",
+    "platform": "Platform",
     "description": "Experience the next generation of learning management with AI-powered insights, immersive content delivery, and seamless multi-tenant architecture.",
     "downloadNow": "Download Now",
     "createAccount": "Create Account",
@@ -535,13 +538,81 @@
     "viewAllButton": "View All Courses",
     "all": "All",
     "noCoursesFound": "No courses found in this category",
-    "footer": {
-      "title": "safier",
-      "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
-      "links": "Quick Links",
-      "social": "Follow Us",
-      "contact": "Contact Us",
-      "copyright": "Safier. All rights reserved."
-    }
+  "footer": {
+    "title": "safier",
+    "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
+    "links": "Quick Links",
+    "social": "Follow Us",
+    "contact": "Contact Us",
+    "copyright": "Safier. All rights reserved."
+  },
+  "FeaturesGrid": {
+    "files": [
+      {
+        "name": "lecture-video-01.mp4",
+        "body": "Introduction to Web Development - Complete video lecture covering HTML, CSS, and JavaScript fundamentals."
+      },
+      {
+        "name": "assessment-01.pdf",
+        "body": "Mid-term Assessment - Comprehensive evaluation covering all course modules with multiple choice and essay questions."
+      },
+      {
+        "name": "quiz-chapter-03.pdf",
+        "body": "Chapter 3 Quiz - Interactive quiz with 20 questions testing your understanding of advanced concepts."
+      },
+      {
+        "name": "course-material.pdf",
+        "body": "Course Materials - Complete study guide with notes, diagrams, and reference materials for the entire semester."
+      },
+      {
+        "name": "assignment-template.docx",
+        "body": "Assignment Template - Structured template for submitting assignments with formatting guidelines and rubric."
+      }
+    ],
+    "features": [
+      {
+        "name": "Save Your Course Materials",
+        "description": "Save your videos and files in one secure place.",
+        "cta": "Learn more"
+      },
+      {
+        "name": "Notifications",
+        "description": "Get notified when something happens.",
+        "cta": "Learn more"
+      },
+      {
+        "name": "Integrations",
+        "description": "Supports 100+ integrations and counting.",
+        "cta": "Learn more"
+      },
+      {
+        "name": "Track Your Deadlines",
+        "description": "Test schedules and submission deadlines and more.",
+        "cta": "Learn more"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "Payment received",
+        "description": "Magic UI",
+        "time": "15m ago"
+      },
+      {
+        "name": "User signed up",
+        "description": "Magic UI",
+        "time": "10m ago"
+      },
+      {
+        "name": "New message",
+        "description": "Magic UI",
+        "time": "5m ago"
+      },
+      {
+        "name": "New event",
+        "description": "Magic UI",
+        "time": "2m ago"
+      }
+    ]
   }
+}
 }
