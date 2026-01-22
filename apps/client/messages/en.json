@@ -171,7 +171,8 @@
   "about": {
     "title": "About Us",
     "description": "We are building a next-generation LMS that empowers organizations to deliver better education.",
-    "mission": "Our mission is to simplify learning management while giving organizations full control, flexibility, and scalability.",
+    "learnMore": "Learn More",
+    "contactUs": "Contact Us",
     "hero": {
       "yearRange": "2007-2024",
       "title": "We share knowledge with the world",
@@ -537,7 +538,8 @@
     "description": "Discover our most popular courses designed by industry experts to advance your skills and accelerate your career growth.",
     "viewAllButton": "View All Courses",
     "all": "All",
-    "noCoursesFound": "No courses found in this category",
+    "noCoursesFound": "No courses found in this category"
+  },
   "footer": {
     "title": "safier",
     "description": "Empowering learners worldwide with high-quality courses. Join thousands of students advancing their careers with our expert-led training programs.",
@@ -613,6 +615,335 @@
         "time": "2m ago"
       }
     ]
+  },
+  "Wallet": {
+    "header": {
+      "title": "My Wallet"
+    },
+    "balanceCard": {
+      "availableBalance": "Available Balance",
+      "walletFrozen": "⚠️ Wallet is frozen",
+      "addFunds": "Add Funds",
+      "withdraw": "Withdraw"
+    },
+    "transactionList": {
+      "title": "Transaction History",
+      "noTransactions": "No transactions yet"
+    },
+    "transactionItem": {
+      "status": {
+        "completed": "completed",
+        "failed": "failed",
+        "pending": "pending"
+      }
+    },
+    "transactionDetails": {
+      "title": "Transaction Details",
+      "amount": "Amount",
+      "transactionInformation": "Transaction Information",
+      "transactionId": "Transaction ID",
+      "balanceBefore": "Balance Before",
+      "balanceAfter": "Balance After",
+      "createdAt": "Created At",
+      "paymentInformation": "Payment Information",
+      "paymentProvider": "Payment Provider",
+      "paymentMethod": "Payment Method",
+      "externalTransactionId": "External Transaction ID",
+      "additionalInformation": "Additional Information",
+      "type": {
+        "credit": "Credit",
+        "debit": "Debit",
+        "transfer": "Transfer"
+      }
+    },
+    "addFunds": {
+      "title": "Add Funds to Wallet",
+      "description": "Choose your payment method and enter the amount you want to deposit.",
+      "paymentMethod": "Payment Method",
+      "noPaymentMethods": "No payment methods available for {currency}. Please contact support.",
+      "amount": "Amount ({currency})",
+      "amountPlaceholder": "Min: {min}, Max: {max}",
+      "amountHint": "Enter amount between {currency} {min} and {currency} {max}",
+      "descriptionLabel": "Description (Optional)",
+      "descriptionPlaceholder": "e.g., Monthly deposit",
+      "summary": {
+        "amount": "Amount:",
+        "paymentMethod": "Payment Method:"
+      },
+      "cancel": "Cancel",
+      "proceedToPayment": "Proceed to Payment",
+      "paymentOptions": {
+        "creditCard": {
+          "name": "Credit/Debit Card",
+          "description": "Pay with your credit or debit card"
+        },
+        "mobileWallet": {
+          "name": "Mobile Wallet",
+          "description": "Vodafone Cash, Orange Cash, Etisalat Cash"
+        },
+        "paypal": {
+          "name": "PayPal",
+          "description": "Pay with your PayPal account"
+        }
+      },
+      "validation": {
+        "selectPaymentMethod": "Please select a payment method",
+        "invalidAmount": "Please enter a valid amount greater than 0",
+        "minAmount": "Minimum amount is {currency} {min}",
+        "maxAmount": "Maximum amount is {currency} {max}",
+        "decimalPlaces": "Amount cannot have more than 2 decimal places"
+      }
+    },
+    "withdraw": {
+      "title": "Withdraw Funds",
+      "description": "Withdraw money from your wallet. Available balance: {currency} {balance}",
+      "amount": "Amount ({currency})",
+      "amountPlaceholder": "0.00",
+      "descriptionLabel": "Description (Optional)",
+      "descriptionPlaceholder": "e.g., Bank transfer",
+      "cancel": "Cancel",
+      "withdraw": "Withdraw",
+      "validation": {
+        "invalidAmount": "Please enter a valid amount greater than 0",
+        "exceedsBalance": "You cannot withdraw more than your current balance ({currency} {balance})",
+        "amountExceedsBalance": "Amount exceeds available balance"
+      },
+      "success": {
+        "withdrawn": "Successfully withdrew {currency} {amount} from your wallet"
+      },
+      "error": {
+        "failed": "Failed to withdraw"
+      }
+    },
+    "page": {
+      "error": {
+        "title": "Error",
+        "message": "Error Handling Wallet Data , Please try again later. 🙏🏼"
+      },
+      "noWallet": {
+        "title": "No Wallet Found",
+        "description": "You don't have a wallet yet. Please contact support."
+      }
+    }
+  },
+  "StudentCourses": {
+    "page": {
+      "title": "My Learning Dashboard",
+      "subtitle": "Track your progress and continue your learning journey",
+      "stats": {
+        "enrolledCourses": "Enrolled Courses",
+        "averageProgress": "Average Progress",
+        "completed": "Completed",
+        "timeSpent": "Time Spent"
+      },
+      "search": {
+        "placeholder": "Search your courses...",
+        "filterPlaceholder": "Filter by status",
+        "allCourses": "All Courses",
+        "activeSubscription": "Active Subscription",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "noCourses": {
+        "title": "No courses found",
+        "description": "Try adjusting your search or filter criteria"
+      }
+    },
+    "enrollmentCard": {
+      "certified": "Certified",
+      "progress": "Progress",
+      "enrolled": "Enrolled",
+      "continueLearning": "Continue Learning",
+      "students": "students",
+      "selfPaced": "Self-paced"
+    },
+    "courseView": {
+      "backToCourses": "Back to My Courses",
+      "courseNotFound": "Course not found",
+      "goBack": "Go Back",
+      "whatYoullLearn": "What you'll learn:",
+      "yourProgress": "Your Progress",
+      "overallProgress": "Overall Progress",
+      "timeSpent": "Time Spent",
+      "lastAccessed": "Last Accessed",
+      "certificateEarned": "Certificate Earned",
+      "subscription": "Subscription",
+      "status": "Status",
+      "nextBilling": "Next Billing",
+      "courseContent": "Course Content",
+      "courseDiscussions": "Course Discussions",
+      "students": "students",
+      "rating": "rating",
+      "durationFormat": "{hours}h {mins}m"
+    },
+    "courseModules": {
+      "items": "items",
+      "completed": "Completed",
+      "progress": "Progress",
+      "learningObjectives": "Learning Objectives:",
+      "moduleDiscussions": "Module Discussions"
+    },
+    "contentViewer": {
+      "completed": "✓ Completed",
+      "points": "points",
+      "due": "Due:",
+      "start": "Start",
+      "review": "Review",
+      "questions": "question",
+      "questionsPlural": "questions",
+      "min": "min"
+    },
+    "contentView": {
+      "backToCourse": "Back to Course",
+      "completed": "✓ Completed",
+      "contentNotAvailable": "Content not available",
+      "contentDiscussions": "Content Discussions",
+      "minutes": "min"
+    },
+    "videoContent": {
+      "noVideoUrl": "No video URL provided",
+      "progress": "Progress:",
+      "watched": "✓ Watched",
+      "completeToMark": "Complete up to 90% to mark as completed"
+    },
+    "articleContent": {
+      "markAsCompleted": "Mark as completed",
+      "completedUncheck": "Completed — uncheck to mark uncompleted"
+    },
+    "quizContent": {
+      "timeExpired": "Time expired! Submitting quiz automatically...",
+      "pleaseAnswerAll": "Please answer all questions before submitting.",
+      "quizSubmitted": "Quiz submitted!",
+      "failedToSubmit": "Failed to submit quiz",
+      "noQuestionsAvailable": "No Questions Available",
+      "noQuestionsDescription": "This quiz doesn't have any questions yet.",
+      "quizCompleted": "Quiz Completed!",
+      "alreadySubmitted": "You have already submitted this quiz.",
+      "onlyRemaining": "Only {time} remaining!",
+      "quizProgress": "Quiz Progress",
+      "ofAnswered": "of {total} answered",
+      "questions": "Questions",
+      "questionOf": "Question {current} of {total}",
+      "previous": "Previous",
+      "submitting": "Submitting...",
+      "submitQuiz": "Submit Quiz",
+      "next": "Next",
+      "minutesShort": "m",
+      "secondsShort": "s"
+    },
+    "assignmentContent": {
+      "assignmentInstructions": "Assignment Instructions",
+      "maxPoints": "Max Points:",
+      "due": "Due:",
+      "yourSubmission": "Your Submission",
+      "placeholder": "Enter your assignment submission here...",
+      "submitAssignment": "Submit Assignment"
+    },
+    "userRatingDisplay": {
+      "yourRating": "Your rating",
+      "rateThis": "Rate this"
+    },
+    "reviewModal": {
+      "pleaseSelectRating": "Please select a rating",
+      "reviewUpdated": "Review updated successfully",
+      "reviewSubmitted": "Review submitted successfully",
+      "failedToSubmit": "Failed to submit review",
+      "update": "Update",
+      "rate": "Rate",
+      "updateDescription": "Update your review and help others make better choices.",
+      "shareDescription": "Share your experience and help others make better choices.",
+      "loadingReview": "Loading your review...",
+      "commentLabel": "Comment (optional)",
+      "commentPlaceholder": "Tell us what you think...",
+      "submitting": "Submitting...",
+      "updateReview": "Update Review",
+      "submitReview": "Submit Review",
+      "rateModule": "Rate Module",
+      "rateCourse": "Rate Course",
+      "rateContent": "Rate Content",
+      "this": "this",
+      "courseType": "course",
+      "moduleType": "module",
+      "contentType": "content"
+    },
+    "contentTypes": {
+      "ARTICLE": "Article",
+      "VIDEO": "Video",
+      "ASSIGNMENT": "Assignment",
+      "QUIZ": "Quiz"
+    },
+    "subscriptionStatus": {
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "SUSPENDED": "Suspended"
+    },
+    "discussion": {
+      "defaultTitle": "Discussions",
+      "startDiscussion": "Start a discussion",
+      "placeholder": "Share your thoughts, ask questions, or start a discussion...",
+      "postDiscussion": "Post Discussion",
+      "loading": "Loading...",
+      "loadMore": "Load More",
+      "noDiscussions": "No discussions yet",
+      "beFirst": "Be the first to start a discussion!",
+      "form": {
+        "defaultPlaceholder": "Share your thoughts...",
+        "defaultSubmit": "Post",
+        "cancel": "Cancel",
+        "save": "Save",
+        "reply": "Reply",
+        "writeReply": "Write your reply..."
+      },
+      "item": {
+        "justNow": "just now",
+        "minutesAgo": "{minutes}m ago",
+        "hoursAgo": "{hours}h ago",
+        "daysAgo": "{days}d ago",
+        "anonymous": "Anonymous",
+        "edited": "(edited)",
+        "reply": "reply",
+        "replies": "replies",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete this discussion?"
+      }
+    }
+  },
+  "common": {
+    "dashboard": "Dashboard"
+  },
+  "StudentSidebar": {
+    "navMain": {
+      "courses": "Courses",
+      "wallet": "Wallet",
+      "calendar": "Calendar"
+    },
+    "navSecondary": {
+      "settings": "Settings",
+      "getHelp": "Get Help",
+      "search": "Search"
+    },
+    "quickCreate": "Quick Create",
+    "navUser": {
+      "account": "Account",
+      "billing": "Billing",
+      "notifications": "Notifications",
+      "logOut": "Log out"
+    }
+  },
+  "Theme": {
+    "toggleTheme": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "Calendar": {
+    "appointment": "Appointment",
+    "findDate": "Find a date",
+    "today": "Today"
+  },
+  "AppSidebar": {
+    "appName": "Safier LMS"
   }
-}
 }

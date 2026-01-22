@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { useQuizTimer } from '@/lib/hooks/course/useQuizTimer.hook';
 import { Alert, AlertDescription } from '@/components/atoms/alert';
 import useGeneralStore from '@/lib/store/generalStore';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface QuizContentProps {
     content: IContent;
@@ -20,11 +21,13 @@ interface QuizContentProps {
 }
 
 const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollmentId }) => {
+    const t = useTranslations('StudentCourses.quizContent');
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<{ [key: number]: number }>({});
     const [completed, setCompleted] = useState(isComplete);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const locale = useLocale()
+    const isRTL = locale === 'ar'
     // Initialize timer hook
     const {
         timeRemaining,
@@ -53,7 +56,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
     }, [isExpired, completed, isSubmitting]);
 
     const handleAutoSubmit = async () => {
-        toast.warning('Time expired! Submitting quiz automatically...');
+        toast.warning(t('timeExpired'));
         await handleQuizSubmit();
     };
 
@@ -85,7 +88,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
             useGeneralStore.setState({ generalIsLoading: true })
 
             if (!content.questions || Object.keys(answers).length < content.questions.length) {
-                toast.error("Please answer all questions before submitting.");
+                toast.error(t('pleaseAnswerAll'));
                 return;
             }
 
@@ -107,14 +110,14 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
             if (result.success) {
                 setCompleted(true);
                 clearTimer(); // Clear timer from storage after successful submission
-                toast.success(`Quiz submitted!`);
+                toast.success(t('quizSubmitted'));
             } else {
-                throw new Error(result.error || "Failed to submit quiz");
+                throw new Error(result.error || t('failedToSubmit'));
             }
 
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || "Failed to submit quiz");
+            toast.error(error.message || t('failedToSubmit'));
         } finally {
             setIsSubmitting(false);
             useGeneralStore.setState({ generalIsLoading: false })
@@ -125,7 +128,10 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+        if (mins > 0) {
+            return `${mins}${t('minutesShort')} ${secs}${t('secondsShort')}`;
+        }
+        return `${secs}${t('secondsShort')}`;
     };
 
     const currentQuestion = content?.questions?.[currentQuestionIndex];
@@ -136,8 +142,8 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
         return (
             <div className="text-center py-12">
                 <HelpCircle className="w-24 h-24 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-2">No Questions Available</h3>
-                <p className="text-gray-600 mb-4">This quiz doesn't have any questions yet.</p>
+                <h3 className="text-xl font-semibold mb-2">{t('noQuestionsAvailable')}</h3>
+                <p className="text-gray-600 mb-4">{t('noQuestionsDescription')}</p>
             </div>
         );
     }
@@ -148,8 +154,8 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                 <div className="w-24 h-24 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
                     <span className="text-4xl">✓</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Quiz Completed!</h3>
-                <p className="text-gray-600">You have already submitted this quiz.</p>
+                <h3 className="text-xl font-semibold mb-2">{t('quizCompleted')}</h3>
+                <p className="text-gray-600">{t('alreadySubmitted')}</p>
             </div>
         );
     }
@@ -161,7 +167,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                 <Alert className="mb-6 border-orange-300 bg-orange-50">
                     <AlertTriangle className="h-4 w-4 text-orange-600" />
                     <AlertDescription className="text-orange-800">
-                        Only {formatTime(timeRemaining)} remaining!
+                        {t('onlyRemaining', { time: formatTime(timeRemaining) })}
                     </AlertDescription>
                 </Alert>
             )}
@@ -170,7 +176,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
             <Card className="mb-6">
                 <CardHeader>
                     <div className="flex justify-between items-center">
-                        <CardTitle>Quiz Progress</CardTitle>
+                        <CardTitle>{t('quizProgress')}</CardTitle>
                         <div className="flex items-center gap-4">
                             {content.quizDurationInMinutes && (
                                 <Badge
@@ -183,7 +189,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                                 </Badge>
                             )}
                             <Badge variant="outline">
-                                {answeredQuestions} of {totalQuestions} answered
+                                {answeredQuestions} {t('ofAnswered', { total: totalQuestions })}
                             </Badge>
                         </div>
                     </div>
@@ -194,7 +200,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
             {/* Question Numbers Navigation */}
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle className="text-sm">Questions</CardTitle>
+                    <CardTitle className="text-sm">{t('questions')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -221,7 +227,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-lg">
-                            Question {currentQuestionIndex + 1} of {totalQuestions}
+                            {t('questionOf', { current: currentQuestionIndex + 1, total: totalQuestions })}
                         </CardTitle>
                     </div>
                 </CardHeader>
@@ -234,9 +240,9 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                         }
                     >
                         {currentQuestion.options.map((option, optionIndex) => (
-                            <div key={optionIndex} className="flex items-center space-x-3 p-3 rounded-lg  ">
+                            <div key={optionIndex} className="flex items-center space-x-3 p-3 rounded-lg rtl:flex-row-reverse rtl:gap-4  ">
                                 <RadioGroupItem value={optionIndex.toString()} id={`option-${optionIndex}`} />
-                                <Label htmlFor={`option-${optionIndex}`} className="text-base cursor-pointer flex-1">
+                                <Label htmlFor={`option-${optionIndex}`} className="text-base cursor-pointer rtl:text-end ">
                                     {option}
                                 </Label>
                             </div>
@@ -251,9 +257,10 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                     variant="outline"
                     onClick={previousQuestion}
                     disabled={currentQuestionIndex === 0 || isSubmitting}
+                    className='flex flex-row!'
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Previous
+                    {!isRTL ? <ChevronLeft className="w-4 h-4 mr-2" /> : <ChevronRight className="w-4 h-4 mr-2" />}
+                    {t('previous')}
                 </Button>
 
                 <div className="flex gap-4">
@@ -263,12 +270,12 @@ const QuizContent: React.FC<QuizContentProps> = ({ isComplete, content, enrollme
                             size="lg"
                             disabled={isSubmitting || Object.keys(answers).length < totalQuestions}
                         >
-                            {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+                            {isSubmitting ? t('submitting') : t('submitQuiz')}
                         </Button>
                     ) : (
-                        <Button onClick={nextQuestion} disabled={isSubmitting}>
-                            Next
-                            <ChevronRight className="w-4 h-4 ml-2" />
+                        <Button onClick={nextQuestion} disabled={isSubmitting} className='flex flex-row!'>
+                            {t('next')}
+                            {isRTL ? <ChevronLeft className="w-4 h-4 mr-2" /> : <ChevronRight className="w-4 h-4 mr-2" />}
                         </Button>
                     )}
                 </div>

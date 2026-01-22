@@ -11,6 +11,7 @@ import { useDiscussion } from '@/lib/hooks/discussion/useDiscussion.hook';
 import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
 import { AvatarFallback } from '../atoms/avatar';
 import { getFileFullUrl } from '@/lib/utils/getFileFullUrl';
+import { useTranslations } from 'next-intl';
 
 interface DiscussionItemProps {
   discussion: IDiscussionWithReplies;
@@ -25,6 +26,8 @@ interface DiscussionItemProps {
 }
 
 export function DiscussionItem({ discussion, currentUserId, onUpdate, type, entityId, moduleId, contentId, depth = 0 }: DiscussionItemProps) {
+  const t = useTranslations('StudentCourses.discussion.item');
+  const tForm = useTranslations('StudentCourses.discussion.form');
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
@@ -94,7 +97,7 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this discussion?')) {
+    if (!confirm(t('confirmDelete'))) {
       return;
     }
 
@@ -124,10 +127,10 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return 'just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 60) return t('justNow');
+    if (diffInSeconds < 3600) return t('minutesAgo', { minutes: Math.floor(diffInSeconds / 60) });
+    if (diffInSeconds < 86400) return t('hoursAgo', { hours: Math.floor(diffInSeconds / 3600) });
+    if (diffInSeconds < 604800) return t('daysAgo', { days: Math.floor(diffInSeconds / 86400) });
 
     return date.toLocaleDateString();
   };
@@ -146,14 +149,14 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold">{userFullName || 'Anonymous'}</span>
+                <span className="text-sm font-semibold">{userFullName || t('anonymous')}</span>
                 <span className="text-muted-foreground text-xs">{formatDate(discussion.createdAt)}</span>
-                {discussion.isEdited && <span className="text-muted-foreground text-xs italic">(edited)</span>}
+                {discussion.isEdited && <span className="text-muted-foreground text-xs italic">{t('edited')}</span>}
               </div>
 
               {isEditing ? (
                 <div className="mt-2">
-                  <DiscussionForm onSubmit={handleEdit} onCancel={() => setIsEditing(false)} initialContent={discussion.content} submitLabel="Save" />
+                  <DiscussionForm onSubmit={handleEdit} onCancel={() => setIsEditing(false)} initialContent={discussion.content} submitLabel={t('save')} />
                 </div>
               ) : (
                 <p className="mt-1 whitespace-pre-wrap break-words text-sm">{discussion.content}</p>
@@ -168,7 +171,7 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
                 {canReply && (
                   <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setIsReplying(!isReplying)}>
                     <MessageCircle className="mr-1 h-4 w-4" />
-                    Reply
+                    {t('reply')}
                   </Button>
                 )}
 
@@ -177,7 +180,7 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
                   <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2 text-xs" onClick={toggleReplies}>
                     {isLoadingReplies ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : showReplies ? <ChevronUp className="mr-1 h-3 w-3" /> : <ChevronDown className="mr-1 h-3 w-3" />}
                     {/* Use the best available count */}
-                    {currentRepliesCount} {currentRepliesCount === 1 ? 'reply' : 'replies'}
+                    {currentRepliesCount} {currentRepliesCount === 1 ? t('reply') : t('replies')}
                   </Button>
                 )}
               </div>
@@ -194,11 +197,11 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setIsEditing(true)}>
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit
+                  {t('edit')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDelete} className="text-red-600">
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t('delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -206,7 +209,7 @@ export function DiscussionItem({ discussion, currentUserId, onUpdate, type, enti
         </div>
       </div>
 
-      {isReplying && <DiscussionForm onSubmit={handleReply} onCancel={() => setIsReplying(false)} placeholder="Write your reply..." submitLabel="Reply" isReply />}
+      {isReplying && <DiscussionForm onSubmit={handleReply} onCancel={() => setIsReplying(false)} placeholder={tForm('writeReply')} submitLabel={t('reply')} isReply />}
 
       {showReplies && replies && replies.length > 0 && (
         <div className="space-y-3">

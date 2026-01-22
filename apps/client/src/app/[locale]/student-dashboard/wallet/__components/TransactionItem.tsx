@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/atoms/badge';
 import { Transaction, TransactionType } from '@/lib/types/transaction/ITransaction.interface';
 import { TransactionDetailsModal } from './TransactionDetailsModal';
+import { useTranslations } from 'next-intl';
 
 
 interface TransactionItemProps {
@@ -13,6 +14,7 @@ interface TransactionItemProps {
 }
 
 export const TransactionItem = ({ transaction }: TransactionItemProps) => {
+  const t = useTranslations('Wallet.transactionItem.status');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const getTransactionIcon = () => {
     switch (transaction.type) {
@@ -83,7 +85,7 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
           <Badge
             variant={transaction.status === 'completed' ? 'default' : 'secondary'}
           >
-            {transaction.status}
+            {t(transaction.status as 'completed' | 'failed' | 'pending')}
           </Badge>
         </div>
       </div>

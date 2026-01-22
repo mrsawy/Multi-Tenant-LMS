@@ -11,9 +11,11 @@ import { WalletHeader } from './__components/WalletHeader';
 import { useWallet } from '@/lib/hooks/wallet/use-wallet';
 import { WalletBalanceCard } from './__components/WalletBalanceCard';
 import { TransactionList } from './__components/TransactionList';
+import { useTranslations } from 'next-intl';
 
 const WalletPage = () => {
   const { data: wallet, isLoading, error, refetch } = useWallet();
+  const t = useTranslations('Wallet.page');
   console.log({ wallet })
 
   if (isLoading) {
@@ -37,11 +39,11 @@ const WalletPage = () => {
         <div className="container mx-auto px-4 py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>{t('error.title')}</AlertTitle>
             <AlertDescription>
               {error instanceof Error
                 ? error.message
-                : 'Error Handling Wallet Data , Please try again later. 🙏🏼'}
+                : t('error.message')}
             </AlertDescription>
           </Alert>
         </div>
@@ -56,9 +58,9 @@ const WalletPage = () => {
         <div className="container mx-auto px-4 py-8">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No Wallet Found</AlertTitle>
+            <AlertTitle>{t('noWallet.title')}</AlertTitle>
             <AlertDescription>
-              You don't have a wallet yet. Please contact support.
+              {t('noWallet.description')}
             </AlertDescription>
           </Alert>
         </div>

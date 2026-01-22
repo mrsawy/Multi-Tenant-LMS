@@ -2,6 +2,7 @@
 
 import { IDiscussionWithReplies, DiscussionType } from '@/lib/types/discussion/discussion.types';
 import { DiscussionItem } from './discussion-item';
+import { useTranslations } from 'next-intl';
 
 interface DiscussionListProps {
   discussions: IDiscussionWithReplies[];
@@ -22,11 +23,13 @@ export function DiscussionList({
   moduleId,
   contentId,
 }: DiscussionListProps) {
+  const t = useTranslations('StudentCourses.discussion');
+  
   if (discussions.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p className="text-lg font-medium">No discussions yet</p>
-        <p className="text-sm mt-1">Be the first to start a discussion!</p>
+        <p className="text-lg font-medium">{t('noDiscussions')}</p>
+        <p className="text-sm mt-1">{t('beFirst')}</p>
       </div>
     );
   }

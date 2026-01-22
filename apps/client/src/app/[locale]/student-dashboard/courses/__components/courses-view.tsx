@@ -5,6 +5,7 @@ import { IEnrollment } from "@/lib/types/enrollment/enrollment.interface";
 import { BookOpen, Filter, Search, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { EnrollmentCard } from "./enrollment-card";
+import { useTranslations } from "next-intl";
 
 
 
@@ -13,6 +14,7 @@ interface EnrollmentsProps {
 }
 
 export default function Enrollments({ enrollments }: EnrollmentsProps) {
+    const t = useTranslations('StudentCourses.page');
 
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -37,8 +39,8 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold  mb-2">My Learning Dashboard</h1>
-                    <p  >Track your progress and continue your learning journey</p>
+                    <h1 className="text-3xl font-bold  mb-2">{t('title')}</h1>
+                    <p  >{t('subtitle')}</p>
                 </div>
 
                 {/* Stats Cards */}
@@ -49,7 +51,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                                 <BookOpen className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                                <p className="text-sm ">Enrolled Courses</p>
+                                <p className="text-sm ">{t('stats.enrolledCourses')}</p>
                                 <p className="text-2xl font-bold text-gray-900">{enrollments.length}</p>
                             </div>
                         </div>
@@ -61,7 +63,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                                 <TrendingUp className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                                <p className="text-sm ">Average Progress</p>
+                                <p className="text-sm ">{t('stats.averageProgress')}</p>
                                 <p className="text-2xl font-bold text-gray-900">{Math.round(totalProgress)}%</p>
                             </div>
                         </div>
@@ -73,7 +75,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                                 <BookOpen className="w-5 h-5 " />
                             </div>
                             <div>
-                                <p className="text-sm ">Completed</p>
+                                <p className="text-sm ">{t('stats.completed')}</p>
                                 <p className="text-2xl font-bold text-gray-900">{completedCourses}</p>
                             </div>
                         </div>
@@ -85,7 +87,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                                 <TrendingUp className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                                <p className="text-sm ">Time Spent</p>
+                                <p className="text-sm ">{t('stats.timeSpent')}</p>
                                 <p className="text-2xl font-bold text-gray-900">{Math.floor(totalTimeSpent / 60)}h</p>
                             </div>
                         </div>
@@ -98,7 +100,7 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2  w-4 h-4" />
                             <Input
-                                placeholder="Search your courses..."
+                                placeholder={t('search.placeholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -107,13 +109,13 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                         <Select value={filterStatus} onValueChange={setFilterStatus}>
                             <SelectTrigger className="w-full sm:w-48">
                                 <Filter className="w-4 h-4 mr-2" />
-                                <SelectValue placeholder="Filter by status" />
+                                <SelectValue placeholder={t('search.filterPlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Courses</SelectItem>
-                                <SelectItem value="active">Active Subscription</SelectItem>
-                                <SelectItem value="in-progress">In Progress</SelectItem>
-                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="all">{t('search.allCourses')}</SelectItem>
+                                <SelectItem value="active">{t('search.activeSubscription')}</SelectItem>
+                                <SelectItem value="in-progress">{t('search.inProgress')}</SelectItem>
+                                <SelectItem value="completed">{t('search.completed')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -133,8 +135,8 @@ export default function Enrollments({ enrollments }: EnrollmentsProps) {
                 {filteredEnrollments.length === 0 && (
                     <div className="text-center py-12">
                         <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-                        <p className="">Try adjusting your search or filter criteria</p>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noCourses.title')}</h3>
+                        <p className="">{t('noCourses.description')}</p>
                     </div>
                 )}
             </div>

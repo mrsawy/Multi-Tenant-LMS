@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/atoms/button"
 import { Calendar } from "@/components/atoms/calendar"
@@ -14,6 +15,7 @@ import {
 } from "@/components/atoms/card"
 
 export default function CalendarWithTodayButton() {
+  const t = useTranslations("Calendar")
   const [date, setDate] = React.useState<Date | undefined>(
     new Date(2025, 5, 12)
   )
@@ -22,8 +24,8 @@ export default function CalendarWithTodayButton() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Appointment</CardTitle>
-        <CardDescription>Find a date</CardDescription>
+        <CardTitle>{t("appointment")}</CardTitle>
+        <CardDescription>{t("findDate")}</CardDescription>
         <CardAction>
           <Button
             size="sm"
@@ -33,7 +35,7 @@ export default function CalendarWithTodayButton() {
               setDate(new Date())
             }}
           >
-            Today
+            {t("today")}
           </Button>
         </CardAction>
       </CardHeader>

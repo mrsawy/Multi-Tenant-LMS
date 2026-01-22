@@ -10,6 +10,7 @@ import { Transaction } from '@/lib/types/transaction/ITransaction.interface';
 
 import { WalletIcon } from 'lucide-react';
 import { TransactionItem } from './TransactionItem';
+import { useTranslations } from 'next-intl';
 
 
 interface TransactionListProps {
@@ -17,10 +18,12 @@ interface TransactionListProps {
 }
 
 export const TransactionList = ({ transactions }: TransactionListProps) => {
+  const t = useTranslations('Wallet.transactionList');
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -32,7 +35,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
         {transactions.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <WalletIcon className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p>No transactions yet</p>
+            <p>{t('noTransactions')}</p>
           </div>
         )}
       </CardContent>

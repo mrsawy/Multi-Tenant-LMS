@@ -24,6 +24,7 @@ import {
   PaymentPurpose,
   PaymentOption,
 } from '@/lib/types/payment/payment.interface';
+import { useTranslations } from 'next-intl';
 
 interface AddFundsDialogProps {
   open: boolean;
@@ -32,39 +33,7 @@ interface AddFundsDialogProps {
   onSuccess?: () => void;
 }
 
-// Define all available payment options
-const PAYMENT_OPTIONS: PaymentOption[] = [
-  {
-    id: 'paymob-card',
-    provider: PaymentProvider.PAYMOB,
-    method: PaymentMethod.CREDIT_CARD,
-    name: 'Credit/Debit Card',
-    description: 'Pay with your credit or debit card',
-    icon: CreditCard,
-    logo: '💳',
-    currencies: ['EGP', 'USD', 'EUR'],
-  },
-  {
-    id: 'paymob-wallet',
-    provider: PaymentProvider.PAYMOB,
-    method: PaymentMethod.MOBILE_WALLET,
-    name: 'Mobile Wallet',
-    description: 'Vodafone Cash, Orange Cash, Etisalat Cash',
-    icon: Smartphone,
-    logo: '📱',
-    currencies: ['EGP'],
-  },
-  {
-    id: 'paypal',
-    provider: PaymentProvider.PAYPAL,
-    method: PaymentMethod.PAYPAL,
-    name: 'PayPal',
-    description: 'Pay with your PayPal account',
-    icon: Wallet,
-    logo: '🅿️',
-    currencies: ['USD', 'EUR', 'EGP'],
-  },
-];
+// Payment options will be created dynamically with translations
 
 const MIN_AMOUNTS: Record<string, number> = {
   USD: 1,
@@ -86,11 +55,46 @@ export const AddFundsDialog = ({
   currency,
   onSuccess,
 }: AddFundsDialogProps) => {
+  const t = useTranslations('Wallet.addFunds');
   const [amount, setAmount] = useState('');
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [description, setDescription] = useState('');
 
   const { mutate: createPayment, isPending } = useCreatePaymentLink();
+
+  // Define payment options with translations
+  const PAYMENT_OPTIONS: PaymentOption[] = [
+    {
+      id: 'paymob-card',
+      provider: PaymentProvider.PAYMOB,
+      method: PaymentMethod.CREDIT_CARD,
+      name: t('paymentOptions.creditCard.name'),
+      description: t('paymentOptions.creditCard.description'),
+      icon: CreditCard,
+      logo: '💳',
+      currencies: ['EGP', 'USD', 'EUR'],
+    },
+    {
+      id: 'paymob-wallet',
+      provider: PaymentProvider.PAYMOB,
+      method: PaymentMethod.MOBILE_WALLET,
+      name: t('paymentOptions.mobileWallet.name'),
+      description: t('paymentOptions.mobileWallet.description'),
+      icon: Smartphone,
+      logo: '📱',
+      currencies: ['EGP'],
+    },
+    {
+      id: 'paypal',
+      provider: PaymentProvider.PAYPAL,
+      method: PaymentMethod.PAYPAL,
+      name: t('paymentOptions.paypal.name'),
+      description: t('paymentOptions.paypal.description'),
+      icon: Wallet,
+      logo: '🅿️',
+      currencies: ['USD', 'EUR', 'EGP'],
+    },
+  ];
 
   // Filter options that support the current currency
   const availableOptions = PAYMENT_OPTIONS.filter((option) =>
@@ -111,30 +115,30 @@ export const AddFundsDialog = ({
     );
 
     if (!paymentOption) {
-      toast.error('Please select a payment method');
+      toast.error(t('validation.selectPaymentMethod'));
       return;
     }
 
     // Validation
     if (isNaN(numAmount) || numAmount <= 0) {
-      toast.error('Please enter a valid amount greater than 0');
+      toast.error(t('validation.invalidAmount'));
       return;
     }
 
     if (numAmount < minAmount) {
-      toast.error(`Minimum amount is ${currency} ${minAmount}`);
+      toast.error(t('validation.minAmount', { currency, min: minAmount }));
       return;
     }
 
     if (numAmount > maxAmount) {
-      toast.error(`Maximum amount is ${currency} ${maxAmount}`);
+      toast.error(t('validation.maxAmount', { currency, max: maxAmount }));
       return;
     }
 
     // Check decimal places
     const decimalPlaces = (amount.split('.')[1] || '').length;
     if (decimalPlaces > 2) {
-      toast.error('Amount cannot have more than 2 decimal places');
+      toast.error(t('validation.decimalPlaces'));
       return;
     }
 
@@ -171,22 +175,20 @@ export const AddFundsDialog = ({
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add Funds to Wallet</DialogTitle>
+            <DialogTitle>{t('title')}</DialogTitle>
             <DialogDescription>
-              Choose your payment method and enter the amount you want to
-              deposit.
+              {t('description')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
             {/* Payment Method Selection */}
             <div className="grid gap-3">
-              <Label>Payment Method</Label>
+              <Label>{t('paymentMethod')}</Label>
               {availableOptions.length === 0 ? (
                 <Alert>
                   <AlertDescription>
-                    No payment methods available for {currency}. Please contact
-                    support.
+                    {t('noPaymentMethods', { currency })}
                   </AlertDescription>
                 </Alert>
               ) : (
@@ -206,10 +208,9 @@ export const AddFundsDialog = ({
                           className={`
                             flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer
                             transition-all hover:border-primary/50
-                            ${
-                              isSelected
-                                ? 'border-primary bg-primary/5'
-                                : 'border-gray-200 dark:border-gray-700'
+                            ${isSelected
+                              ? 'border-primary bg-primary/5'
+                              : 'border-gray-200 dark:border-gray-700'
                             }
                             ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
                           `}
@@ -237,14 +238,14 @@ export const AddFundsDialog = ({
 
             {/* Amount Input */}
             <div className="grid gap-2">
-              <Label htmlFor="amount">Amount ({currency})</Label>
+              <Label htmlFor="amount">{t('amount', { currency })}</Label>
               <Input
                 id="amount"
                 type="number"
                 step="0.01"
                 min={minAmount}
                 max={maxAmount}
-                placeholder={`Min: ${minAmount}, Max: ${maxAmount}`}
+                placeholder={t('amountPlaceholder', { min: minAmount, max: maxAmount })}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
@@ -252,18 +253,17 @@ export const AddFundsDialog = ({
                 className="text-lg"
               />
               <p className="text-xs text-muted-foreground">
-                Enter amount between {currency} {minAmount} and {currency}{' '}
-                {maxAmount}
+                {t('amountHint', { currency, min: minAmount, max: maxAmount })}
               </p>
             </div>
 
             {/* Description (Optional) */}
             <div className="grid gap-2">
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">{t('descriptionLabel')}</Label>
               <Input
                 id="description"
                 type="text"
-                placeholder="e.g., Monthly deposit"
+                placeholder={t('descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isPending}
@@ -275,14 +275,14 @@ export const AddFundsDialog = ({
             {amount && parseFloat(amount) > 0 && selectedOption && (
               <div className="p-4 bg-muted rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">Amount:</span>
+                  <span className="text-sm text-muted-foreground">{t('summary.amount')}</span>
                   <span className="font-semibold">
                     {currency} {parseFloat(amount).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    Payment Method:
+                    {t('summary.paymentMethod')}
                   </span>
                   <span className="font-semibold">
                     {
@@ -302,7 +302,7 @@ export const AddFundsDialog = ({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
@@ -310,8 +310,9 @@ export const AddFundsDialog = ({
                 isPending || availableOptions.length === 0 || !selectedOption
               }
               effect="expandIcon"
+              iconPlacement='right'
             >
-              Proceed to Payment
+              {t('proceedToPayment')}
               {isPending && <Loader2 className="ms-2 h-4 w-4 animate-spin" />}
             </Button>
           </DialogFooter>
