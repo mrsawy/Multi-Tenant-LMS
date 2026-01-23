@@ -24,6 +24,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { useTranslations, useLocale } from 'next-intl';
 import { Typography } from "@/components/atoms/typography"
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import AuthInput from "@/components/molecules/AuthInput"
 
 export function SignupForm({
   redirectUrl,
@@ -54,8 +55,9 @@ export function SignupForm({
       country: Country.Egypt,
     },
   });
-
-
+  const showPasswordValue = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   const selectedRole = watch('roleName');
 
@@ -113,63 +115,16 @@ export function SignupForm({
               </p>
             </div>
             <div className="flex flex-col gap-4">
-
-              <div className="flex gap-2 justify-between">
-                <div className="flex flex-col gap-2 w-full">
-                  <Label className="text-sm lg:text-medium" htmlFor="firstName">{t('firstName')}</Label>
-                  <Input placeholder={t('firstNamePlaceholder')} className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" {...register("firstName")} />
-                  {(errors.firstName) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.firstName?.message as any)}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-col gap-2 w-full">
-                  <Label className="text-sm lg:text-medium" htmlFor="lastName">{t('lastName')}</Label>
-                  <Input placeholder={t('lastNamePlaceholder')} className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" {...register("lastName")} />
-                  {(errors.lastName) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.lastName?.message as any)}
-                    </p>
-                  ) : null}
-                </div>
+              <div className="flex justify-between gap-2">
+                <AuthInput register={register} t={t} validationError={errors.firstName?.message} name="firstName" label="firstName" />
+                <AuthInput register={register} t={t} validationError={errors.lastName?.message} name="lastName" label="lastName" />
               </div>
-
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm lg:text-medium" htmlFor="email">{t('email')}</Label>
-                <Input placeholder={t('emailPlaceholder')} className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" {...register("email")} />
-                {(errors.email ?? errors.root) ? (
-                  <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                    {t((errors.email?.message || errors.root?.message) as any)}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="flex gap-2 justify-between flex-col lg:flex-row">
-                <div className="flex flex-col gap-1 w-full">
-                  <Label className="text-sm lg:text-medium" htmlFor="username">{t('username')}</Label>
-                  <Input placeholder={t('usernamePlaceholder')} className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" {...register("username")} />
-                  {(errors.username) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.username?.message as any)}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-col gap-2 w-full">
-                  {/* <Label className="text-sm lg:text-medium" htmlFor="phoneNumber">{t('phoneNumber')}</Label> */}
-                  <PhoneInput
-                  label={t('phoneNumber')}
-                  placeholder={t("phoneNumberPlaceholder")}
-                    className="w-full"
-                    // {...register("phoneNumber")}
-                    isRTL={isRTL}
-                    onValueChange={(value) => setValue('phoneNumber', value)}
-                  />
-                  {(errors.phoneNumber) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.phoneNumber?.message as any)}
-                    </p>
-                  ) : null}
+              <AuthInput register={register} t={t} validationError={errors.email?.message || errors.root?.message} name="email" label="email" />
+              <div className="flex flex-col justify-between gap-2 lg:flex-row">
+                <AuthInput register={register} t={t} validationError={errors.username?.message} name="username" label="username" />
+                <div className="flex w-full flex-col gap-2">
+                  <PhoneInput label={t('phoneNumber')} placeholder={t('phoneNumberPlaceholder')} className="w-full" isRTL={isRTL} onValueChange={(value) => setValue('phoneNumber', value)} />
+                  {errors.phoneNumber && <Typography className={cn('mt-0! text-start text-sm text-red-400')}>{t(errors.phoneNumber?.message as string)}</Typography>}
                 </div>
               </div>
 
@@ -184,11 +139,11 @@ export function SignupForm({
                     placeholder={t('countryPlaceholder')}
                     onValueChange={(value) => setValue('country', value as Country)}
                   />
-                  {(errors.country) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.country?.message as any)}
+                    {(errors.country)&&(
+                    <p className={cn("text-sm text-red-400 text-start")}>
+                      {t(errors.country?.message as string)}
                     </p>
-                  ) : null}
+                  ) }
                 </div>
 
                 <div className="flex flex-col gap-2 w-full">
@@ -199,85 +154,33 @@ export function SignupForm({
                     title={t('userRole')}
                     placeholder={t('rolePlaceholder')}
                     onValueChange={(value) => setValue('roleName', value as UserMainRoles)}
-                    buttonClassName={cn(isRTL ? "text-right" : "text-left")}
                   />
-                  {(errors.roleName) ? (
-                    <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                      {t(errors.roleName?.message as any)}
-                    </p>
-                  ) : null}
+                  {errors.roleName && (
+                    <Typography variant="p" className={cn('mt-0! text-start text-sm text-red-400')}>
+                      {t(errors.roleName?.message as string)}
+                    </Typography>
+                  )}
                 </div>
-
               </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col items-start">
-                  <Label className="text-sm lg:text-medium" htmlFor="password">{t('password')}</Label>
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    className={cn("placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium", isRTL ? "pl-10" : "pr-10")}
-                    placeholder={t('passwordPlaceholder')}
-                    {...register("password")}
-                  />
-
-                  <div
-                    className={cn("absolute top-1/2 -translate-y-1/2 cursor-pointer", isRTL ? "left-3" : "right-3")}
-                    onClick={() => setShowPassword(prev => !prev)}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </div>
-                </div>              {(errors.password) ? (
-                  <Typography variant="p" className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                    {t(errors.password?.message as any)}
-                  </Typography>
-                ) : null}
-              </div>
-
-
-
-
+              <AuthInput register={register} t={t} validationError={errors.password?.message} name="password" label="password" type={showPassword ? 'text' : 'password'} showPassword={showPassword} showPasswordValue={showPasswordValue} />
               {/* Organization Inputs - Only show when role is organization */}
               {selectedRole === UserMainRoles.ORGANIZATION && (
                 <>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-col items-start">
-                      <Label className="text-sm lg:text-medium" htmlFor="organizationName">{t('organizationName')}</Label>
-                    </div>
-                    <Input className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" placeholder={t('organizationNamePlaceholder')} {...register("organizationName")} />
-                    {(errors.organizationName) ? (
-                      <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                        {t(errors.organizationName?.message as any)}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-col items-start">
-                      <Label className="text-sm lg:text-medium" htmlFor="organizationSlug">{t('organizationSlug')}</Label>
-                    </div>
-                    <Input className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium" placeholder={t('organizationSlugPlaceholder')} {...register("organizationSlug")} />
-                    {(errors.organizationSlug) ? (
-                      <p className={cn("text-sm text-red-400", isRTL ? "text-right" : "text-left")}>
-                        {t(errors.organizationSlug?.message as any)}
-                      </p>
-                    ) : null}
-                  </div>
+                  <AuthInput register={register} t={t} validationError={errors.organizationName?.message} name="organizationName" label="organizationName" />
+                  <AuthInput register={register} t={t} validationError={errors.organizationSlug?.message} name="organizationSlug" label="organizationSlug" />
                 </>
               )}
               <Button type="submit" className="w-full">
                 {t('submit')}
               </Button>
-              {(errors.root) ? (
-                <p className="text-sm text-red-400 m-auto text-center">
-                  {t(errors.root?.message as any)}
-                </p>
-              ) : null}
+              {errors.root && (
+                <Typography variant="p" className={cn('m-auto mt-0! text-center text-sm text-red-400')}>
+                  {errors.root?.message}
+                </Typography>
+              )}
             </div>
             <div className="text-center text-sm">
-              {t('alreadyHaveAccount')}{" "}
-
+              {t('alreadyHaveAccount')}
 
               {onLoginClick ? (
                 <button
