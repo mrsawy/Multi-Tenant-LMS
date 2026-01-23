@@ -15,7 +15,8 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { UserMainRoles } from '@/lib/data/userRole.enum';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useTranslations ,useLocale  } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import AuthInput from '@/components/molecules/AuthInput';
 
 export function LoginForm({
   className,
@@ -29,6 +30,7 @@ export function LoginForm({
   onSuccess?: () => void;
 }) {
   const t = useTranslations('auth.login');
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const {
     register,
@@ -40,6 +42,9 @@ export function LoginForm({
     mode: 'onSubmit',
   });
 
+  const showPasswordValue = () => {
+    setShowPassword((prev) => !prev);
+  };
   const onSubmit = async (data: LoginSchema) => {
     try {
       useGeneralStore.setState({ generalIsLoading: true });
@@ -69,11 +74,6 @@ export function LoginForm({
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const locale = useLocale();
-
-  const isRTL =locale === "ar";
-
   return (
     <div className={cn('flex flex-col gap-6', className)}>
       <Card className="overflow-hidden p-0">
@@ -89,60 +89,8 @@ export function LoginForm({
                 {t('subtitle')}
               </p>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm lg:text-medium" htmlFor="identifier">
-                {t('identifier')}
-              </Label>
-              <Input
-                placeholder={t('identifierPlaceholder')}
-                className="placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium"
-                {...register('identifier')}
-              />
-              {errors.identifier ? (
-                <p  className={`${isRTL?'text-right':"text-left"} text-sm text-red-400`}>
-                  {t(errors.identifier?.message as any)}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm lg:text-medium" htmlFor="password">
-                  {t('password')}
-                </Label>
-              </div>
-              <div className="relative">
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  className={`placeholder:text-sm lg:placeholder:text-medium text-sm lg:text-medium ${isRTL ?'pl-10':'pr-10'} `}
-                  placeholder={t('passwordPlaceholder')}
-                  // "identifierPlaceholder": "المعرف الخاص بك",
-      // "passwordPlaceholder": "...كلمة المرور الخاصة بك",
-                  {...register('password')}
-                />
-
-                <button
-                  type="button"
-                  
-                  className={`absolute ${isRTL ?'left-3':'right-3'}   top-1/2 -translate-y-1/2`}
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              </div>{' '}
-              {errors.password ? (
-                <p  className={`${isRTL?'text-right':"text-left"} text-sm text-red-400`}>
-                  {t(errors.password?.message as any)}
-                </p>
-              ) : null}
-            </div>
-
-
+            <AuthInput register={register} t={t} validationError={errors.identifier?.message} name="identifier" label="identifier" />
+            <AuthInput register={register} t={t} validationError={errors.password?.message} name="password" label="password" type={showPassword ? 'text' : 'password'} showPassword={showPassword} showPasswordValue={showPasswordValue} />
             <Button type="submit" className="w-full">
               {t('submit')}
             </Button>
@@ -153,10 +101,8 @@ export function LoginForm({
                 errors?.root && errors.root?.message && 'scale-100',
               )}
             >
-              {errors?.root?.message ? t(errors.root.message as any) : ''}
+              {errors?.root?.message && t(errors.root.message as string) }
             </p>
-
-
             <div className="text-center text-sm">
               {t('noAccount')}{' '}
               {onSignupClick ? (
