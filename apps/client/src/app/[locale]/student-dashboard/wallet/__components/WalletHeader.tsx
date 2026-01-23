@@ -1,7 +1,10 @@
 import { WalletIcon } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 export const WalletHeader = () => {
+  const t = useTranslations('Wallet.header');
+  
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4">
@@ -12,7 +15,7 @@ export const WalletHeader = () => {
           >
             <WalletIcon className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">
-              My Wallet
+              {t('title')}
             </span>
           </Link>
         </div>

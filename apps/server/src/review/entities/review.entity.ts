@@ -37,4 +37,27 @@ ReviewSchema.virtual('user', {
 ReviewSchema.set('toJSON', { virtuals: true });
 ReviewSchema.set('toObject', { virtuals: true });
 
+// Pre-save hook to prevent duplicate course reviews
+ReviewSchema.pre('save', async function (next) {
+    if (this.isNew && this.reviewType === ReviewType.COURSE && (this as any).courseId) {
+        const ReviewModel = this.constructor as any;
+
+        // Check for existing course review by same user
+        const existingReview = await ReviewModel.findOne({
+            userId: this.userId,
+            courseId: (this as any).courseId,
+            reviewType: ReviewType.COURSE,
+            isActive: true,
+        });
+
+        if (existingReview) {
+            const error = new Error('Duplicate review: A review already exists for this course by this user');
+            (error as any).code = 11000; // MongoDB duplicate key error code
+            return next(error);
+        }
+    }
+
+    next();
+});
+
 ReviewSchema.plugin(mongoosePaginate);

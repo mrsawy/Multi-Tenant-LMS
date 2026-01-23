@@ -48,7 +48,7 @@ export class PaypalPaymentService {
     private readonly courseService: CourseService,
     private readonly organizationService: OrganizationService,
     private readonly enrollmentService: EnrollmentService,
-  ) { }
+  ) {}
 
   async getPaymentUrl(
     initiateSubscriptionDto: InitiateSubscriptionDto,

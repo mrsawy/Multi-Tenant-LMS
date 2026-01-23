@@ -67,7 +67,7 @@ export interface IUser {
   updatedAt?: Date;
   organization?: Organization
   role: Role;
- 
+
 
 }
 

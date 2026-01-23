@@ -12,10 +12,12 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../../services/user.service';
+import { UserService } from   '../../services/user.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { UpdateUserDto } from '../../dto/update-user.dto';
-import mongoose from 'mongoose';
+import { User } from '../../entities/user.entity';
+import mongoose, { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { RequiredPermissions } from 'src/role/permission.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Actions } from 'src/role/enum/Action.enum';
@@ -33,7 +35,7 @@ export class UserControllerHttp {
   constructor(
     private readonly userService: UserService,
     private readonly roleService: RoleService,
-  ) {}
+  ) { }
 
   @UseGuards(PermissionsGuard)
   @RequiredPermissions({ action: Actions.CREATE, subject: Subjects.USER })

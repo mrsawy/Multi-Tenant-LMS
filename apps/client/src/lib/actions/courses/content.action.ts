@@ -15,7 +15,7 @@ import { IModuleWithContents } from "@/lib/types/course/modules.interface";
 import { IContent } from "@/lib/types/course/content.interface";
 import { AUTH_COOKIE_NAME } from "@/lib/data/constants";
 import { createAuthorizedNatsRequest } from "@/lib/utils/createNatsRequest";
-import { SubmitQuizDto } from "@/lib/types/course/DTO/quizSubmission.dto";
+import { SubmitQuizDto, SubmitQuizResponse } from "@/lib/types/course/DTO/quizSubmission.dto";
 
 export async function createContent(moduleId: string, courseId: string, data: CourseContentFormData, fileKey?: string) {
     try {
@@ -81,6 +81,6 @@ export async function updateContent(contentId: string, updatedData: Partial<ICon
 
 
 
-export async function submitQuizAction(submission: SubmitQuizDto) {
-    return await createAuthorizedNatsRequest<SubmitQuizDto>('enrollment.submitQuiz', submission)
+export async function submitQuizAction(submission: SubmitQuizDto): Promise<SubmitQuizResponse> {
+    return await createAuthorizedNatsRequest<SubmitQuizResponse, SubmitQuizDto>('enrollment.submitQuiz', submission)
 }

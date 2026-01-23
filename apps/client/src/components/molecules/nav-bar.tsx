@@ -47,6 +47,7 @@ import { logout } from '@/lib/actions/auth/auth.action';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import logoSrc from '@/../public/images/logo.png';
+import { ScrollProgress } from '../atoms/scroll-progress';
 // Simple logo component for the navbar
 const Logo = (props: any) => {
   return (
@@ -554,6 +555,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
             )}
           </div>
         </div>
+
       </header>
     );
   },

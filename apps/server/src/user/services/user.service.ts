@@ -1,11 +1,9 @@
 import {
   BadRequestException,
-  ClassSerializerInterceptor,
   ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -20,17 +18,14 @@ import mongoose, {
 import { User, UserDocument } from '../entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { handleError } from 'src/utils/errorHandling';
-import { Roles } from 'src/role/enum/Roles.enum';
-import { ApplyRpcErrorHandling } from 'src/utils/docerators/error-handeling/class/ApplyRpcErrorHandling.decorator';
 
 const saltRounds = 10;
 
-@ApplyRpcErrorHandling
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: PaginateModel<User>,
-  ) { }
+  ) {}
   async create(
     createUserDto: CreateUserDto & { organizationId?: mongoose.Types.ObjectId },
     session?: ClientSession,
@@ -123,38 +118,37 @@ export class UserService {
     filters: mongoose.RootFilterQuery<User>,
     updateUserDto: UpdateUserDto,
   ) {
-    
-    const existingUser = await this.filterOne(filters);
-    if ("roleName" in filters && existingUser.roleName !== filters.roleName) {
-      throw new BadRequestException('You are not authorized to update the role of this user');
-    }
-    
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(
-        updateUserDto.password,
-        saltRounds,
-      ); // Hashed
-    }
+    try {
+      console.log({ updateUserDto });
 
-    const result = await this.userModel.updateOne(filters, {
-      $set: updateUserDto,
-    });
-    if (result.matchedCount === 0) {
-      throw new NotFoundException('User not found');
-    }
+      if (updateUserDto.password) {
+        updateUserDto.password = await bcrypt.hash(
+          updateUserDto.password,
+          saltRounds,
+        ); // Hashed
+      }
 
-    if (result.modifiedCount === 0) {
+      const result = await this.userModel.updateOne(filters, {
+        $set: updateUserDto,
+      });
+      if (result.matchedCount === 0) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (result.modifiedCount === 0) {
+        return {
+          message: 'User matched but no changes were made',
+          updated: false,
+        };
+      }
+
       return {
-        message: 'User matched but no changes were made',
-        updated: false,
+        message: 'User updated successfully',
+        updated: true,
       };
+    } catch (error) {
+      handleError(error);
     }
-
-    return {
-      message: 'User updated successfully',
-      updated: true,
-    };
-
   }
 
   async delete(filters: mongoose.RootFilterQuery<User>) {

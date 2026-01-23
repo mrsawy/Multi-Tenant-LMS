@@ -50,7 +50,7 @@ const InstructorCard4: React.FC<{ instructor: IInstructor }> = ({ instructor }) 
                                 variant="h5"
                                 weight="bold"
                                 align="center"
-                                className='mb-1 group-hover:text-brand-purple transition-colors flex justify-center' 
+                                className='mb-1 group-hover:text-brand-purple transition-colors flex justify-center'
                             >
                                 {instructor.firstName} {instructor.lastName}
                             </Typography>

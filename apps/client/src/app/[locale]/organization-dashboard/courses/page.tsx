@@ -6,7 +6,7 @@ export default async function CoursePage() {
     try {
         const response = await getCourses()
         const courses = Array.isArray(response.docs) ? response.docs : [];
-        
+
         return (
             <div className="p-4">
                 <h1 className="text-2xl font-semibold mb-4">Courses Management</h1>

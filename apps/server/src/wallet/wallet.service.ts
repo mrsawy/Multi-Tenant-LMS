@@ -22,7 +22,6 @@ import { Connection } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { PaymentPurpose } from 'src/payment/types/PaymentPurpose.interface';
 import { OrganizationService } from 'src/organization/organization.service';
-import { CourseService } from 'src/course/services/course.service';
 
 @Injectable()
 export class WalletService {

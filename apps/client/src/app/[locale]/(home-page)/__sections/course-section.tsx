@@ -1,63 +1,79 @@
-"use client"
-import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
-import { Clock, Users, Star, Play, BookOpen, TrendingUp } from "lucide-react";
-import { Paginated } from "@/lib/types/Paginated";
-import { ICourse } from "@/lib/types/course/course.interface";
-import CourseCard from "../courses/__components/course-card";
+import { BookOpen } from "lucide-react";
+import CourseCard from "../../../../components/organs/course-card";
+import { getFeaturedCourses } from "@/lib/actions/courses/getFeaturedCourses.action";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import CategoryFilter from "./__components/category-filter";
 
+interface CoursesSectionProps {
+    searchParams?: Promise<{ category?: string }>;
+}
 
-const CoursesSection = ({ courses }: { courses: Paginated<ICourse> }) => {
+const CoursesSection = async ({ searchParams }: CoursesSectionProps) => {
+    const t = await getTranslations('CoursesSection');
+    const params = await searchParams;
+    const allText = t("all");
+    const selectedCategory = params?.category || allText;
 
+    const courses = await getFeaturedCourses({ limit: 9 });
+    console.dir({ courses }, { depth: null });
 
-    const categories = ["All", "Web Development", "Data Science", "Design", "Cloud Computing", "Marketing", "Blockchain"];
+    const allCategories = [allText, ...new Set(courses.flatMap((course) => course.categories).filter((category) => !!category).map((category) => category?.name))].slice(0, 7);
+
+    // Filter courses based on selected category
+    const filteredCourses = selectedCategory === allText
+        ? courses
+        : courses.filter((course) =>
+            course.categories?.some((category) => category?.name === selectedCategory)
+        );
 
     return (
-        <section className="  ">
+        <section className="py-24 bg-section-bg">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-                        Featured
+                        {t('title.featured')}{" "}
                         <span className="xbg-gradient-to-r from-brand-purple to-brand-blue bg-clip-text xtext-transparent ml-3">
-                            Courses
+                            {t('title.courses')}
                         </span>
                     </h2>
                     <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-                        Discover our most popular courses designed by industry experts to advance your skills
-                        and accelerate your career growth.
+                        {t('description')}
                     </p>
 
                     {/* Category Filter */}
-                    <div className="flex flex-wrap justify-center gap-3">
-                        {categories.map((category) => (
-                            <Button
-                                key={category}
-                                variant={category === "All" ? "default" : "outline"}
-                                size="sm"
-                                className={"border-border hover:border-brand-purple/30 hover:bg-brand-purple/5"}
-                            >
-                                {category}
-                            </Button>
-                        ))}
-                    </div>
+                    <CategoryFilter categories={allCategories} />
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                    {courses.docs.map((course) => (
-                        <CourseCard key={course._id?.toString()} course={course} />
-                    ))}
+                    {filteredCourses.length > 0 ? (
+                        filteredCourses.map((course) => (
+                            <CourseCard key={course._id?.toString()} course={course} />
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-12">
+                            <p className="text-muted-foreground text-lg">
+                                {t('noCoursesFound')}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* View All Courses */}
                 <div className="text-center mt-12">
-                    <Button
-                        size="lg"
-                        variant="outline"
-                        className="border-brand-purple/30 text-brand-purple hover:bg-brand-purple hover: transition-all duration-300 px-8"
-                    >
-                        <BookOpen className="w-5 h-5 mr-2" />
-                        View All Courses
-                    </Button>
+                    <Link href="/courses">
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            effect="expandIcon"
+                            icon={<BookOpen />}
+                            iconPlacement="left"
+                        >
+                            {t('viewAllButton')}
+                        </Button>
+                    </Link>
+
                 </div>
             </div>
         </section>

@@ -50,8 +50,8 @@ export async function findInstructors(filters: IInstructorFilters) {
                 id: v7(),
                 data: {
                     authorization: idToken,
-                    options: { 
-                        ...filters, 
+                    options: {
+                        ...filters,
                         limit: filters.limit || 12,
                         page: filters.page || 1
                     },

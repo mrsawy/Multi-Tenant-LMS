@@ -36,6 +36,8 @@ export class EnrollmentService {
     private readonly enrollmentModel: PaginateModel<Enrollment>,
     @InjectModel(Course.name)
     private readonly courseModel: PaginateModel<Course>,
+    @InjectModel(Organization.name)
+    private readonly organizationModel: PaginateModel<Organization>,
     @InjectConnection() private readonly connection: Connection,
     private readonly currencyService: CurrencyService,
     private readonly instructorService: InstructorService,
@@ -89,6 +91,13 @@ export class EnrollmentService {
       { _id: new mongoose.Types.ObjectId(courseId) },
       { $inc: { 'stats.totalEnrollments': 1 } },
     );
+
+    // Update organization totalEnrollments
+    await this.organizationModel.updateOne(
+      { _id: course.organizationId },
+      { $inc: { 'stats.totalEnrollments': 1 } },
+    );
+
     if (course.instructorId) {
       this.instructorService.update(
         { _id: new mongoose.Types.ObjectId(course.instructorId) },

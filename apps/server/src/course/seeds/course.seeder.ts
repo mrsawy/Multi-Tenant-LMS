@@ -86,7 +86,7 @@ export class CourseSeeder {
         courseId: course._id,
         organizationId,
         createdBy,
-        title: `Module ${i + 1}: ${faker.lorem.words(3)}`,
+        title: `${faker.lorem.words(5)}`,
         description: faker.lorem.sentence(),
         learningObjectives: [
           faker.lorem.sentence(),
@@ -127,7 +127,7 @@ export class CourseSeeder {
           moduleId: module._id,
           createdBy,
           type,
-          title: `${type} content ${j + 1}: ${faker.lorem.words(2)}`,
+          title: ` ${faker.lorem.words(4)}`,
           description: faker.lorem.sentence(),
         };
 

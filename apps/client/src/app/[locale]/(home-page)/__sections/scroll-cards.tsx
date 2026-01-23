@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const ScrollCards = () => {
   const t = useTranslations('ScrollCards');
@@ -10,6 +11,7 @@ const ScrollCards = () => {
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(0);
   const ticking = useRef(false);
 
   const cardsData = [
@@ -21,28 +23,28 @@ const ScrollCards = () => {
     {
       image: '/images/home-section-cards/card2/5.jpg',
       styles: { backgroundImage: "url('/images/home-section-cards/card2/bg.jpg')" },
-      tag: t('cards.1.tag'), title: t('cards.1.title'), description: t('cards.1.description')
+      tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
     },
     {
       image: '/images/home-section-cards/card3/3.jpg',
       styles: { backgroundImage: "url('/images/home-section-cards/card3/bg.jpg')" },
-      tag: t('cards.2.tag'), title: t('cards.2.title'), description: t('cards.2.description')
-    },
-    {
-      image: '/images/home-section-cards/card4/6.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card4/bg.jpg')" },
-      tag: t('cards.3.tag'), title: t('cards.3.title'), description: t('cards.3.description')
-    },
-    {
-      image: '/images/home-section-cards/card5/4.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card5/bg.jpg')" },
-      tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
-    },
-    {
-      image: '/images/home-section-cards/card6/2.jpg',
-      styles: { backgroundImage: "url('/images/home-section-cards/card6/bg.jpg')" },
       tag: t('cards.5.tag'), title: t('cards.5.title'), description: t('cards.5.description')
     },
+    // {
+    //   image: '/images/home-section-cards/card4/6.jpg',
+    //   styles: { backgroundImage: "url('/images/home-section-cards/card4/bg.jpg')" },
+    //   tag: t('cards.3.tag'), title: t('cards.3.title'), description: t('cards.3.description')
+    // },
+      // {
+      //   image: '/images/home-section-cards/card5/4.jpg',
+      //   styles: { backgroundImage: "url('/images/home-section-cards/card5/bg.jpg')" },
+      //   tag: t('cards.4.tag'), title: t('cards.4.title'), description: t('cards.4.description')
+      // },
+      // {
+      //   image: '/images/home-section-cards/card6/2.jpg',
+      //   styles: { backgroundImage: "url('/images/home-section-cards/card6/bg.jpg')" },
+      //   tag: t('cards.5.tag'), title: t('cards.5.title'), description: t('cards.5.description')
+      // },
   ];
 
   // More responsive timing function with shorter duration
@@ -53,6 +55,23 @@ const ScrollCards = () => {
     transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
     willChange: 'transform, opacity',
   };
+
+  // Track viewport height for conditional styling
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    // Set initial height
+    updateViewportHeight();
+
+    // Listen for resize events
+    window.addEventListener('resize', updateViewportHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportHeight);
+    };
+  }, []);
 
   useEffect(() => {
     // Create intersection observer to detect when section is in view
@@ -183,10 +202,10 @@ const ScrollCards = () => {
                         {card.tag}
                       </span>
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-bold mb-6 text-gray-900 leading-[1.1] font-display">
+                    <h3 className={cn(`text-base  sm:text-3xl md:text-5xl font-bold mb-6 text-gray-900 leading-[1.1] font-display`, viewportHeight >= 700 && 'text-2xl')}>
                       {card.title}
                     </h3>
-                    <p className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-lg">
+                    <p className={cn(`text-gray-600 text-xs md:text-xl leading-relaxed max-w-lg`, viewportHeight >= 700 && 'text-lg')}>
                       {card.description}
                     </p>
                   </div>

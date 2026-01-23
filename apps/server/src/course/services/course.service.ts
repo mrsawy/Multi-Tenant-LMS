@@ -6,7 +6,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-; import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import mongoose, {
   ClientSession,
   Connection,
@@ -34,6 +34,7 @@ import { CourseModule } from '../course.module';
 import { CourseContent } from '../entities/course-content.entity';
 import { InstructorService } from 'src/user/services/instructor.service';
 import { convertToObjectId } from 'src/utils/ObjectId.utils';
+import { Organization } from 'src/organization/entities/organization.entity';
 
 @Injectable()
 export class CourseService {
@@ -41,6 +42,8 @@ export class CourseService {
     @InjectConnection() private readonly connection: Connection,
     @InjectModel(Course.name)
     private readonly courseModel: PaginateModel<Course>,
+    @InjectModel(Organization.name)
+    private readonly organizationModel: PaginateModel<Organization>,
     private readonly currencyService: CurrencyService,
     @Inject(forwardRef(() => CourseModulesService))
     private readonly courseModuleService: CourseModulesService,
@@ -78,6 +81,13 @@ export class CourseService {
       );
     }
     const createdCourse = await this.courseModel.create({ ...createCourseDto });
+
+    // Update organization totalCourses
+    await this.organizationModel.updateOne(
+      { _id: new mongoose.Types.ObjectId(createCourseDto.organizationId) },
+      { $inc: { 'stats.totalCourses': 1 } },
+    );
+
     if (createCourseDto.instructorId) {
       this.instructorService.update(
         { _id: new mongoose.Types.ObjectId(createCourseDto.instructorId) },
@@ -554,6 +564,9 @@ export class CourseService {
         })
         .session(session);
 
+      // Track organization IDs and count courses per organization
+      const organizationCourseCounts = new Map<string, number>();
+
       for (const course of courses) {
         await this.courseModuleService.deleteModules(
           course.modulesIds.map((id) => id.toString()),
@@ -562,11 +575,31 @@ export class CourseService {
         if (course.thumbnailKey) {
           await this.fileService.deleteFile(course.thumbnailKey);
         }
+
+        // Track courses per organization for stats update
+        const orgId = course.organizationId?.toString();
+        if (orgId) {
+          organizationCourseCounts.set(
+            orgId,
+            (organizationCourseCounts.get(orgId) || 0) + 1
+          );
+        }
       }
 
       await this.courseModel
         .deleteMany({ _id: { $in: coursesIds } })
         .session(session);
+
+      // Update organization totalCourses for each affected organization
+      for (const [organizationId, count] of organizationCourseCounts.entries()) {
+        await this.organizationModel.updateOne(
+          { _id: new mongoose.Types.ObjectId(organizationId) },
+          { $inc: { 'stats.totalCourses': -count } },
+          { session },
+        );
+      }
+
+      await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
       console.error('Error deleting Courses:', error);

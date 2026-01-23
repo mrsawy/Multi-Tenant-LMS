@@ -167,7 +167,7 @@ export class Course extends Document<Types.ObjectId> {
   @Prop({ type: Boolean, default: false })
   isPaid: boolean;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User',  })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   instructorId: Types.ObjectId;
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
@@ -230,7 +230,6 @@ export class Course extends Document<Types.ObjectId> {
 
   @Prop({ type: String, required: false })
   paypalPlanId: string;
-  
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

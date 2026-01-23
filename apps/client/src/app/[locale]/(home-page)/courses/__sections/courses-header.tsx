@@ -17,7 +17,7 @@ import FiltersBar from "./filters-bar";
 import { ICourseFilters } from "@/lib/types/course/ICourseFilters";
 import { useRouter } from "next/navigation";
 import { Currency } from "@/lib/data/currency.enum";
-import CourseCard from "../__components/course-card";
+import CourseCard from "../../../../../components/organs/course-card";
 
 const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => {
     const [showFilters, setShowFilters] = useState(false);

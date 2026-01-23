@@ -101,6 +101,3 @@ export async function getCoursesByInstructor(instructorId: string, options?: { p
         throw new Error()
     }
 }
-
-
-

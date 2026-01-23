@@ -206,6 +206,19 @@ export class User extends Document<mongoose.Types.ObjectId> {
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.plugin(mongoosePaginate);
 
+// Compound index for featured instructors query performance
+UserSchema.index(
+  {
+    roleName: 1,
+    totalCourses: 1,
+    totalCoursesReviews: -1,
+  },
+  {
+    name: 'featured_instructors_idx',
+    background: true,
+  },
+);
+
 // Pre-save hook to reset instructor-only fields if user is not an instructor
 UserSchema.pre('save', function (next) {
   const isInstructor = this.roleName &&

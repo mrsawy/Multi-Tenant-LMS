@@ -8,7 +8,6 @@ import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Organization } from '../../organization/entities/organization.entity';
 import { Category } from '../../category/entities/category.entity';
 import { Course } from '../../course/entities/course.entity';
-import { CourseModuleEntity } from '../../course/entities/course-module.entity';
 import { CourseContent } from '../../course/entities/course-content.entity';
 import { Enrollment } from '../../enrollment/entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
@@ -22,7 +21,7 @@ import { UserSeeder } from '../../user/seeds/user.seeder';
 import { OrganizationSeeder } from '../../organization/seeds/organization.seeder';
 import { CourseSeeder } from '../../course/seeds/course.seeder';
 import { EnrollmentSeeder } from '../../enrollment/seeds/enrollment.seeder';
-import { CategorySeeder } from '../../category/seed/category.seeder';
+import { CategorySeeder } from '../../category/seeds/category.seeder';
 import { Connection } from 'mongoose';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { ORGANIZATIONS_SEED, ORGANIZATIONS_CONFIG } from './seed.config';
@@ -52,7 +51,7 @@ async function bootstrap() {
   const roleSeeder = new RoleSeeder(roleModel);
   const planSeeder = new PlanSeeder(planModel);
   const userSeeder = new UserSeeder(userModel, walletModel);
-  const orgSeeder = new OrganizationSeeder(organizationModel);
+  const orgSeeder = new OrganizationSeeder(organizationModel, enrollmentModel, reviewModel, courseModel);
   const categorySeeder = new CategorySeeder(categoryModel);
   const courseSeeder = new CourseSeeder(courseModel, categoryModel, moduleModel, contentModel, userModel);
   const enrollmentSeeder = new EnrollmentSeeder(enrollmentModel, attendanceModel, reviewModel, discussionModel, courseModel, moduleModel, contentModel, userModel);
@@ -208,15 +207,23 @@ async function bootstrap() {
     console.log(`  Seeding Enrollments for ${organization.name}...`);
     await enrollmentSeeder.seedEnrollmentsForStudents(students, courses, org._id);
 
-    await reviewSeeder.seedCoursesReviews(courses, students);
+    console.log(`  Seeding Reviews for ${organization.name}...`);
+    await reviewSeeder.seedCoursesReviews(courses, students, organization);
+
+    // Update organization stats
+    console.log(`  Updating organization statistics for ${organization.name}...`);
+    const totalCourses = organization.totalCourses ?? courses.length;
+    await orgSeeder.updateOrganizationStats(org._id, totalCourses);
 
     // Recalculate all instructor totalCourses to ensure accuracy
     console.log(`  Recalculating instructor statistics for ${organization.name}...`);
     await courseSeeder.recalculateAllInstructorTotalCourses(org._id);
+    await reviewSeeder.recalculateAllInstructorCourseRatings(org._id);
   }
 
   console.log('Seeding complete!');
   await app.close();
+  process.exit(0);
 }
 
 bootstrap();

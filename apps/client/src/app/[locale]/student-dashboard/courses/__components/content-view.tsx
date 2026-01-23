@@ -23,6 +23,7 @@ import { useParams } from 'next/navigation';
 import { toast } from "react-toastify";
 import { DiscussionSection } from "@/components/organs/discussion-section";
 import { DiscussionType } from "@/lib/types/discussion/discussion.types";
+import { useTranslations } from "next-intl";
 
 
 interface ContentViewProps {
@@ -31,6 +32,8 @@ interface ContentViewProps {
 }
 
 export default function ContentView({ content, progress }: ContentViewProps) {
+    const t = useTranslations('StudentCourses.contentView');
+    const tContentTypes = useTranslations('StudentCourses.contentTypes');
 
     const [isComplete, setIsComplete] = useState<boolean>(progress.completedContents.includes(content._id))
     useEffect(() => {
@@ -83,7 +86,7 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                 return (
                     <div className="text-center py-12">
                         <FileText className="w-24 h-24 mx-auto mb-4" />
-                        <p className="text-xl text-gray-600">Content not available</p>
+                        <p className="text-xl text-gray-600">{t('contentNotAvailable')}</p>
                     </div>
                 );
         }
@@ -93,14 +96,14 @@ export default function ContentView({ content, progress }: ContentViewProps) {
         <div className="min-h-screen bg-gradient-to-br">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-8 flex flex-col">
                     <Button
                         variant="ghost"
                         onClick={() => { router.back() }}
-                        className="mb-6"
+                        className="mb-6 flex flex-col self-end"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Course
+                        {t('backToCourse')}
                     </Button>
 
                     <div className="rounded-lg shadow-sm border p-6">
@@ -110,7 +113,7 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                             </div>
                             <div className="flex justify-between w-full">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                    <h1 className="text-3xl font-bold mb-2">
                                         {content.title}
                                     </h1>
                                     {content.description && (
@@ -120,12 +123,12 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                                     )}
                                     <div className="flex items-center gap-3">
                                         <Badge variant="outline" className="text-sm">
-                                            {content.type}
+                                            {tContentTypes(content.type)}
                                         </Badge>
                                         {content.quizDurationInMinutes && (
                                             <Badge variant="outline" className="flex items-center gap-1">
                                                 <Clock className="w-3 h-3" />
-                                                {content.quizDurationInMinutes} min
+                                                {content.quizDurationInMinutes} {t('minutes')}
                                             </Badge>
                                         )}
                                     </div>
@@ -133,7 +136,7 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                                 <div>
                                     {isComplete && (
                                         <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                            ✓ Completed
+                                            {t('completed')}
                                         </Badge>
                                     )}
                                 </div>
@@ -152,7 +155,7 @@ export default function ContentView({ content, progress }: ContentViewProps) {
                     type={DiscussionType.CONTENT}
                     entityId={content._id}
                     contentId={content._id}
-                    title="Content Discussions"
+                    title={t('contentDiscussions')}
                 />
             </div>
         </div>

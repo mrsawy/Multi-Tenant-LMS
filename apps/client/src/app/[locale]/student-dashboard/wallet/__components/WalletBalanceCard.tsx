@@ -6,6 +6,7 @@ import { Button } from '@/components/atoms/button';
 import { useState } from 'react';
 import { AddFundsDialog } from './AddFundsDialog';
 import { WithdrawDialog } from './WithdrawDialog';
+import { useTranslations } from 'next-intl';
 
 interface WalletBalanceCardProps {
   balance: number;
@@ -20,6 +21,7 @@ export const WalletBalanceCard = ({
   isFrozen = false,
   onTransactionComplete,
 }: WalletBalanceCardProps) => {
+  const t = useTranslations('Wallet.balanceCard');
   const [showAddFunds, setShowAddFunds] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
 
@@ -36,7 +38,7 @@ export const WalletBalanceCard = ({
           <div className="flex items-start justify-between mb-8">
             <div>
               <p className="text-primary-foreground/80 mb-2">
-                Available Balance
+                {t('availableBalance')}
               </p>
               <h2 className="text-5xl font-bold">
                 {balance.toFixed(2)}
@@ -46,7 +48,7 @@ export const WalletBalanceCard = ({
               </p>
               {isFrozen && (
                 <p className="text-yellow-300 mt-2 text-sm font-semibold">
-                  ⚠️ Wallet is frozen
+                  {t('walletFrozen')}
                 </p>
               )}
             </div>
@@ -61,7 +63,7 @@ export const WalletBalanceCard = ({
               disabled={isFrozen}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Funds
+              {t('addFunds')}
             </Button>
             <Button
               variant="outline"
@@ -69,7 +71,7 @@ export const WalletBalanceCard = ({
               onClick={() => setShowWithdraw(true)}
               disabled={isFrozen}
             >
-              Withdraw
+              {t('withdraw')}
             </Button>
           </div>
         </CardContent>

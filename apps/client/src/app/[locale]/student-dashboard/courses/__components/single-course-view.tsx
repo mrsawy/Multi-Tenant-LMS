@@ -13,6 +13,7 @@ import { ReviewType } from "@/lib/types/review/review.types";
 import { UserRatingDisplay } from "@/components/organs/user-rating-display";
 import { DiscussionSection } from "@/components/organs/discussion-section";
 import { DiscussionType } from "@/lib/types/discussion/discussion.types";
+import { useTranslations } from "next-intl";
 
 
 
@@ -23,7 +24,8 @@ interface CourseViewProps {
 }
 
 export default function CourseView({ course, enrollment, onViewContent }: CourseViewProps) {
-
+    const t = useTranslations('StudentCourses.courseView');
+    const tStatus = useTranslations('StudentCourses.subscriptionStatus');
     const router = useRouter()
     console.log({ course })
     const handleStartContent = (contentId: string) => {
@@ -34,10 +36,10 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-xl font-semibold mb-2">Course not found</h2>
+                    <h2 className="text-xl font-semibold mb-2">{t('courseNotFound')}</h2>
                     <Button onClick={
                         () => { router.back() }
-                    }>Go Back</Button>
+                    }>{t('goBack')}</Button>
                 </div>
             </div>
         );
@@ -46,29 +48,30 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
     const formatDuration = (minutes: number) => {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
-        return `${hours}h ${mins}m`;
+        return t('durationFormat', { hours, mins });
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br  ">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="mb-6">
+                <div className="mb-6 flex flex-col">
                     <Button
                         variant="ghost"
                         onClick={
                             () => { router.back() }
                         }
-                        className="mb-4"
+                        className="mb-4 self-end"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to My Courses
+                        {t('backToCourses')}
                     </Button>
 
-                    <div className="flex justify-end mb-4">
-                        <UserRatingDisplay 
-                            reviewType={ReviewType.COURSE} 
-                            entityId={course._id} 
+                    <div className="flex justify-end mb-4 self-start">
+                        <UserRatingDisplay
+                            reviewType={ReviewType.COURSE}
+                            entityId={course._id}
+                            showLabel={false}
                         />
                     </div>
 
@@ -89,11 +92,11 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                                     </div>
                                     <div className="flex items-center gap-2 text-sm ">
                                         <Users className="w-4 h-4" />
-                                        <span>{course.stats?.totalEnrollments.toLocaleString()} students</span>
+                                        <span>{course.stats?.totalEnrollments.toLocaleString()} {t('students')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm ">
                                         <Star className="w-4 h-4" />
-                                        <span>{course.stats?.averageRating.toFixed(1)} rating</span>
+                                        <span>{course.stats?.averageRating.toFixed(1)} {t('rating')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm ">
                                         <BookOpen className="w-4 h-4" />
@@ -103,7 +106,7 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
 
                                 {course.learningObjectives.length > 0 && (
                                     <div className=" p-4 rounded-lg">
-                                        <h3 className="font-semibold mb-2">What you'll learn:</h3>
+                                        <h3 className="font-semibold mb-2">{t('whatYoullLearn')}</h3>
                                         <ul className="space-y-1">
                                             {course.learningObjectives.map((objective, index) => (
                                                 <li key={index} className="flex items-start gap-2 text-sm">
@@ -118,11 +121,11 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
 
                             <div className="space-y-4">
                                 <div className=" p-4 rounded-lg">
-                                    <h3 className="font-semibold mb-3">Your Progress</h3>
+                                    <h3 className="font-semibold mb-3">{t('yourProgress')}</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <div className="flex justify-between text-sm mb-1">
-                                                <span>Overall Progress</span>
+                                                <span>{t('overallProgress')}</span>
                                                 <span>{enrollment.progressPercentage}%</span>
                                             </div>
                                             <Progress value={enrollment.progressPercentage} className="h-2" />
@@ -130,11 +133,11 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
 
                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <p className="">Time Spent</p>
+                                                <p className="">{t('timeSpent')}</p>
                                                 <p className="font-semibold">{formatDuration(enrollment.timeSpentMinutes)}</p>
                                             </div>
                                             <div>
-                                                <p className="">Last Accessed</p>
+                                                <p className="">{t('lastAccessed')}</p>
                                                 <p className="font-semibold">
                                                     {new Date(enrollment.lastAccessedAt).toLocaleDateString()}
                                                 </p>
@@ -144,7 +147,7 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                                         {enrollment.certificate.issued && (
                                             <Badge className="w-full justify-center bg-green-500">
                                                 <Award className="w-4 h-4 mr-2" />
-                                                Certificate Earned
+                                                {t('certificateEarned')}
                                             </Badge>
                                         )}
                                     </div>
@@ -152,21 +155,21 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
 
                                 {enrollment.subscription && (
                                     <div className=" p-4 rounded-lg">
-                                        <h3 className="font-semibold mb-2">Subscription</h3>
+                                        <h3 className="font-semibold mb-2">{t('subscription')}</h3>
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
-                                                <span>Status</span>
+                                                <span>{t('status')}</span>
                                                 <Badge className={
                                                     enrollment.subscription.status === 'ACTIVE'
                                                         ? 'bg-green-500'
                                                         : '0'
                                                 }>
-                                                    {enrollment.subscription.status}
+                                                    {tStatus(enrollment.subscription.status)}
                                                 </Badge>
                                             </div>
                                             {enrollment.subscription.next_billing && (
                                                 <div className="flex justify-between">
-                                                    <span>Next Billing</span>
+                                                    <span>{t('nextBilling')}</span>
                                                     <span>{new Date(enrollment.subscription.next_billing).toLocaleDateString()}</span>
                                                 </div>
                                             )}
@@ -180,7 +183,7 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
 
                 {/* Course Content */}
                 <div className=" rounded-lg shadow-sm border p-6">
-                    <h2 className="text-2xl font-bold mb-6">Course Content</h2>
+                    <h2 className="text-2xl font-bold mb-6">{t('courseContent')}</h2>
                     <CourseModules
                         modules={course.modules}
                         completedModules={enrollment.progress.completedModules}
@@ -193,9 +196,9 @@ export default function CourseView({ course, enrollment, onViewContent }: Course
                     type={DiscussionType.COURSE}
                     entityId={course._id}
                     courseId={course._id}
-                    title="Course Discussions"
+                    title={t('courseDiscussions')}
                 />
-            </div> 
+            </div>
         </div>
     );
 }

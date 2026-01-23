@@ -94,7 +94,7 @@ export function DataTable<TData>({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [internalPagination, setInternalPagination] = React.useState({ pageIndex: 0, pageSize: pageSize, })
   const [globalFilterState, setGlobalFilterState] = React.useState(globalFilter || '')
-  
+
   // Use external pagination if provided (for manual pagination), otherwise use internal
   const pagination = manualPagination && externalPagination ? externalPagination : internalPagination
 
@@ -452,4 +452,3 @@ export function DataTable<TData>({
     </Tabs>
   )
 }
-

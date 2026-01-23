@@ -6,34 +6,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CourseService } from '../services/course.service';
-import {
-  Ctx,
-  MessagePattern,
-  Payload,
-  RpcException,
-} from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, } from '@nestjs/microservices';
 import { RpcValidationPipe } from 'src/utils/RpcValidationPipe';
-import { CreateCourseDto } from '../dto/create-course.dto';
-import { UpdateCourseDto } from '../dto/update-course.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { IUserContext } from 'src/utils/types/IUserContext.interface';
 import { handleRpcError } from 'src/utils/errorHandling';
-import { CreateCourseModuleDto } from '../dto/create-course-module.dto';
-import { CourseModulesService } from '../services/courseModules.service';
 import { CreateCourseContentDto } from '../dto/create-course-content.dto';
 import { CourseContentService } from '../services/courseContent.service';
-import { PaginateOptions } from 'mongoose';
-import { ICourseFilters } from 'src/utils/types/CourseFilters';
-import { SubmitQuizDto } from '../../enrollment/dto/quiz-submission.dto';
 import { QuizService } from '../services/quiz.service';
-import { EnrollmentService } from 'src/enrollment/services/enrollment.service';
 import { ContentType } from '../enum/contentType.enum';
 import { VideoType } from '../enum/videoType.enum';
 import { FileService } from 'src/file/file.service';
 import { ProjectService } from '../services/project.service';
 import { LiveSessionService } from '../services/liveSession.service';
-import { SubmitProjectDto } from '../../enrollment/dto/project-submission.dto';
-import { MarkLiveSessionAttendanceDto } from '../../enrollment/dto/live-session-attendance.dto';
+
 
 @Controller()
 export class ContentControllerMessage {

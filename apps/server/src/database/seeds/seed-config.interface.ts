@@ -39,5 +39,6 @@ export interface OrganizationSeedConfig {
   studentsCount: number;
   teachersCount: number;
   adminsCount: number;
+  totalCourses?: number; // Optional: will default to courses.length if not provided
   courses: CourseSeedConfig[];
 }

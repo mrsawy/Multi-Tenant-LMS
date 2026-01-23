@@ -18,6 +18,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/atoms/alert';
 import { useWallet } from '@/lib/hooks/wallet/use-wallet';
 import { toast } from 'react-toastify';
+import { useTranslations } from 'next-intl';
 
 interface WithdrawDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ export const WithdrawDialog = ({
   currentBalance,
   onSuccess,    
 }: WithdrawDialogProps) => {
+  const t = useTranslations('Wallet.withdraw');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const { isLoading } = useWallet();
@@ -43,13 +45,13 @@ export const WithdrawDialog = ({
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      toast.success('Please enter a valid amount greater than 0');
+      toast.error(t('validation.invalidAmount'));
       return;
     }
 
     if (numAmount > currentBalance) {
-      toast.success(
-        `You cannot withdraw more than your current balance (${currency} ${currentBalance.toFixed(2)})`,
+      toast.error(
+        t('validation.exceedsBalance', { currency, balance: currentBalance.toFixed(2) }),
       );
       return;
     }
@@ -57,14 +59,14 @@ export const WithdrawDialog = ({
     try {
       //   await withdraw(numAmount, currency, description || 'Withdrawal');
       toast.success(
-        `Successfully withdrew ${currency} ${numAmount.toFixed(2)} from your wallet`,
+        t('success.withdrawn', { currency, amount: numAmount.toFixed(2) }),
       );
       setAmount('');
       setDescription('');
       onSuccess?.();
     } catch (error) {
-      toast.success(
-        error instanceof Error ? error.message : 'Failed to withdraw',
+      toast.error(
+        error instanceof Error ? error.message : t('error.failed'),
       );
     }
   };
@@ -77,22 +79,21 @@ export const WithdrawDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Withdraw Funds</DialogTitle>
+            <DialogTitle>{t('title')}</DialogTitle>
             <DialogDescription>
-              Withdraw money from your wallet. Available balance: {currency}{' '}
-              {currentBalance.toFixed(2)}
+              {t('description', { currency, balance: currentBalance.toFixed(2) })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="withdraw-amount">Amount ({currency})</Label>
+              <Label htmlFor="withdraw-amount">{t('amount', { currency })}</Label>
               <Input
                 id="withdraw-amount"
                 type="number"
                 step="0.01"
                 min="0.01"
                 max={currentBalance}
-                placeholder="0.00"
+                placeholder={t('amountPlaceholder')}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
@@ -101,12 +102,12 @@ export const WithdrawDialog = ({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="withdraw-description">
-                Description (Optional)
+                {t('descriptionLabel')}
               </Label>
               <Input
                 id="withdraw-description"
                 type="text"
-                placeholder="e.g., Bank transfer"
+                placeholder={t('descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
@@ -117,7 +118,7 @@ export const WithdrawDialog = ({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Amount exceeds available balance
+                  {t('validation.amountExceedsBalance')}
                 </AlertDescription>
               </Alert>
             )}
@@ -129,11 +130,11 @@ export const WithdrawDialog = ({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || showWarning}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Withdraw
+              {t('withdraw')}
             </Button>
           </DialogFooter>
         </form>

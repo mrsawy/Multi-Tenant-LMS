@@ -7,6 +7,9 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
+import { useLocale } from "next-intl"
+import { ar, enUS } from "date-fns/locale"
+import { format } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/atoms/button"
@@ -24,10 +27,13 @@ function Calendar({
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
   const defaultClassNames = getDefaultClassNames()
+  const locale = useLocale()
+  const dateFnsLocale = locale === "ar" ? ar : enUS
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      locale={dateFnsLocale}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
@@ -37,7 +43,12 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString(locale, { month: "short" }),
+        formatWeekdayName: (date, options) => {
+          const weekdayName = format(date, "EEE", { locale: dateFnsLocale })
+          // For Arabic, show only first letter; for English, show first 2 letters
+          return locale === "ar" ? weekdayName.charAt(0) : weekdayName.substring(0, 2)
+        },
         ...formatters,
       }}
       classNames={{

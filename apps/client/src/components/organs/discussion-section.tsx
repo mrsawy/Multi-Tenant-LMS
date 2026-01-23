@@ -8,6 +8,7 @@ import { MessageSquare, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
 import { toast } from 'react-toastify';
 import { useDiscussion } from '@/lib/hooks/discussion/useDiscussion.hook';
 import { Button } from '@/components/atoms/button';
+import { useTranslations } from 'next-intl';
 
 interface DiscussionSectionProps {
   type: DiscussionType;
@@ -19,8 +20,10 @@ interface DiscussionSectionProps {
   title?: string;
 }
 
-export function DiscussionSection({ type, entityId, courseId, moduleId, contentId, currentUserId, title = 'Discussions' }: DiscussionSectionProps) {
+export function DiscussionSection({ type, entityId, courseId, moduleId, contentId, currentUserId, title }: DiscussionSectionProps) {
+  const t = useTranslations('StudentCourses.discussion');
   const [isOpen, setIsOpen] = useState(false);
+  const displayTitle = title || t('defaultTitle');
 
   const { discussions, total, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, createDiscussion, refetch } = useDiscussion({
     type,
@@ -48,7 +51,7 @@ export function DiscussionSection({ type, entityId, courseId, moduleId, contentI
               <div className="flex items-center gap-2">
                 {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                 <MessageSquare className="h-5 w-5" />
-                <CardTitle className="text-lg">{title}</CardTitle>
+                <CardTitle className="text-lg">{displayTitle}</CardTitle>
                 {total > 0 && <span className="text-muted-foreground text-sm">({total})</span>}
               </div>
             </div>
@@ -58,8 +61,8 @@ export function DiscussionSection({ type, entityId, courseId, moduleId, contentI
         <CollapsibleContent>
           <CardContent className="space-y-6">
             <div>
-              <h4 className="mb-3 text-sm font-medium">Start a discussion</h4>
-              <DiscussionForm onSubmit={handleCreateDiscussion} placeholder="Share your thoughts, ask questions, or start a discussion..." submitLabel="Post Discussion" />
+              <h4 className="mb-3 text-sm font-medium">{t('startDiscussion')}</h4>
+              <DiscussionForm onSubmit={handleCreateDiscussion} placeholder={t('placeholder')} submitLabel={t('postDiscussion')} />
             </div>
 
             <div className="border-t pt-6">
@@ -85,10 +88,10 @@ export function DiscussionSection({ type, entityId, courseId, moduleId, contentI
                         {isFetchingNextPage ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Loading...
+                            {t('loading')}
                           </>
                         ) : (
-                          'Load More'
+                          t('loadMore')
                         )}
                       </Button>
                     </div>

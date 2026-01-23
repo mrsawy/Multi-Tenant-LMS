@@ -12,6 +12,7 @@ import { ReviewType } from '@/lib/types/review/review.types';
 import useGeneralStore from '@/lib/store/generalStore';
 import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface ReviewModalProps {
   type: ReviewType;
@@ -21,6 +22,7 @@ interface ReviewModalProps {
 }
 
 export function ReviewModal({ type, entityId, courseId, trigger }: ReviewModalProps) {
+  const t = useTranslations('StudentCourses.reviewModal');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -67,7 +69,7 @@ export function ReviewModal({ type, entityId, courseId, trigger }: ReviewModalPr
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast.error('Please select a rating');
+      toast.error(t('pleaseSelectRating'));
       return;
     }
 
@@ -90,13 +92,13 @@ export function ReviewModal({ type, entityId, courseId, trigger }: ReviewModalPr
 
       await createReview(input);
 
-      toast.success(existingReview ? 'Review updated successfully' : 'Review submitted successfully');
+      toast.success(existingReview ? t('reviewUpdated') : t('reviewSubmitted'));
       setIsOpen(false);
       setRating(0);
       setComment('');
       setExistingReview(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to submit review');
+      toast.error(error.message || t('failedToSubmit'));
     } finally {
       setIsSubmitting(false);
     }
@@ -108,23 +110,25 @@ export function ReviewModal({ type, entityId, courseId, trigger }: ReviewModalPr
         {trigger || (
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <Star className={cn('size-4', existingReview ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300')} />
-            <span className="sr-only">Rate Module</span>
+            <span className="sr-only">
+              {type === ReviewType.COURSE ? t('rateCourse') : type === ReviewType.MODULE ? t('rateModule') : t('rateContent')}
+            </span>
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {existingReview ? 'Update' : 'Rate'} this {type.toLowerCase()}
+            {existingReview ? t('update') : t('rate')} {t('this')} {type === ReviewType.COURSE ? t('courseType') : type === ReviewType.MODULE ? t('moduleType') : t('contentType')}
           </DialogTitle>
-          <DialogDescription>{existingReview ? 'Update your review and help others make better choices.' : 'Share your experience and help others make better choices.'}</DialogDescription>
+          <DialogDescription>{existingReview ? t('updateDescription') : t('shareDescription')}</DialogDescription>
         </DialogHeader>
         {isLoadingReview ? (
-          <div className="text-muted-foreground py-8 text-center">Loading your review...</div>
+          <div className="text-muted-foreground py-8 text-center">{t('loadingReview')}</div>
         ) : (
           <>
             <div className="grid gap-4 py-4">
-              <div className="flex justify-center space-x-2">
+              <div className="flex justify-center space-x-2 ">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button key={star} type="button" className="focus:outline-none" onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)} onClick={() => setRating(star)}>
                     <Star className={`h-8 w-8 ${(hoverRating || rating) >= star ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
@@ -132,13 +136,13 @@ export function ReviewModal({ type, entityId, courseId, trigger }: ReviewModalPr
                 ))}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="comment">Comment (optional)</Label>
-                <Textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Tell us what you think..." />
+                <Label htmlFor="comment">{t('commentLabel')}</Label>
+                <Textarea id="comment" value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t('commentPlaceholder')} />
               </div>
             </div>
             <DialogFooter>
               <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : existingReview ? 'Update Review' : 'Submit Review'}
+                {isSubmitting ? t('submitting') : existingReview ? t('updateReview') : t('submitReview')}
               </Button>
             </DialogFooter>
           </>

@@ -8,12 +8,14 @@ import { IContent } from '@/lib/types/course/content.interface';
 import { useRouter } from '@/i18n/navigation';
 import VideoDice from '@/components/molecules/video-player/Video-dice';
 import YoutubeVideoPlayer from '@/components/molecules/video-player/youtube-video-player';
+import { useTranslations } from 'next-intl';
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 const VideoContent: React.FC<{
   content: IContent, isComplete: boolean,
   toggleComplete: (args: { completed: boolean, withToast: boolean, withRefresh: boolean }) => Promise<void>
 }> = ({ toggleComplete, isComplete, content }) => {
+  const t = useTranslations('StudentCourses.videoContent');
   const [url, setUrl] = useState(content.videoUrl || "");
   const [playedPercentage, setPlayedPercentage] = useState(0);
   const [isUploadedVideo, setIsUploadedVideo] = useState(false);
@@ -44,7 +46,7 @@ const VideoContent: React.FC<{
         <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-6">
           <div className="text-center text-gray-500">
             <Play className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p>No video URL provided</p>
+            <p>{t('noVideoUrl')}</p>
           </div>
         </div>
       </div>
@@ -73,11 +75,11 @@ const VideoContent: React.FC<{
 
         <div className="flex items-center justify-center gap-2">
           <div className="text-sm text-gray-600">
-            Progress: {Math.round(playedPercentage * 100)}%
+            {t('progress')} {Math.round(playedPercentage * 100)}%
           </div>
           {hasCompletedRef.current && (
             <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-              ✓ Watched
+              {t('watched')}
             </span>
           )}
         </div>
@@ -87,7 +89,7 @@ const VideoContent: React.FC<{
           disabled={hasCompletedRef.current}
           className={hasCompletedRef.current ? 'bg-green-600 hover:bg-green-600' : ''}
         >
-          {hasCompletedRef.current ? '✓  Watched' : 'Complete up to 90% to mark as completed'}
+          {hasCompletedRef.current ? t('watched') : t('completeToMark')}
         </Button>
       </div>
     </div>

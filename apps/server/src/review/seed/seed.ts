@@ -35,6 +35,18 @@ export class ReviewSeeder {
             userId,
             courseId,
         });
+        if (!enrollment) {
+            // Don't create review if student is not enrolled
+            // This is expected behavior - reviews should only be created for enrolled students
+            return null;
+        }
+        const existingReview = await this.reviewModel.findOne({
+            userId,
+            courseId,
+        });
+        if (existingReview) {
+            return existingReview;
+        }
 
         const rating = overrides.rating ?? faker.number.int({ min: 1, max: 5 });
 
@@ -72,9 +84,6 @@ export class ReviewSeeder {
                     'stats.averageRating': Math.round(newAverageRating * 10) / 10, // Round to 1 decimal place
                 },
             });
-
-            // Update instructor and co-instructors course ratings
-            await this.updateInstructorCourseRatings(course);
         }
 
         return review;
@@ -84,23 +93,41 @@ export class ReviewSeeder {
     async seedCoursesReviews(
         courses: Course[],
         users: User[],
+        organizationConfig?: any,
     ) {
+        console.log(`  Starting review seeding: ${courses.length} courses, ${users.length} users`);
+        
         // Get students from users array
         const students = users.filter(user => user.roleName === 'STUDENT');
 
         if (students.length === 0) {
-            console.log('No students available for seeding reviews');
+            console.log('  No students available for seeding reviews');
             return;
         }
 
-        for (const organization of ORGANIZATIONS_CONFIG) {
-            const unUsedUsers = [...students];
+        if (courses.length === 0) {
+            console.log('  No courses available for seeding reviews');
+            return;
+        }
+
+        let totalReviewsCreated = 0;
+        const unUsedUsers = [...students];
+
+        // If organizationConfig is provided, use it; otherwise iterate through all organizations
+        const organizationsToProcess = organizationConfig 
+            ? [{ courses: organizationConfig.courses }]
+            : ORGANIZATIONS_CONFIG;
+
+        // Iterate through courses and seed reviews based on config
+        for (const organization of organizationsToProcess) {
             for (const courseConfig of organization.courses) {
                 const course = courses.find(c => c.name === courseConfig.name);
                 if (course && courseConfig.reviews) {
+                    console.log(`  Seeding reviews for course: ${course.name} (${courseConfig.reviews.length} reviews)`);
                     for (const reviewConfig of courseConfig.reviews) {
                         if (unUsedUsers.length === 0) {
-                            // Reset if we run out of users
+                            console.log('  No more unused students available for reviews, reusing students...');
+                            // Reset unused users if we run out
                             unUsedUsers.push(...students);
                         }
                         const user = faker.helpers.arrayElement(unUsedUsers);
@@ -109,14 +136,21 @@ export class ReviewSeeder {
                             unUsedUsers.splice(userIndex, 1);
                         }
                         // Correct parameter order: userId, courseId, overrides
-                        await this.seedCourseReview(user._id, course._id, {
+                        const review = await this.seedCourseReview(user._id, course._id, {
                             rating: reviewConfig.rating,
                             comment: reviewConfig.comment,
                         });
+                        if (review) {
+                            totalReviewsCreated++;
+                        }
                     }
+                } else if (courseConfig.reviews && !course) {
+                    console.log(`  Warning: Course "${courseConfig.name}" not found in courses array`);
                 }
             }
         }
+        
+        console.log(`  Review seeding complete: ${totalReviewsCreated} reviews created`);
     }
 
     /**
@@ -262,17 +296,16 @@ export class ReviewSeeder {
 
         const reviews: Review[] = [];
         for (const enrollment of enrollments) {
-            // Only seed review if student has made progress
-            if (enrollment.progressPercentage > 20) {
-                const review = await this.seedCourseReview(
-                    enrollment.userId,
-                    courseId,
-                    {
-                        rating: enrollment.progressPercentage > 80
-                            ? faker.number.int({ min: 4, max: 5 })
-                            : faker.number.int({ min: 1, max: 5 }),
-                    },
-                );
+            const review = await this.seedCourseReview(
+                enrollment.userId,
+                courseId,
+                {
+                    rating: enrollment.progressPercentage > 80
+                        ? faker.number.int({ min: 4, max: 5 })
+                        : faker.number.int({ min: 1, max: 5 }),
+                },
+            );
+            if (review) {
                 reviews.push(review);
             }
         }
@@ -527,6 +560,107 @@ export class ReviewSeeder {
             const totalCoursesReviews = allCourseReviews.length;
             const averageCoursesRating = totalCoursesReviews > 0
                 ? Math.round((allCourseReviews.reduce((sum, review) => sum + review.rating, 0) / totalCoursesReviews) * 10) / 10
+                : 0;
+
+            // Update the instructor's course ratings
+            await this.userModel.findByIdAndUpdate(
+                instructorId,
+                {
+                    $set: {
+                        totalCoursesReviews: totalCoursesReviews,
+                        averageCoursesRating: averageCoursesRating,
+                    },
+                }
+            );
+        }
+    }
+
+
+
+    /**
+    * Recalculates totalCoursesReviews and averageCoursesRating for all instructors in an organization
+    * This should be called after all course reviews are seeded to ensure accuracy
+    */
+    async recalculateAllInstructorCourseRatings(organizationId: Types.ObjectId) {
+        // Get all courses in the organization
+        const courses = await this.courseModel.find({ organizationId }).select('instructorId coInstructorsIds').exec();
+
+        // Collect all unique instructor IDs (main + co-instructors)
+        // Use string representation to ensure proper uniqueness
+        const allInstructorIdsSet = new Set<string>();
+        const instructorIdMap = new Map<string, Types.ObjectId>();
+
+        for (const course of courses) {
+            if (course.instructorId) {
+                const idStr = course.instructorId.toString();
+                allInstructorIdsSet.add(idStr);
+                instructorIdMap.set(idStr, course.instructorId);
+            }
+            if (course.coInstructorsIds && course.coInstructorsIds.length > 0) {
+                course.coInstructorsIds.forEach(id => {
+                    const idStr = id.toString();
+                    allInstructorIdsSet.add(idStr);
+                    instructorIdMap.set(idStr, id);
+                });
+            }
+        }
+
+        // Recalculate course ratings for each instructor using aggregation for accuracy
+        for (const instructorIdStr of allInstructorIdsSet) {
+            const instructorId = instructorIdMap.get(instructorIdStr)!;
+
+            // Use aggregation to directly count reviews for courses this instructor teaches
+            // This ensures we only count reviews from courses in the correct organization
+            const result = await this.reviewModel.aggregate([
+                // Match only course reviews that are active
+                {
+                    $match: {
+                        reviewType: ReviewType.COURSE,
+                        isActive: true,
+                    }
+                },
+                // Lookup the course to verify it belongs to this instructor and organization
+                {
+                    $lookup: {
+                        from: 'courses',
+                        localField: 'courseId',
+                        foreignField: '_id',
+                        as: 'course',
+                    }
+                },
+                // Unwind course array (should be single course)
+                {
+                    $unwind: {
+                        path: '$course',
+                        preserveNullAndEmptyArrays: false
+                    }
+                },
+                // Match courses that:
+                // 1. Belong to the correct organization
+                // 2. Are taught by this instructor (as main or co-instructor)
+                {
+                    $match: {
+                        'course.organizationId': organizationId,
+                        $or: [
+                            { 'course.instructorId': instructorId },
+                            { 'course.coInstructorsIds': instructorId }
+                        ]
+                    }
+                },
+                // Group to calculate totals and average
+                {
+                    $group: {
+                        _id: null,
+                        totalReviews: { $sum: 1 },
+                        totalRating: { $sum: '$rating' },
+                    }
+                }
+            ]);
+
+            // Extract results
+            const totalCoursesReviews = result.length > 0 ? result[0].totalReviews : 0;
+            const averageCoursesRating = result.length > 0 && totalCoursesReviews > 0
+                ? Math.round((result[0].totalRating / totalCoursesReviews) * 10) / 10
                 : 0;
 
             // Update the instructor's course ratings

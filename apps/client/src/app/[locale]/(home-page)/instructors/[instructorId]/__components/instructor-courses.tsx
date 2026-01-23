@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/car
 import { BookOpen, Loader2 } from 'lucide-react';
 import { IInstructor } from '@/lib/types/user/user.interface';
 import { useCoursesByInstructor } from '@/lib/hooks/course/useCourses';
-import CourseCard from '@/app/[locale]/(home-page)/courses/__components/course-card';
+import CourseCard from '@/components/organs/course-card';
 import { ICourse } from '@/lib/types/course/course.interface';
 import { Typography } from '@/components/atoms/typography';
 import { useTranslations } from 'next-intl';

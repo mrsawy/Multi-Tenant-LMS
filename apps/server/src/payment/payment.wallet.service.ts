@@ -46,7 +46,7 @@ export class PaymentWalletService {
     private readonly paymobService: PaymobService,
     @InjectConnection() private readonly connection: Connection,
     private readonly walletService: WalletService,
-  ) { }
+  ) {}
 
   // async createPaymobPaymentLink(
   //   createWalletCreditUrlDto: CreateWalletCreditUrlDto,

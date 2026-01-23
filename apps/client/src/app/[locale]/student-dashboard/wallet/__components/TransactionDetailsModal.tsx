@@ -20,6 +20,7 @@ import {
   FileText,
   Info,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TransactionDetailsModalProps {
   transaction: Transaction | null;
@@ -32,6 +33,7 @@ export const TransactionDetailsModal = ({
   open,
   onOpenChange,
 }: TransactionDetailsModalProps) => {
+  const t = useTranslations('Wallet.transactionDetails');
   if (!transaction) return null;
 
   const getTransactionIcon = () => {
@@ -74,6 +76,12 @@ export const TransactionDetailsModal = ({
   };
 
   const formatEnumValue = (value: string) => {
+    // Try to get translation for transaction type first
+    const typeKey = value.toLowerCase() as 'credit' | 'debit' | 'transfer';
+    if (['credit', 'debit', 'transfer'].includes(typeKey)) {
+      return t(`type.${typeKey}`);
+    }
+    // Fallback to formatted enum value
     return value
       .split('_')
       .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
@@ -117,7 +125,7 @@ export const TransactionDetailsModal = ({
               {getTransactionIcon()}
             </div>
             <div className='flex-1'>
-              <DialogTitle className='text-left'>Transaction Details</DialogTitle>
+              <DialogTitle className='text-left'>{t('title')}</DialogTitle>
               <DialogDescription className='text-left'>
                 {transaction.description}
               </DialogDescription>
@@ -138,7 +146,7 @@ export const TransactionDetailsModal = ({
           {/* Amount Section */}
           <div className='bg-muted rounded-lg p-4'>
             <div className='flex items-center justify-between'>
-              <span className='text-sm text-muted-foreground'>Amount</span>
+              <span className='text-sm text-muted-foreground'>{t('amount')}</span>
               <span
                 className={`text-2xl font-bold ${transaction.type === TransactionType.CREDIT
                     ? 'text-green-600 dark:text-green-400'
@@ -157,26 +165,26 @@ export const TransactionDetailsModal = ({
           <div className='space-y-2'>
             <h3 className='text-sm font-semibold text-foreground flex items-center gap-2'>
               <Info className='size-4' />
-              Transaction Information
+              {t('transactionInformation')}
             </h3>
             <div className='bg-card border border-border rounded-lg p-4'>
               <DetailRow
-                label='Transaction ID'
+                label={t('transactionId')}
                 value={transaction.id}
                 icon={FileText}
               />
               <DetailRow
-                label='Balance Before'
+                label={t('balanceBefore')}
                 value={`${transaction.balanceBefore.toFixed(2)} ${transaction.currency}`}
                 icon={DollarSign}
               />
               <DetailRow
-                label='Balance After'
+                label={t('balanceAfter')}
                 value={`${transaction.balanceAfter.toFixed(2)} ${transaction.currency}`}
                 icon={DollarSign}
               />
               <DetailRow
-                label='Created At'
+                label={t('createdAt')}
                 value={format(new Date(transaction.createdAt), 'PPpp')}
                 icon={Calendar}
               />
@@ -190,23 +198,23 @@ export const TransactionDetailsModal = ({
               <div className='space-y-2'>
                 <h3 className='text-sm font-semibold text-foreground flex items-center gap-2'>
                   <CreditCard className='size-4' />
-                  Payment Information
+                  {t('paymentInformation')}
                 </h3>
                 <div className='bg-card border border-border rounded-lg p-4'>
                   {transaction.paymentProvider && (
                     <DetailRow
-                      label='Payment Provider'
+                      label={t('paymentProvider')}
                       value={formatEnumValue(transaction.paymentProvider)}
                     />
                   )}
                   {transaction.paymentMethod && (
                     <DetailRow
-                      label='Payment Method'
+                      label={t('paymentMethod')}
                       value={formatEnumValue(transaction.paymentMethod)}
                     />
                   )}
                   {transaction.externalTransactionId && (
-                    <DetailRow label='External Transaction ID' value={transaction.externalTransactionId} />
+                    <DetailRow label={t('externalTransactionId')} value={transaction.externalTransactionId} />
                   )}
                 </div>
               </div>
@@ -217,7 +225,7 @@ export const TransactionDetailsModal = ({
             <div className='space-y-2'>
               <h3 className='text-sm font-semibold text-foreground flex items-center gap-2'>
                 <FileText className='size-4' />
-                Additional Information
+                {t('additionalInformation')}
               </h3>
               <div className='bg-card border border-border rounded-lg p-4'>
                 {Object.entries(transaction.metadata).map(([key, value]) => (

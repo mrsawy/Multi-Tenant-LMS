@@ -4,20 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/car
 import { Textarea } from '@/components/atoms/textarea';
 import { IContent } from '@/lib/types/course/content.interface';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 const AssignmentContent: React.FC<{ content: IContent }> = ({ content }) => {
+    const t = useTranslations('StudentCourses.assignmentContent');
+    
     return (
         <div className="max-w-4xl mx-auto">
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Assignment Instructions</CardTitle>
+                    <CardTitle>{t('assignmentInstructions')}</CardTitle>
                     <div className="flex gap-2">
                         {content.maxPoints && (
-                            <Badge variant="outline">Max Points: {content.maxPoints}</Badge>
+                            <Badge variant="outline">{t('maxPoints')} {content.maxPoints}</Badge>
                         )}
                         {content.dueDate && (
                             <Badge variant="outline">
-                                Due: {new Date(content.dueDate).toLocaleDateString()}
+                                {t('due')} {new Date(content.dueDate).toLocaleDateString()}
                             </Badge>
                         )}
                     </div>
@@ -31,11 +34,11 @@ const AssignmentContent: React.FC<{ content: IContent }> = ({ content }) => {
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Your Submission</CardTitle>
+                    <CardTitle>{t('yourSubmission')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Textarea
-                        placeholder="Enter your assignment submission here..."
+                        placeholder={t('placeholder')}
                         // value={assignmentText}
                         // onChange={(e) => setAssignmentText(e.target.value)}
                         className="min-h-48 text-base"
@@ -49,7 +52,7 @@ const AssignmentContent: React.FC<{ content: IContent }> = ({ content }) => {
                     // disabled={!assignmentText.trim()}
                     size="lg"
                 >
-                    Submit Assignment
+                    {t('submitAssignment')}
                 </Button>
             </div>
         </div>

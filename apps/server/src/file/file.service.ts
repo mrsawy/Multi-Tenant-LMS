@@ -54,7 +54,7 @@ export class FileService {
     const params = {
       Bucket: this.configService.get('S3_BUCKET_NAME'),
       Key: fileKey,
-      Expires: generatePresignedUrlDto.isPublic ? undefined : 3600, // 1 hour
+      Expires: 3600, // 1 hour
       ContentType: fileType,
       ACL: generatePresignedUrlDto.isPublic ? ObjectCannedACL.public_read : ObjectCannedACL.private,
       // ContentLength: fileSize,
