@@ -4,6 +4,8 @@ import {
   ValidateNested,
   ValidateIf,
   IsOptional,
+  IsArray,
+  IsMongoId,
 } from 'class-validator';
 import { CreateOrganizationDto } from 'src/organization/dto/create-organization.dto';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
@@ -20,4 +22,9 @@ export class RegisterDto {
   @IsNotEmpty()
   @Type(() => CreateOrganizationDto)
   organizationDto?: CreateOrganizationDto;
+
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  wishlistCourseIds?: string[];
 }

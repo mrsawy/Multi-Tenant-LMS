@@ -21,6 +21,7 @@ import { PlanService } from 'src/plan/plan.service';
 import { SubscriptionStatus } from 'src/utils/enums/subscriptionStatus.enum';
 import { BillingCycle } from 'src/utils/enums/billingCycle.enum';
 import { Status } from 'src/user/enum/status.enum';
+import { WishlistService } from 'src/wishlist/service/wishlist.service';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +33,7 @@ export class AuthService {
     @Inject(forwardRef(() => OrganizationService)) private readonly organizationService: OrganizationService,
     @Inject(forwardRef(() => WalletService)) private readonly walletService: WalletService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    @Inject(forwardRef(() => WishlistService)) private readonly wishlistService: WishlistService,
     private readonly roleService: RoleService,
     private readonly planService: PlanService,
   ) { }
@@ -115,6 +117,21 @@ export class AuthService {
       await session.commitTransaction();
       session.endSession();
 
+      // Create wishlist items if provided (after transaction commits to ensure user exists)
+      if (registerDto.wishlistCourseIds && registerDto.wishlistCourseIds.length > 0) {
+        const userIdString = userId.toString();
+        // Create wishlist items in bulk (non-blocking, errors won't fail registration)
+        this.wishlistService
+          .createMany({
+            courseIds: registerDto.wishlistCourseIds,
+            userId: userIdString,
+          })
+          .catch((error) => {
+            // Log error but don't fail registration if wishlist creation fails
+            console.error('Error creating wishlist items during registration:', error);
+          });
+      }
+
       return {
         access_token: token,
         user: payload,
@@ -182,6 +199,8 @@ export class AuthService {
   async verifyToken(token: string) {
     try {
       const decodedPayload = jwt.verify(token, this.secret) as User;
+      const foundedUser = await this.userService.findOne(decodedPayload._id.toString());
+      if (!foundedUser) throw new UnauthorizedException('Authentication failed');
       return decodedPayload;
     } catch (error) {
       if (error.name === 'TokenExpiredError') {

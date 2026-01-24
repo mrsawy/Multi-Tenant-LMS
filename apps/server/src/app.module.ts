@@ -24,6 +24,7 @@ import { PageModule } from './page/page.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { DiscussionModule } from './discussion/discussion.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ErrorHandlerInterceptor } from './utils/interceptors/errorHandler.interceptor';
 
@@ -72,6 +73,7 @@ import { ErrorHandlerInterceptor } from './utils/interceptors/errorHandler.inter
     GalleryModule,
     DiscussionModule,
     AttendanceModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [

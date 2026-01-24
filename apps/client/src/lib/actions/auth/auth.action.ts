@@ -14,7 +14,7 @@ import { RegisterResponse } from '@/lib/types/auth/auth.type';
 import { AUTH_COOKIE_NAME } from '@/lib/data/constants';
 import { parseDurationToSeconds } from '@/lib/utils';
 
-export async function handleSignup(signUpData: SignupSchema) {
+export async function handleSignup(signUpData: SignupSchema, wishlistCourseIds?: string[]) {
     const natsClient = await connectToNats();
     const { username, roleName, email, phoneNumber, password, firstName, lastName, country, organizationName, organizationSlug } = signUpData
     const preferredCurrency = getPreferredCurrency(country);
@@ -27,7 +27,9 @@ export async function handleSignup(signUpData: SignupSchema) {
     if (roleName !== UserMainRoles.STUDENT) {
         organizationDto = { name: organizationName, slug: organizationSlug };
     }
-    const data = organizationDto ? { userDto, organizationDto } : { userDto }
+    const data = organizationDto 
+        ? { userDto, organizationDto, ...(wishlistCourseIds && wishlistCourseIds.length > 0 ? { wishlistCourseIds } : {}) }
+        : { userDto, ...(wishlistCourseIds && wishlistCourseIds.length > 0 ? { wishlistCourseIds } : {}) }
 
     const response = await request<RegisterResponse>(
         natsClient,

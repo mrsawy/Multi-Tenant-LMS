@@ -4,7 +4,7 @@ import { Currency } from '@/lib/data/currency.enum';
 import { IModule, IModuleWithContents } from "./modules.interface";
 import { ICategory } from '../category/ICategory';
 import { IContent } from './content.interface';
-import { IUser } from '../user/user.interface';
+import { IInstructor, IUser } from '../user/user.interface';
 
 // ----- Subdocuments -----
 
@@ -92,7 +92,7 @@ export interface ICourse {
     createdAt: string;
     updatedAt: string;
 
-    instructor?: IUser
+    instructor?: IInstructor
 
     learningObjectives: string[]
 

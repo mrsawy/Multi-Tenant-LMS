@@ -8,6 +8,7 @@ import { UserModule } from 'src/user/user.module';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { RoleModule } from 'src/role/role.module';
 import { PlanModule } from 'src/plan/plan.module';
+import { WishlistModule } from 'src/wishlist/wishlist.module';
 import { AuthControllerMessage } from './auth.controller.message';
 import { AuthGuard } from './auth.guard';
 
@@ -19,6 +20,7 @@ export const JWT_SECRET = 'VERY_hard!to-guess_secret';
     OrganizationModule,
     forwardRef(() => UserModule),
     forwardRef(() => WalletModule),
+    forwardRef(() => WishlistModule),
     RoleModule,
     PlanModule,
   ],

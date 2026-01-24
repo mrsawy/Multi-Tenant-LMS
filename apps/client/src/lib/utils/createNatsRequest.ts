@@ -1,10 +1,11 @@
 'use server';
 
-import { getCookie } from './serverUtils';
+import { getCookie, setCookie } from './serverUtils';
 import { v7 } from 'uuid';
 import { connectToNats, request } from '@/lib/nats/client';
 import NatsError from '../nats/error';
 import { AUTH_COOKIE_NAME } from '../data/constants';
+import { redis } from '../redis/client';
 
 interface NatsRequestPayload<T = any> {
   id: string;
@@ -36,10 +37,19 @@ export async function createAuthorizedNatsRequest<R = any, T = any>(
     subject,
     JSON.stringify(payload),
   );
-  console.log({ response });
+  // console.log({ response });
 
   if (typeof response === 'object' && response !== null && 'err' in response) {
-    console.log({ response })
+    // console.log({ response })
+    if (response.err.message.startsWith('auth-failed-')) {
+      await redis.del(`auth-${idToken}`);
+      await setCookie(AUTH_COOKIE_NAME, '', {
+        httpOnly: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 0,
+        path: '/',
+      });
+    }
     throw new Error((response as { err: NatsError }).err.message);
   }
 
