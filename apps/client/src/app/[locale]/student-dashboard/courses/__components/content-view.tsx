@@ -24,16 +24,24 @@ import { toast } from "react-toastify";
 import { DiscussionSection } from "@/components/organs/discussion-section";
 import { DiscussionType } from "@/lib/types/discussion/discussion.types";
 import { useTranslations } from "next-intl";
+import { ICourseOverview } from "@/lib/types/course/course.interface";
+import { IEnrollment } from "@/lib/types/enrollment/enrollment.interface";
+import { IUser } from "@/lib/types/user/user.interface";
+import { useSidebar } from "@/components/atoms/sidebar";
 
 
 interface ContentViewProps {
     content: IContent;
-    progress: IEnrollmentProgress
+    progress: IEnrollmentProgress;
+    course?: ICourseOverview;
+    enrollment?: IEnrollment;
+    user?: IUser;
 }
 
-export default function ContentView({ content, progress }: ContentViewProps) {
+export default function ContentView({ content, progress, course, enrollment, user }: ContentViewProps) {
     const t = useTranslations('StudentCourses.contentView');
     const tContentTypes = useTranslations('StudentCourses.contentTypes');
+    const { toggleSidebar } = useSidebar()
 
     const [isComplete, setIsComplete] = useState<boolean>(progress.completedContents.includes(content._id))
     useEffect(() => {
@@ -94,69 +102,72 @@ export default function ContentView({ content, progress }: ContentViewProps) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br">
-            <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="mb-8 flex flex-col">
-                    <Button
-                        variant="ghost"
-                        onClick={() => { router.back() }}
-                        className="mb-6 flex flex-col self-end"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        {t('backToCourse')}
-                    </Button>
+            {/* Main Content */}
+            <div className="w-full">
+                <div className="container mx-auto px-4 py-8">
+                    {/* Header */}
+                    <div className="mb-8 flex flex-col">
+                        <Button
+                            variant="ghost"
+                            onClick={() => { toggleSidebar() }}
+                            className="mb-6 flex flex-col self-end"
+                        >
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            {t('courseContent')}
+                        </Button>
 
-                    <div className="rounded-lg shadow-sm border p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-blue-100 rounded-lg text-blue-600">
-                                {getContentIcon(content.type)}
-                            </div>
-                            <div className="flex justify-between w-full">
-                                <div>
-                                    <h1 className="text-3xl font-bold mb-2">
-                                        {content.title}
-                                    </h1>
-                                    {content.description && (
-                                        <p className="text-lg mb-3">
-                                            {content.description}
-                                        </p>
-                                    )}
-                                    <div className="flex items-center gap-3">
-                                        <Badge variant="outline" className="text-sm">
-                                            {tContentTypes(content.type)}
-                                        </Badge>
-                                        {content.quizDurationInMinutes && (
-                                            <Badge variant="outline" className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {content.quizDurationInMinutes} {t('minutes')}
+                        <div className="rounded-lg shadow-sm border p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-blue-100 rounded-lg text-blue-600">
+                                    {getContentIcon(content.type)}
+                                </div>
+                                <div className="flex justify-between w-full">
+                                    <div>
+                                        <h1 className="text-3xl font-bold mb-2">
+                                            {content.title}
+                                        </h1>
+                                        {content.description && (
+                                            <p className="text-lg mb-3">
+                                                {content.description}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="outline" className="text-sm">
+                                                {tContentTypes(content.type)}
+                                            </Badge>
+                                            {content.quizDurationInMinutes && (
+                                                <Badge variant="outline" className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    {content.quizDurationInMinutes} {t('minutes')}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {isComplete && (
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                                {t('completed')}
                                             </Badge>
                                         )}
                                     </div>
                                 </div>
-                                <div>
-                                    {isComplete && (
-                                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                            {t('completed')}
-                                        </Badge>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Content */}
-                <div className="rounded-lg shadow-sm border p-8">
-                    {renderContent()}
-                </div>
+                    {/* Content */}
+                    <div className="rounded-lg shadow-sm border p-8">
+                        {renderContent()}
+                    </div>
 
-                {/* Content Discussions */}
-                <DiscussionSection
-                    type={DiscussionType.CONTENT}
-                    entityId={content._id}
-                    contentId={content._id}
-                    title={t('contentDiscussions')}
-                />
+                    {/* Content Discussions */}
+                    <DiscussionSection
+                        type={DiscussionType.CONTENT}
+                        entityId={content._id}
+                        contentId={content._id}
+                        title={t('contentDiscussions')}
+                    />
+                </div>
             </div>
         </div>
     );

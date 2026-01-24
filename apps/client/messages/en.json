@@ -799,7 +799,9 @@
       "completed": "✓ Completed",
       "contentNotAvailable": "Content not available",
       "contentDiscussions": "Content Discussions",
-      "minutes": "min"
+      "minutes": "min",
+      "courseContent": "Course Content",
+      "toggleCourseContent": "Toggle Course Content"
     },
     "videoContent": {
       "noVideoUrl": "No video URL provided",

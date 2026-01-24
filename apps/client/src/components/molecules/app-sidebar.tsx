@@ -15,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/atoms/sidebar"
 import { useLocale, useTranslations } from "next-intl"
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -33,7 +34,7 @@ export function AppSidebar({ data, ...props }: AppSidebarProps) {
   const t = useTranslations("AppSidebar");
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} side={isRTL ? 'right' : 'left'} >
+    <Sidebar collapsible="offcanvas" variant="inset" {...props} side={isRTL ? 'right' : 'left'} >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
