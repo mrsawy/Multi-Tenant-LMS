@@ -13,6 +13,9 @@ import { uploadFile } from '@/lib/utils/uploadFile';
 import { slugify } from '@/lib/utils/slugify';
 import { createAuthorizedNatsRequest } from '@/lib/utils/createNatsRequest';
 import { getPreferredCurrency } from '@/lib/utils/getPreferredCurrency';
+import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { parseDurationToSeconds } from '@/lib/utils';
 
 
 
@@ -36,8 +39,25 @@ export async function getAuthUser() {
         }),
     );
 
-    if ('err' in (response as any)) return;
-    return (response as { message: string, user: IUser }).user;
+    console.dir({ response }, { depth: null })
+    if ('err' in (response as any)) {
+        // Remove invalid token from Redis
+        if (idToken) {
+            await redis.del(`auth-${idToken}`);
+        }
+        // Get current pathname from x-pathname header (set by middleware)
+        const headersList = await headers();
+        const currentPath = headersList.get('x-pathname') || '/';
+
+        // Redirect to cleanup route handler which can modify cookies
+        // Route handlers can modify cookies, unlike Server Components
+        // Pass the pathname as a query parameter
+        redirect(`/api/auth/cleanup?redirect=${encodeURIComponent(currentPath)}`);
+    }
+    const user = (response as { message: string, user: IUser }).user
+    await redis.set(`auth-${idToken}`, JSON.stringify(user), 'EX', parseDurationToSeconds('10m'));
+
+    return user;
 }
 
 
@@ -66,12 +86,12 @@ export async function createUserAction(userData: CreateUserFormData): Promise<IU
     }
 
 }
-  
+
 export async function updateOneUserAction(userId: string, userData: EditUserFormData): Promise<IUser> {
     let avatarUrl;
     try {
         if (userData.profile?.avatarFile instanceof File) {
-            const fileExtension = userData.profile?.avatarFile.name.split('.').pop() || 'jpg'; 
+            const fileExtension = userData.profile?.avatarFile.name.split('.').pop() || 'jpg';
             avatarUrl = await uploadFile(
                 await userData.profile?.avatarFile.arrayBuffer(),
                 `users/avatars/${slugify(userData.firstName + userData.lastName + userData.username)}_${v7()}_thumbnail.${fileExtension}`,

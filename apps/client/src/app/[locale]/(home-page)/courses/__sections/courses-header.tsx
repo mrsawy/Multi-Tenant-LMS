@@ -23,7 +23,6 @@ const CoursesHeaderSection: React.FC<{ courses: ICourse[] }> = ({ courses }) => 
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState<ICourseFilters>({ priceCurrency: Currency.EGP, page: 1, limit: 10 });
 
-    console.dir({ courses }, { depth: null })
     const route = useRouter()
 
 

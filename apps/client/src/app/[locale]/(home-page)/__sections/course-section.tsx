@@ -17,7 +17,6 @@ const CoursesSection = async ({ searchParams }: CoursesSectionProps) => {
     const selectedCategory = params?.category || allText;
 
     const courses = await getFeaturedCourses({ limit: 9 });
-    console.dir({ courses }, { depth: null });
 
     const allCategories = [allText, ...new Set(courses.flatMap((course) => course.categories).filter((category) => !!category).map((category) => category?.name))].slice(0, 7);
 

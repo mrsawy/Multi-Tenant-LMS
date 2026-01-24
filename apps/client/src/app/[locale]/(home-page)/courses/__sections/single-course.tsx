@@ -12,7 +12,7 @@ import { ICourseOverview } from "@/lib/types/course/course.interface";
 import { CourseContentType } from "@/lib/types/course/enum/CourseContentType.enum";
 import BreadCrumb from "@/components/organs/Breadcrumb";
 import SingleCourseHeader from "../__components/single-course-header";
-import InstructorCard from "../__components/instructor-dard";
+import InstructorCard from "../__components/instructor-card";
 import CourseContent from "../__components/course-content";
 import SingleCourseOverView from "../__components/single-course-overview";
 import { IUser } from "@/lib/types/user/user.interface";

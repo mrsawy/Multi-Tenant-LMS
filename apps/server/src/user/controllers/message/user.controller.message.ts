@@ -35,9 +35,7 @@ export class UserControllerMessage {
   @UseGuards(AuthGuard)
   async findOwnData(@Request() req: IUserRequest) {
     const user = req.user;
-    const foundedUser = await this.userService.findOne(user._id.toString());
-    if (!foundedUser) throw new UnauthorizedException('User not found');
-    const { password, ...userData } = foundedUser;
+    const { password, ...userData } = user;
     return {
       message: 'User data fetched successfully',
       user: userData,

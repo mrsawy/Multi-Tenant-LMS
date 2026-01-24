@@ -7,6 +7,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./../globals.css";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import Provider from "./provider";
+import { getAuthUser } from "@/lib/actions/user/user.action";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,12 +39,12 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-
+  const user = await getAuthUser();
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`} >
-        <Provider locale={locale} messages={messages}>
+        <Provider locale={locale} messages={messages} user={user}>
           {children}
         </Provider>
       </body>

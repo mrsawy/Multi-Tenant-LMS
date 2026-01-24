@@ -14,18 +14,24 @@ import { useTranslations } from 'next-intl';
 import { Price } from '@/components/molecules/price';
 import { Currency } from '@/lib/data/currency.enum';
 import { BorderBeam } from '../atoms/border-beam';
+import { WishlistHeartButton } from '../molecules/wishlist-heart-button';
 
 const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
     const t = useTranslations('CourseCard');
     return (
         <Card key={course._id?.toString()}
-            className="bg-section-card border-border/50 hover:border-brand-purple/30 transition-all duration-300 hover:shadow-lg group relative py-0 gap-0 flex flex-col justify-between ">
+            className="bg-section-card border-border/50 hover:border-brand-purple/30 transition-all duration-300 hover:shadow-lg group relative py-0 gap-0 flex flex-col justify-between "
+        >
             <CardHeader className="p-0">
                 <Link href={"/courses/" + course._id}>
                     {/* Course Thumbnail */}
                     <div className={`h-56 sm:h-72 ${course.thumbnailKey} relative overflow-hidden`}>
                         <Image src={getFileFullUrl(course.thumbnailKey ?? "")} alt="Course Thumbnail" fill className=" rounded-t-xl object-cover object-center fixed top-0 size-full" />
                         <div className="absolute inset-0" />
+                        {/* Wishlist Button */}
+                        <div className="absolute top-1 right-1 sm:top-4 sm:right-4 z-10">
+                            <WishlistHeartButton courseId={course._id} course={course} size="sm" variant="ghost" />
+                        </div>
                         {/* Trending Badge */}
                         <Badge className="absolute top-1 left-1 sm:top-4 sm:left-4 bg-brand-purple text-sm sm:text-sm py-0.5 px-1.5 sm:px-2">
                             <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
@@ -35,9 +41,9 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                         </Badge>
 
                         {/* Play Button */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="w-10 h-10 sm:w-16 sm:h-16 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                <Play className="w-4 h-4 sm:w-6 sm:h-6 ml-0.5 sm:ml-1" />
+                        <div className="absolute inset-0 flex items-center justify-center   group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
+                            <div className="size-6 sm:size-12  backdrop-blur-sm bg-black/10 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out transform scale-0 group-hover:scale-100">
+                                <Play className="size-2 sm:size-5 ml-0.5 sm:ml-1 transition-transform duration-300 group-hover:scale-110" />
                             </div>
                         </div>
                         {/* Category */}
@@ -125,18 +131,19 @@ const CourseCard: React.FC<{ course: ICourse }> = ({ course }) => {
                     </ButtonArrowRight>
                 </Link>
             </CardFooter>
-            <BorderBeam
+            {/* <BorderBeam
                 duration={6}
                 size={400}
                 className="from-transparent via-accent to-transparent"
-            />
+            /> */}
+            {/*
             <BorderBeam
                 duration={6}
                 delay={3}
                 size={400}
                 borderWidth={2}
                 className="from-transparent via-primary to-transparent"
-            />
+            /> */}
         </Card>
     );
 };

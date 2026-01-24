@@ -20,6 +20,7 @@ import { Combobox } from "@/components/molecules/combobox"
 import { PhoneInput } from "@/components/organs/phone-input"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
+import { getLocalWishlistCourseIds, clearLocalWishlist } from "@/lib/utils/localStorageWishlist"
 
 export function SignupForm({
   redirectUrl,
@@ -57,7 +58,11 @@ export function SignupForm({
   const onSubmit = async (data: SignupSchema) => {
     try {
       useGeneralStore.setState({ generalIsLoading: true })
-      const response = await handleSignup(data);
+      
+      // Get wishlist course IDs from localStorage
+      const wishlistCourseIds = getLocalWishlistCourseIds();
+      
+      const response = await handleSignup(data, wishlistCourseIds.length > 0 ? wishlistCourseIds : undefined);
       if ('err' in response) {
         if (response.err.message.includes('username')) {
           console.log({ response })
@@ -74,6 +79,13 @@ export function SignupForm({
         }
         return toast.error(response.err.message)
       }
+      
+      // Clear localStorage wishlist after successful registration
+      // The wishlist items are now stored on the server
+      if (wishlistCourseIds.length > 0) {
+        clearLocalWishlist();
+      }
+      
       onSuccess?.()
       router.push(redirectUrl ? redirectUrl : response.roleName.toLowerCase() === UserMainRoles.STUDENT.toLowerCase() ? '/student-dashboard' : '/organization-dashboard')
     } catch (error) {

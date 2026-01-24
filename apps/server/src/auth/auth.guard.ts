@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService,
     // private readonly userService: UserService
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (context.getType() === 'http') {
@@ -71,7 +71,7 @@ export class AuthGuard implements CanActivate {
           ? error.message
           : 'session expired! Please sign In';
 
-      throw new RpcException(errorMessage);
+      throw new RpcException("auth-failed-" + errorMessage);
     }
   }
 }

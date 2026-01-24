@@ -31,10 +31,15 @@ export default async function proxy(request: NextRequest & { user?: IUser }) {
 
         if (isPublicRoute(pathWithoutLocale)) {
             console.log("isPublicRoute(pathWithoutLocale)", { pathWithoutLocale })
-            return i18nMiddleware(request);
+            const response = i18nMiddleware(request);
+            // Set pathname header for use in server actions
+            response.headers.set('x-pathname', pathname);
+            return response;
         }
 
         const i18nResponse = i18nMiddleware(request);
+        // Set pathname header for use in server actions
+        i18nResponse.headers.set('x-pathname', pathname);
 
         if (request.cookies.has(AUTH_COOKIE_NAME)) {
 

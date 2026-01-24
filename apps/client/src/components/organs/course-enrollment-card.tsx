@@ -63,6 +63,7 @@ export const CourseEnrollmentCard = React.memo<CourseEnrollmentCardProps>(({
                         isPaid={course.isPaid}
                         selectedPricing={selectedPricing}
                         onEnroll={handleEnroll}
+                        courseId={course._id}
                     />
 
                     <p className="text-center text-sm text-muted-foreground">

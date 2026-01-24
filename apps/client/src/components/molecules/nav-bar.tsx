@@ -20,7 +20,7 @@ import {
 } from '@/components/atoms/popover';
 import { cn } from '@/lib/utils';
 import type { ComponentProps } from 'react';
-import { ModeToggle } from './theme-switcher';
+import { ModeToggle, ThemeToggler } from './theme-switcher';
 import { getAuthUser } from '@/lib/actions/user/user.action';
 import { IUser } from '@/lib/types/user/user.interface';
 import { NavUser } from './nav-user';
@@ -48,6 +48,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import logoSrc from '@/../public/images/logo.png';
 import { ScrollProgress } from '../atoms/scroll-progress';
+import { WishlistNavButton } from '../molecules/wishlist-nav-button';
 // Simple logo component for the navbar
 const Logo = (props: any) => {
   return (
@@ -305,7 +306,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
                               (link.submenu &&
                                 navigationLinks[index + 1].submenu &&
                                 link.type !==
-                                  navigationLinks[index + 1].type)) && (
+                                navigationLinks[index + 1].type)) && (
                               <div
                                 role="separator"
                                 aria-orientation="horizontal"
@@ -343,7 +344,7 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
                             </NavigationMenuTrigger>
                             <NavigationMenuContent>
                               {link.type === 'description' &&
-                              link.label === 'Features' ? (
+                                link.label === 'Features' ? (
                                 <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                                   <div className="row-span-3">
                                     <NavigationMenuLink asChild>
@@ -436,8 +437,9 @@ export const Navbar02 = React.forwardRef<HTMLElement, Navbar02Props>(
           </div>
           {/* Right side */}
           <div className="flex items-center gap-3">
+            <WishlistNavButton />
             <LanguageSwitcher />
-            <ModeToggle />
+            <ThemeToggler />
             {!user ? (
               <>
                 <Button

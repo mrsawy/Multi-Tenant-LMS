@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { ToastContainer } from 'react-toastify';
 import Spinner from "@/components/organs/spinner";
@@ -8,6 +8,8 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ClickSpark from '@/components/ClickSpark';
 import Ribbons from '@/components/Ribbons';
+import { IUser } from '@/lib/types/user/user.interface';
+import useUserStore from '@/lib/store/userStore';
 
 // Create QueryClient with proper config to prevent unwanted prefetching
 const queryClient = new QueryClient({
@@ -17,6 +19,7 @@ const queryClient = new QueryClient({
             retry: 1,
             refetchOnWindowFocus: false, // Prevent refetch on window focus
             refetchOnMount: false, // Only fetch if data is stale
+            gcTime: 24 * 60 * 60 * 1000, // 24 hours (formerly cacheTime)
         },
     },
 });
@@ -25,10 +28,18 @@ type ProviderProps = {
     children: ReactNode;
     locale: string;
     messages: Record<string, string>;
+    user?: IUser | null;
 };
 
-export default function Provider({ children, locale, messages }: ProviderProps) {
-
+export default function Provider({ children, locale, messages, user }: ProviderProps) {
+    const { setUser, clearUser } = useUserStore(state => state);
+    useEffect(() => {
+        if (user) {
+            setUser(user);
+        } else {
+            clearUser();
+        }
+    }, [user]);
     return (
         <div className='min-h-screen relative'>
             <div className='relative z-10'>

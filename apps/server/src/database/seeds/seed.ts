@@ -13,6 +13,7 @@ import { Enrollment } from '../../enrollment/entities/enrollment.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
 import { Review } from '../../review/entities/review.entity';
 import { Discussion } from '../../discussion/entities/discussion.entity';
+import { Wishlist } from '../../wishlist/entities/wishlist.entity';
 import { fakerAR as faker } from '@faker-js/faker';
 
 import { RoleSeeder } from '../../role/seeds/role.seeder';
@@ -27,6 +28,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { ORGANIZATIONS_SEED, ORGANIZATIONS_CONFIG } from './seed.config';
 import { Roles } from 'src/role/enum/Roles.enum';
 import { ReviewSeeder } from 'src/review/seed/seed';
+import { WishlistSeeder } from 'src/wishlist/seeds/wishlist.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -47,6 +49,7 @@ async function bootstrap() {
   const attendanceModel = app.get(getModelToken(Attendance.name));
   const reviewModel = app.get(getModelToken(Review.name));
   const discussionModel = app.get(getModelToken(Discussion.name));
+  const wishlistModel = app.get(getModelToken(Wishlist.name));
 
   const roleSeeder = new RoleSeeder(roleModel);
   const planSeeder = new PlanSeeder(planModel);
@@ -56,6 +59,7 @@ async function bootstrap() {
   const courseSeeder = new CourseSeeder(courseModel, categoryModel, moduleModel, contentModel, userModel);
   const enrollmentSeeder = new EnrollmentSeeder(enrollmentModel, attendanceModel, reviewModel, discussionModel, courseModel, moduleModel, contentModel, userModel);
   const reviewSeeder = new ReviewSeeder(reviewModel, courseModel, enrollmentModel, userModel, organizationModel, moduleModel, contentModel);
+  const wishlistSeeder = new WishlistSeeder(wishlistModel, courseModel, userModel, enrollmentModel);
 
   console.log('Seeding Roles...');
   await roleSeeder.seed();
@@ -209,6 +213,9 @@ async function bootstrap() {
 
     console.log(`  Seeding Reviews for ${organization.name}...`);
     await reviewSeeder.seedCoursesReviews(courses, students, organization);
+
+    // console.log(`  Seeding Wishlists for ${organization.name}...`);
+    // await wishlistSeeder.seedWishlistsForStudents(students, courses);
 
     // Update organization stats
     console.log(`  Updating organization statistics for ${organization.name}...`);

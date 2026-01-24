@@ -20,11 +20,10 @@ export default async function LocaleLayout({
   children,
   params,
 }: LayoutProps<'/[locale]'>) {
-  const user = await getAuthUser();
 
   return (
     <Provider>
-      <HomeNave user={user} />
+      <HomeNave  />
       {children}
       <Footer />
 
