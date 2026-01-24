@@ -796,7 +796,9 @@
       "completed": "✓ مكتمل",
       "contentNotAvailable": "المحتوى غير متاح",
       "contentDiscussions": "مناقشات المحتوى",
-      "minutes": "دقيقة"
+      "minutes": "دقيقة",
+      "courseContent": "محتوى الدورة",
+      "toggleCourseContent": "تبديل محتوى الدورة"
     },
     "videoContent": {
       "noVideoUrl": "لم يتم توفير رابط الفيديو",

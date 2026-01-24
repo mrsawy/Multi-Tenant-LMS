@@ -9,6 +9,7 @@ import { useRouter } from '@/i18n/navigation';
 import VideoDice from '@/components/molecules/video-player/Video-dice';
 import YoutubeVideoPlayer from '@/components/molecules/video-player/youtube-video-player';
 import { useTranslations } from 'next-intl';
+import ReactYoutubePlayer from '@/components/molecules/video-player/react-youtube-player';
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 const VideoContent: React.FC<{
@@ -54,21 +55,21 @@ const VideoContent: React.FC<{
   }
 
   return (
-    <div className="max-w-4xl mx-auto dir-ltr">
+    <div className="max-w-4xl mx-auto ">
       <div
         id="video-player-wrapper"
-        className="relative aspect-video bg-black rounded-lg overflow-hidden mb-6 group"
+        className="relative aspect-video bg-black rounded-lg overflow-hidden mb-6 group dir-ltr"
       >
         {isUploadedVideo
           ?
           (<VideoDice url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)
-          :
-          (<YoutubeVideoPlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)
+          : <ReactYoutubePlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />
+          // : (<YoutubeVideoPlayer url={url} onPlayedPercentageUpdate={handlePercentageUpdate} />)
         }
 
       </div>
 
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-4 ">
         {content.title && (
           <h3 className="text-xl font-semibold">{content.title}</h3>
         )}

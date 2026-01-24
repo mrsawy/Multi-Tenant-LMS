@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeProps, YouTubeEvent } from 'react-youtube';
 import { Play, Pause, Volume2, VolumeX, Maximize, Gauge, Loader2 } from 'lucide-react';
+import { formatTime } from '@/lib/utils/video';
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 type ReactYoutubePlayerProps = {
     url: string;
-
-    formatTime: (seconds: number) => string;
+    onPlayedPercentageUpdate?: (time: number) => void;
 };
 
 // Extract YouTube video ID from various URL formats
@@ -29,15 +29,15 @@ function getYouTubeVideoId(url: string): string | null {
 
 function ReactYoutubePlayer({
     url,
-
-    formatTime,
+    onPlayedPercentageUpdate,
 }: ReactYoutubePlayerProps) {
     const [playing, setPlaying] = useState(false);
-    const [volume, setVolume] = useState(80);
+    const [volume, setVolume] = useState(0.8);
     const [muted, setMuted] = useState(false);
     const [playbackRate, setPlaybackRate] = useState(1);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [playedPercentage, setPlayedPercentage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [seeking, setSeeking] = useState(false);
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
@@ -48,7 +48,7 @@ function ReactYoutubePlayer({
 
     const videoId = getYouTubeVideoId(url);
 
-    // Update current time periodically
+    // Update current time periodically and track progress
     useEffect(() => {
         if (isReady && playerRef.current) {
             const updateTime = () => {
@@ -57,6 +57,13 @@ function ReactYoutubePlayer({
                         const time = playerRef.current.getCurrentTime();
                         if (typeof time === 'number' && !isNaN(time) && time >= 0) {
                             setCurrentTime(time);
+
+                            // Calculate and update played percentage
+                            if (duration > 0) {
+                                const percentage = time / duration;
+                                setPlayedPercentage(percentage);
+                                onPlayedPercentageUpdate?.(percentage);
+                            }
                         }
                     } catch (err) {
                         // Silent fail
@@ -81,7 +88,7 @@ function ReactYoutubePlayer({
                 clearInterval(intervalRef.current);
             }
         };
-    }, [isReady, seeking]);
+    }, [isReady, seeking, duration, onPlayedPercentageUpdate]);
 
     const handleReady: YouTubeProps['onReady'] = (event: YouTubeEvent<any>) => {
         playerRef.current = event.target;
@@ -105,9 +112,9 @@ function ReactYoutubePlayer({
         };
         getDuration();
 
-        // Set initial volume
+        // Set initial volume (convert from 0-1 to 0-100 for YouTube API)
         try {
-            event.target.setVolume(volume);
+            event.target.setVolume(volume * 100);
             if (muted) {
                 event.target.mute();
             }
@@ -204,15 +211,27 @@ function ReactYoutubePlayer({
         }
     };
 
-    const handleVolumeChange = (newVolume: number) => {
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
-        setMuted(false);
+
+        // Automatically mute/unmute based on volume
+        if (newVolume === 0) {
+            setMuted(true);
+        } else {
+            setMuted(false);
+        }
 
         if (!playerRef.current) return;
 
         try {
-            playerRef.current.setVolume(newVolume);
-            playerRef.current.unMute();
+            // YouTube API expects 0-100, but we store 0-1
+            playerRef.current.setVolume(newVolume * 100);
+            if (newVolume === 0) {
+                playerRef.current.mute();
+            } else {
+                playerRef.current.unMute();
+            }
         } catch (err) {
             console.error('Volume change error:', err);
         }
@@ -224,6 +243,7 @@ function ReactYoutubePlayer({
 
     const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const percentage = parseFloat(e.target.value);
+        setPlayedPercentage(percentage);
         if (duration > 0) {
             setCurrentTime(percentage * duration);
         }
@@ -263,14 +283,15 @@ function ReactYoutubePlayer({
 
     // Sync volume changes
     useEffect(() => {
-        if (playerRef.current && !muted) {
+        if (playerRef.current && !muted && isReady) {
             try {
-                playerRef.current.setVolume(volume);
+                // YouTube API expects 0-100, but we store 0-1
+                playerRef.current.setVolume(volume * 100);
             } catch (err) {
                 // Silent fail
             }
         }
-    }, [volume, muted]);
+    }, [volume, muted, isReady]);
 
     // Sync playback rate changes
     useEffect(() => {
@@ -298,8 +319,6 @@ function ReactYoutubePlayer({
             </div>
         );
     }
-
-    const playedPercentage = duration > 0 ? currentTime / duration : 0;
 
     const opts: YouTubeProps['opts'] = {
         height: '100%',
@@ -345,21 +364,16 @@ function ReactYoutubePlayer({
                     onChange={handleSeekChange}
                     onMouseUp={handleSeekMouseUp}
                     style={{
-                        background: `linear-gradient(to right, var(--ant-color-primary) 0%, var(--ant-color-primary) ${(playedPercentage || 0) * 100}%, var(--ant-color-border) ${(playedPercentage || 0) * 100}%, var(--ant-color-border) 100%)`,
-                        WebkitAppearance: 'none',
-                        appearance: 'none',
-                        height: '4px',
-                        borderRadius: '4px',
-                        outline: 'none',
-                    } as React.CSSProperties}
-                    className="w-full mb-3 cursor-pointer range-input"
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(playedPercentage || 0) * 100}%, #4b5563 ${(playedPercentage || 0) * 100}%, #4b5563 100%)`
+                    }}
+                    className="w-full h-1 mb-3 rounded-lg appearance-none cursor-pointer"
                 />
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handlePlayPause}
-                            className="text-white hover:text-[var(--ant-color-primary)] transition-colors"
+                            className="text-white hover:text-blue-400 transition-colors"
                         >
                             {playing ? (
                                 <Pause className="w-6 h-6" />
@@ -370,9 +384,9 @@ function ReactYoutubePlayer({
 
                         <button
                             onClick={handleVolumeToggle}
-                            className="text-white hover:text-[var(--ant-color-primary)] transition-colors"
+                            className="text-white hover:text-blue-400 transition-colors"
                         >
-                            {muted ? (
+                            {muted || volume === 0 ? (
                                 <VolumeX className="w-5 h-5" />
                             ) : (
                                 <Volume2 className="w-5 h-5" />
@@ -382,19 +396,14 @@ function ReactYoutubePlayer({
                         <input
                             type="range"
                             min={0}
-                            max={100}
-                            step={5}
+                            max={1}
+                            step={0.05}
                             value={muted ? 0 : volume}
-                            onChange={(e) => handleVolumeChange(parseInt(e.target.value))}
+                            onChange={handleVolumeChange}
                             style={{
-                                background: `linear-gradient(to right, var(--ant-color-primary) 0%, var(--ant-color-primary) ${(muted ? 0 : volume)}%, var(--ant-color-border) ${(muted ? 0 : volume)}%, var(--ant-color-border) 100%)`,
-                                WebkitAppearance: 'none',
-                                appearance: 'none',
-                                height: '4px',
-                                borderRadius: '4px',
-                                outline: 'none',
-                            } as React.CSSProperties}
-                            className="w-20 mb-0 cursor-pointer"
+                                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(muted ? 0 : volume) * 100}%, #4b5563 ${(muted ? 0 : volume) * 100}%, #4b5563 100%)`
+                            }}
+                            className="w-20 h-1 rounded-lg appearance-none cursor-pointer"
                         />
 
                         <span className="text-white text-sm">
@@ -407,7 +416,7 @@ function ReactYoutubePlayer({
                         <div className="relative">
                             <button
                                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                                className="text-white hover:text-[var(--ant-color-primary)] transition-colors flex items-center gap-1"
+                                className="text-white hover:text-blue-400 transition-colors flex items-center gap-1"
                             >
                                 <Gauge className="w-5 h-5" />
                                 <span className="text-sm">{playbackRate}x</span>
@@ -419,7 +428,7 @@ function ReactYoutubePlayer({
                                         <button
                                             key={speed}
                                             onClick={() => handleSpeedChange(speed)}
-                                            className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-800 transition-colors ${speed === playbackRate ? 'text-[var(--ant-color-primary)]' : 'text-white'
+                                            className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-800 transition-colors ${speed === playbackRate ? 'text-blue-400' : 'text-white'
                                                 }`}
                                         >
                                             {speed}x
@@ -431,7 +440,7 @@ function ReactYoutubePlayer({
 
                         <button
                             onClick={handleFullscreen}
-                            className="text-white hover:text-[var(--ant-color-primary)] transition-colors"
+                            className="text-white hover:text-blue-400 transition-colors"
                         >
                             <Maximize className="w-5 h-5" />
                         </button>
